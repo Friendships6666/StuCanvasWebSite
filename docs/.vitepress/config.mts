@@ -4,7 +4,7 @@ export default defineConfig({
   title: "StuCanvas",
   description: "A modern, high-performance, Vulkan-based comprehensive engine for scientific visualization.",
   appearance: true,
-  ignoreDeadLinks: true,
+  ignoreDeadLinks: false,
 
   themeConfig: {
     nav: [
