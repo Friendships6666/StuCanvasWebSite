@@ -16,6 +16,7 @@
   },
   "private": true,
   "dependencies": {
+    "opusscript": "^0.1.1",
     "resonix": "^0.2.6"
   }
 }
