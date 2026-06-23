@@ -1,0 +1,15 @@
+/* 代码块软换行按钮 */
+.code-wrap-btn {
+  font-size: 12px;
+  padding: 0 8px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--vp-c-text-2);
+}
+.code-wrap-btn:hover {
+  color: var(--vp-c-text-1);
+}
+.code-wrap-btn.active {
+  color: var(--vp-c-brand-1);
+}
