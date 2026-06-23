@@ -1,35 +1,34 @@
-# Introducing StuCanvas
+# StuCanvas 简介
 
-StuCanvas is an open-source, high-performance, Vulkan-based comprehensive engine designed specifically for interactive real-time and offline scientific visualization. By bypassing the CPU and driver bottlenecks of traditional WebGL/OpenGL, StuCanvas leverages modern GPU architectures to render complex mathematical, physical, and chemical models with high precision, striving to define the **next generation of scientific visualization libraries**.
+StuCanvas 是一个基于 Vulkan 的开源渲染引擎，用于实时与离线科学可视化。
 
-This documentation provides a comprehensive guide to understanding, deploying, and extending StuCanvas for your scientific research and visualization workflows.
+本篇文档介绍 StuCanvas 的部署、使用和扩展方法。
+
+
+## 功能模块
+
+StuCanvas 将计算机图形学、CAD 工程和数值计算集成于 C++ API。
+
+### 1. 参数化建模（2D 与 3D）
+以数学方式定义 2D 和 3D 几何结构。该模块采用有向无环图（DAG）执行引擎，支持拉伸、扫掠和布尔等参数化建模操作，实时计算数学关系并构建拓扑表示。
+
+### 2. 动态几何
+创建和处理几何约束。该模块针对更新频率高的交互操作设计，更新顶点和索引缓冲区，支持几何操作。
+
+### 3. 函数绘制
+StuCanvas 将绘图分类为黑盒标量函数与区间定义函数。该模块结合区间算术、L-SHADE 全局搜索算法以及 Marching Squares 和 Marching Cubes 算法，用于提取边界、根与奇异点，并渲染拓扑特征。
+
+### 4. 非线性编辑（NLE）架构与并发
+采用非线性编辑（NLE）架构，支持 $O(1)$ 时间轴定位与跳转，并进行状态重构。该引擎利用多核 CPU 分担数学计算，对接 Vulkan 的计算与图形队列，进行物理与化学模拟。
+
+### 5. 渲染与 OpenPBR
+提供 C++ API，支持实时预览与离线导出。它利用 Vulkan 光线追踪（`VK_KHR_ray_tracing_pipeline`），并实现 OpenPBR 材质规范，可渲染玻璃、金属晶格与物理光学效果，计算折射、反射和次表面散射。
+
+### 6. 硬件视频导出
+通过 GPU 编码接口（如 NVIDIA NVENC、AMD AMF 和 Intel QuickSync）导出渲染画面，不依赖外部 FFmpeg 二进制文件。支持 AV1、H.265 (HEVC) 和 H.264 格式，分辨率支持至 8192×8192 (8K)，直接捕获帧缓冲区。
 
 ---
 
-## Core Feature Modules
+## 相关指南
 
-StuCanvas integrates cutting-edge computer graphics, CAD engineering, and numerical computing into a unified, developer-friendly C++ API.
-
-### 1. Parametric Modeling (2D & 3D)
-Define complex 2D and 3D geometric structures mathematically. Inspired by industry-grade CAD software like **Creo** and interactive mathematics suites like **GeoGebra**, this module is driven by a robust **Directed Acyclic Graph (DAG)** execution engine. It supports a wide array of common parametric modeling operations (such as extrusions, sweeps, and boolean operations), evaluating mathematical relationships and constructing topological representations in real-time.
-
-### 2. High-Performance Dynamic Geometry
-Create and manipulate geometric constraints dynamically with an experience analogous to **GeoGebra**, but supercharged with Vulkan-native performance and a vastly expanded feature set. Designed for high-frequency interactive updates, it optimizes vertex and index buffers with minimum latency, supporting rich interactive geometric operations that are computationally prohibitive on legacy platforms.
-
-### 3. State-of-the-Art Function Plotting
-Experience plotting driven by pioneering mathematical algorithms. StuCanvas classifies plotting into **black-box scalar functions**, **interval-defined functions**, and more. By combining rigorous **Interval Arithmetic**, **L-SHADE** (Successor History-based Adaptive Differential Evolution) global search, and highly optimized contouring algorithms like **Marching Squares** (and Marching Cubes), the engine accurately isolates boundaries, roots, and singularities, rendering pixel-perfect topological features without missing critical points.
-
-### 4. NLE Architecture & Concurrency
-Engineered around a modern **Non-Linear Editing (NLE) architecture** supporting **$O(1)$ temporal seek/jump animations** with zero-overhead state reconstruction. The engine fully utilizes modern **multi-core CPUs** via task-parallel schedulers to offload mathematical generation, seamlessly feeding Vulkan's compute and graphics queues for real-time physical and chemical simulations.
-
-### 5. Advanced Rendering & OpenPBR
-Enjoy a highly modern, intuitive, and simple C++ API supporting both **real-time interactive preview** and high-fidelity **offline export**. It features native, hardware-accelerated **Vulkan Ray Tracing** (`VK_KHR_ray_tracing_pipeline`) and fully implements the complete **OpenPBR** material specification. Render photorealistic glass apparatuses, metallic lattices, and complex physical optics with physically accurate refraction, reflection, and subsurface scattering.
-
-### 6. Dependency-Free Hardware Video Export
-Export high-resolution rendering pipelines directly via native, hardware-accelerated GPU encoding APIs (such as NVIDIA NVENC, AMD AMF, and Intel QuickSync) **completely independent of external FFmpeg binaries**. It supports state-of-the-art codecs including **AV1, H.265 (HEVC), and H.264** up to an ultra-high resolution of **8192×8192 (8K)**, capturing framebuffers directly with zero memory-copy overhead.
-
----
-
-## Next Steps
-
-To begin using StuCanvas, please refer to the following guides:
+使用 StuCanvas 请参考：

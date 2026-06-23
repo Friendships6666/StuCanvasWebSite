@@ -1,17 +1,17 @@
-# Introducing StuCanvas
+# StuCanvas 简介
 
-This section explains what StuCanvas does, why it is needed, its limitations and its licensing. After reading, you will understand whether StuCanvas is the right tool for you, and where to go if you have further questions.
+本章节将介绍 StuCanvas 的主要功能、适用场景、局限性及其开源许可。阅读完本页后，您将明确 StuCanvas 是否符合您的开发需求，以及在遇到后续疑问时该如何获取帮助。
 
-- **About StuCanvas**: An overview of the Vulkan-based rendering framework.
-- **Community**: How to join the developers' group and get support.
-- **Open Source License**: Our permissive MIT license and compliance.
+- **关于 StuCanvas**：基于 Vulkan 的渲染框架概览。
+- **社区交流**：如何加入开发者社群并获取支持。
+- **开源许可证**：宽松的 MIT 许可证及其合规说明。
 
-## What is StuCanvas?
+## 什么是 StuCanvas？
 
-StuCanvas is an open-source, high-performance C++ engine designed specifically for scientific visualization. By leveraging the Vulkan API, it bypassed the CPU bottlenecks of traditional WebGL/OpenGL rendering.
+StuCanvas 是一款专为科学可视化设计的高性能开源 C++ 引擎。通过充分利用 Vulkan API，它有效解决了传统 WebGL/OpenGL 渲染中常见的 CPU 性能瓶颈。
 
-## Key Features
+## 核心特性
 
-- **Vulkan-Driven**: Native GPU acceleration.
-- **Cross-Platform**: Compile once, run on Arch Linux, Windows, and macOS.
-- **Modern C++**: Built with C++20 standards.
+- **Vulkan 驱动**：原生 GPU 加速。
+- **跨平台**：一次编译，即可运行于 Arch Linux、Windows 和 macOS。
+- **现代 C++**：基于 C++23 标准构建。
