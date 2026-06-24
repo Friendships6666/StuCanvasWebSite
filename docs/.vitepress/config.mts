@@ -60,8 +60,12 @@ export default defineConfig({
 
   markdown: {
     math: true, // 开启官方原生的数学公式支持
+    theme: {
+      dark: 'material-theme-palenight',
+      light: 'material-theme-lighter'
+    },
     code: {
-      lineNumbers: true // 代码块显示行号
+      lineNumbers: true
     }
   },
 
@@ -97,8 +101,24 @@ export default defineConfig({
         text: '代数与几何',
         collapsed: true,
         items: [
-          { text: '动态几何构建', link: '/modules/dynamic-geometry' },
-          { text: '数学函数绘制', link: '/modules/function-plotting' }
+          {
+            text: '动态几何构建',
+            collapsed: true,
+            items: [
+              { text: '直线和圆', link: '/modules/dynamic-geometry/lines-circles' },
+              { text: '求解器对象', link: '/modules/dynamic-geometry/solver' },
+              { text: '三维物体', link: '/modules/dynamic-geometry/3d-objects' },
+              { text: '圆锥曲线', link: '/modules/dynamic-geometry/conics' }
+            ]
+          },
+          {
+            text: '数学函数绘制',
+            collapsed: true,
+            items: [
+              { text: '显函数与隐函数', link: '/modules/function-plotting/explicit-implicit' },
+              { text: '参数方程', link: '/modules/function-plotting/parametric' }
+            ]
+          }
         ]
       },
       {
@@ -106,6 +126,7 @@ export default defineConfig({
         collapsed: true,
         items: [
           { text: 'RTS变换', link: '/modules/rts-transform' },
+          { text: '相机变换', link: '/modules/camera-transform' },
         ]
       },
       {

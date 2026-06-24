@@ -1,3 +1,21 @@
+/* 侧边栏嵌套组标题字体比父级小（如"动态几何构建"比"代数与几何"弱一级） */
+.VPSidebarItem.level-1.collapsible > .item > .text {
+  font-size: 0.9em;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+/* 表格功能支持色块 */
+.feature-table td { padding: 2px; text-align: center; vertical-align: middle; }
+.sup-yes { display: inline-block; width: 28px; height: 28px; background: #2da44e; }
+.sup-no  { display: inline-block; width: 28px; height: 28px; background: #cf222e; }
+.sup-mix { display: inline-block; width: 28px; height: 28px; background: #d4a72c; }
+
+/* 代码块高亮行：绿色背景 */
+:root {
+  --vp-code-line-highlight-color: rgba(0, 180, 80, 0.18);
+}
+
 /* 代码块软换行按钮 */
 .code-wrap-btn {
   font-size: 12px;
