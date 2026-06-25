@@ -5,15 +5,36 @@
   opacity: 0.85;
 }
 
-/* 表格功能支持色块 */
-.feature-table td { padding: 2px; text-align: center; vertical-align: middle; }
-.sup-yes { display: inline-block; width: 28px; height: 28px; background: #2da44e; }
-.sup-no  { display: inline-block; width: 28px; height: 28px; background: #cf222e; }
-.sup-mix { display: inline-block; width: 28px; height: 28px; background: #d4a72c; }
 
-/* 代码块高亮行：绿色背景 */
-:root {
-  --vp-code-line-highlight-color: rgba(0, 180, 80, 0.18);
+
+/* 1. 从全球高速 CDN 引入开源的 JetBrains Mono 编程字体 */
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono/index.css');
+
+/* 2. 强制将所有代码容器、代码块、内联代码改为 JetBrains Mono 字体 */
+code,
+pre,
+kbd,
+samp,
+.vp-code,       /* VitePress 专属代码区类名 */
+.vp-code-group  /* VitePress 代码组类名 */ {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace !important;
+}
+
+
+
+/* 3. 【体验优化】微调行高与字号 */
+/* JetBrains Mono 的 x-height 较大，在小字号下表现极佳，建议将字号微调为 0.9em */
+.vp-code pre,
+code {
+  font-size: 0.9em !important;       /* 适配 JetBrains Mono 视觉比例 */
+  line-height: 1.6 !important;       /* 保持舒适的行高 */
+  letter-spacing: normal !important;  /* 恢复正常字距（JetBrains Mono 已自带最优字母间距，无需手动拉伸） */
+}
+
+/* 代码块绿色高亮行 */
+.vp-doc .vp-code .highlighted {
+  background-color: rgba(0, 180, 80, 0.18);
+  display: block;
 }
 
 /* 代码块软换行按钮 */

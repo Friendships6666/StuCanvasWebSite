@@ -9,6 +9,8 @@
 ```cpp:line-numbers
 import stucanvas;
 
+using namespace StuCanvas;
+
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
     auto& a = graph.createFreePoint2D(1.0, 2.0);
@@ -21,8 +23,10 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 垂线和平行线均依赖一个线对象和一个点对象。线对象确定方向，点对象确定经过位置。
 
-```cpp:line-numbers{9-10}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
@@ -30,8 +34,8 @@ STUCANVAS_MAIN(Canvas& canvas) {
     auto& b = graph.createFreePoint2D(4.0, 5.0);
     auto& seg = graph.createSegment2D(a, b);
     auto& c = graph.createFreePoint2D(6.0, 1.0);
-    auto& perp = graph.createPerpendicularLine2D(seg, c);
-    auto& para = graph.createParallelLine2D(seg, c);
+    auto& perp = graph.createPerpendicularLine2D(seg, c); // [!code ++]
+    auto& para = graph.createParallelLine2D(seg, c); // [!code ++]
 };
 ```
 
@@ -44,8 +48,10 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 吸附点
 
-```cpp:line-numbers{11}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
@@ -55,7 +61,7 @@ STUCANVAS_MAIN(Canvas& canvas) {
     auto& c = graph.createFreePoint2D(6.0, 1.0);
     auto& perp = graph.createPerpendicularLine2D(seg, c);
     auto& para = graph.createParallelLine2D(seg, c);
-    auto& snap = graph.createSnappedPoint_2D(seg, 3.0, 1.0);
+    auto& snap = graph.createSnappedPoint_2D(seg, 3.0, 1.0); // [!code ++]
 };
 ```
 
@@ -70,8 +76,10 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 交点
 
-```cpp:line-numbers{12-13}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
@@ -82,8 +90,8 @@ STUCANVAS_MAIN(Canvas& canvas) {
     auto& perp = graph.createPerpendicularLine2D(seg, c);
     auto& para = graph.createParallelLine2D(seg, c);
     auto& snap = graph.createSnappedPoint_2D(seg, 3.0, 1.0);
-    auto& circle = graph.createCircle2D_Radius(a, 3.0);
-    auto& isect = graph.createIntersectionPoint_2D(seg, circle, 3.0, 2.0);
+    auto& circle = graph.createCircle2D_Radius(a, 3.0); // [!code ++]
+    auto& isect = graph.createIntersectionPoint_2D(seg, circle, 3.0, 2.0); // [!code ++]
 };
 ```
 
@@ -91,8 +99,10 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 切线
 
-```cpp:line-numbers{14-15}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
@@ -105,8 +115,8 @@ STUCANVAS_MAIN(Canvas& canvas) {
     auto& snap = graph.createSnappedPoint_2D(seg, 3.0, 1.0);
     auto& circle = graph.createCircle2D_Radius(a, 3.0);
     auto& isect = graph.createIntersectionPoint_2D(seg, circle, 3.0, 2.0);
-    auto& snap_c = graph.createSnappedPoint_2D(circle, 4.0, 3.0);
-    auto& tangent = graph.createTangentLine_2D(snap_c, circle);
+    auto& snap_c = graph.createSnappedPoint_2D(circle, 4.0, 3.0); // [!code ++]
+    auto& tangent = graph.createTangentLine_2D(snap_c, circle); // [!code ++]
 };
 ```
 

@@ -5,6 +5,8 @@
 ```cpp:line-numbers
 import stucanvas;
 
+using namespace StuCanvas;
+
 // 入口函数：接收 Canvas 引用
 STUCANVAS_MAIN(Canvas& canvas) {
     // 创建 Clip，帧范围 0-60，60 FPS → 持续 1 秒

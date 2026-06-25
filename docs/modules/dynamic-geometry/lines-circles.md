@@ -1,9 +1,11 @@
 # 直线和圆
 
 所有 StuCanvas 代码以模块导入开始：
+ni
+```cpp:line-numbers
+import stucanvas; // [!code ++]
 
-```cpp:line-numbers{1}
-import stucanvas;
+using namespace StuCanvas; // [!code ++]
 ```
 
 `import stucanvas;` 是 C++20 模块声明，取代 `#include`。编译器在处理 `import` 时只读取预编译的模块接口单元（BMI），不递归解析头文件，以此缩短编译时间。
@@ -12,11 +14,13 @@ import stucanvas;
 
 `STUCANVAS_MAIN` 是入口点宏，替代 `int main`。它展开为 C ABI 导出函数，供前端进程通过函数指针注入并调用。
 
-```cpp:line-numbers{3-4}
+```cpp:line-numbers
 import stucanvas;
 
-STUCANVAS_MAIN(Canvas& canvas) {
-};
+using namespace StuCanvas;
+
+STUCANVAS_MAIN(Canvas& canvas) { // [!code ++]
+}; // [!code ++]
 ```
 
 ## 有向无环图（DAG）
@@ -29,11 +33,13 @@ GeoGebra 和几何画板同样采用依赖图模型：用户定义点，再由�
 
 ## SObjectGraph
 
-```cpp:line-numbers{4}
+```cpp:line-numbers
 import stucanvas;
 
+using namespace StuCanvas;
+
 STUCANVAS_MAIN(Canvas& canvas) {
-    auto& graph = canvas.createSObjectGraph<double>();
+    auto& graph = canvas.createSObjectGraph<double>(); // [!code ++]
 };
 ```
 
@@ -43,13 +49,15 @@ StuCanvas 内所有对象均为 `StuObject`，简写为 `SObject`。`createSObje
 
 ## 自由点
 
-```cpp:line-numbers{5-6}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
-    auto& p1 = graph.createFreePoint2D(1.0, 2.0);
-    auto& p2 = graph.createFreePoint2D(4.0, 5.0);
+    auto& p1 = graph.createFreePoint2D(1.0, 2.0); // [!code ++]
+    auto& p2 = graph.createFreePoint2D(4.0, 5.0); // [!code ++]
 };
 ```
 
@@ -65,14 +73,16 @@ Graph 内所有对象共享同一世界坐标系。自由点（`FreePoint2D`）�
 
 ## 线段
 
-```cpp:line-numbers{7}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
     auto& p1 = graph.createFreePoint2D(1.0, 2.0);
     auto& p2 = graph.createFreePoint2D(4.0, 5.0);
-    auto& seg = graph.createSegment2D(p1, p2);
+    auto& seg = graph.createSegment2D(p1, p2); // [!code ++]
 };
 ```
 
@@ -80,16 +90,18 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 射线与直线
 
-```cpp:line-numbers{8-9}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
     auto& p1 = graph.createFreePoint2D(1.0, 2.0);
     auto& p2 = graph.createFreePoint2D(4.0, 5.0);
     auto& seg = graph.createSegment2D(p1, p2);
-    auto& ray = graph.createRay2D(p1, p2);
-    auto& line = graph.createLine2D(p1, p2);
+    auto& ray = graph.createRay2D(p1, p2); // [!code ++]
+    auto& line = graph.createLine2D(p1, p2); // [!code ++]
 };
 ```
 
@@ -103,8 +115,10 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 标签
 
-```cpp:line-numbers{10-13}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
@@ -113,10 +127,10 @@ STUCANVAS_MAIN(Canvas& canvas) {
     auto& seg = graph.createSegment2D(p1, p2);
     auto& ray = graph.createRay2D(p1, p2);
     auto& line = graph.createLine2D(p1, p2);
-    graph.modifyName(p1, "A");
-    graph.modifyName(p2, "B");
-    graph.modifyID(p1, 1);
-    graph.modifyID(p2, 2);
+    graph.modifyName(p1, "A"); // [!code ++]
+    graph.modifyName(p2, "B"); // [!code ++]
+    graph.modifyID(p1, 1); // [!code ++]
+    graph.modifyID(p2, 2); // [!code ++]
 };
 ```
 
@@ -126,8 +140,10 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 查找
 
-```cpp:line-numbers{14}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
@@ -140,7 +156,7 @@ STUCANVAS_MAIN(Canvas& canvas) {
     graph.modifyName(p2, "B");
     graph.modifyID(p1, 1);
     graph.modifyID(p2, 2);
-    auto result = graph.findByName("A").findByID(2).findByType(SObjectType::FreePoint2D).findEnd();
+    auto result = graph.findByName("A").findByID(2).findByType(SObjectType::FreePoint2D).findEnd(); // [!code ++]
 };
 ```
 
@@ -152,14 +168,16 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 圆
 
-```cpp:line-numbers{7,16-18}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
     auto& p1 = graph.createFreePoint2D(1.0, 2.0);
     auto& p2 = graph.createFreePoint2D(4.0, 5.0);
-    auto& p3 = graph.createFreePoint2D(7.0, 3.0);
+    auto& p3 = graph.createFreePoint2D(7.0, 3.0); // [!code ++]
     auto& seg = graph.createSegment2D(p1, p2);
     auto& ray = graph.createRay2D(p1, p2);
     auto& line = graph.createLine2D(p1, p2);
@@ -168,9 +186,9 @@ STUCANVAS_MAIN(Canvas& canvas) {
     graph.modifyID(p1, 1);
     graph.modifyID(p2, 2);
     auto result = graph.findByName("A").findByID(2).findByType(SObjectType::FreePoint2D).findEnd();
-    auto& c1 = graph.createCircle2D_Radius(p1, 3.0);
-    auto& c2 = graph.createCircle2D_2Points(p1, p2);
-    auto& c3 = graph.createCircle2D_3Points(p1, p2, p3);
+    auto& c1 = graph.createCircle2D_Radius(p1, 3.0); // [!code ++]
+    auto& c2 = graph.createCircle2D_2Points(p1, p2); // [!code ++]
+    auto& c3 = graph.createCircle2D_3Points(p1, p2, p3); // [!code ++]
 };
 ```
 
@@ -186,15 +204,17 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 圆弧
 
-```cpp:line-numbers{8,20-21}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
     auto& p1 = graph.createFreePoint2D(1.0, 2.0);
     auto& p2 = graph.createFreePoint2D(4.0, 5.0);
     auto& p3 = graph.createFreePoint2D(7.0, 3.0);
-    auto& p4 = graph.createFreePoint2D(5.0, 1.0);
+    auto& p4 = graph.createFreePoint2D(5.0, 1.0); // [!code ++]
     auto& seg = graph.createSegment2D(p1, p2);
     auto& ray = graph.createRay2D(p1, p2);
     auto& line = graph.createLine2D(p1, p2);
@@ -206,8 +226,8 @@ STUCANVAS_MAIN(Canvas& canvas) {
     auto& c1 = graph.createCircle2D_Radius(p1, 3.0);
     auto& c2 = graph.createCircle2D_2Points(p1, p2);
     auto& c3 = graph.createCircle2D_3Points(p1, p2, p3);
-    auto& arc = graph.createArc2D_3Points(p1, p2, p4);
-    graph.modifyArcMajorMinor_2D(arc, ArcMajorMinor::Minor);
+    auto& arc = graph.createArc2D_3Points(p1, p2, p4); // [!code ++]
+    graph.modifyArcMajorMinor_2D(arc, ArcMajorMinor::Minor); // [!code ++]
 };
 ```
 
@@ -225,8 +245,11 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 仅创建对象不足以实现动态几何——必须支持运行时变更。`graph.modify*` 系列函数负责此职责。
 
-```cpp:line-numbers{22-24}
+```cpp:line-numbers
+import std;
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
@@ -247,9 +270,9 @@ STUCANVAS_MAIN(Canvas& canvas) {
     auto& c3 = graph.createCircle2D_3Points(p1, p2, p3);
     auto& arc = graph.createArc2D_3Points(p1, p2, p4);
     graph.modifyArcMajorMinor_2D(arc, ArcMajorMinor::Minor);
-    graph.modifyFreePoint_2D(p1, 10.0, 20.0);
-    auto new_parents = std::vector<const SObject&>{p3, p4};
-    graph.modifyParents(seg, new_parents);
+    graph.modifyFreePoint_2D(p1, 10.0, 20.0); // [!code ++]
+    auto new_parents = std::vector<const SObject&>{p3, p4}; // [!code ++]
+    graph.modifyParents(seg, new_parents); // [!code ++]
 };
 ```
 

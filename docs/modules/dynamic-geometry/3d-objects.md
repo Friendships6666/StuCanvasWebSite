@@ -5,6 +5,8 @@
 ```cpp:line-numbers
 import stucanvas;
 
+using namespace StuCanvas;
+
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
     auto& p1 = graph.createFreePoint3D(1.0, 2.0, 3.0);
@@ -19,17 +21,19 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 平面对象由两个向量张成：第一个参数为起点，后两个参数为终点，三点构成空间中的平面区域。
 
-```cpp:line-numbers{8-10}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
     auto& a = graph.createFreePoint3D(0.0, 0.0, 0.0);
     auto& b = graph.createFreePoint3D(3.0, 0.0, 0.0);
     auto& c = graph.createFreePoint3D(0.0, 4.0, 0.0);
-    auto& inf_plane = graph.createInfinitePlane_3D(a, b, c);
-    auto& tri_plane = graph.createTrianglePlane_3D(a, b, c);
-    auto& para_plane = graph.createParallelogramPlane_3D(a, b, c);
+    auto& inf_plane = graph.createInfinitePlane_3D(a, b, c); // [!code ++]
+    auto& tri_plane = graph.createTrianglePlane_3D(a, b, c); // [!code ++]
+    auto& para_plane = graph.createParallelogramPlane_3D(a, b, c); // [!code ++]
 };
 ```
 
@@ -58,16 +62,18 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 圆柱与圆锥
 
-```cpp:line-numbers{8-9}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
     auto& a = graph.createFreePoint3D(0.0, 0.0, 0.0);
     auto& b = graph.createFreePoint3D(0.0, 0.0, 5.0);
     auto& c = graph.createFreePoint3D(0.0, 0.0, 3.0);
-    auto& cylinder = graph.createCylinder_3D(a, b, 2.0);
-    auto& cone = graph.createCone_3D(c, b, 30.0, 3.0);
+    auto& cylinder = graph.createCylinder_3D(a, b, 2.0); // [!code ++]
+    auto& cone = graph.createCone_3D(c, b, 30.0, 3.0); // [!code ++]
 };
 ```
 
@@ -78,8 +84,10 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 球体
 
-```cpp:line-numbers{9-10}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
@@ -87,8 +95,8 @@ STUCANVAS_MAIN(Canvas& canvas) {
     auto& b = graph.createFreePoint3D(0.0, 1.0, 0.0);
     auto& c = graph.createFreePoint3D(0.0, 0.0, 1.0);
     auto& center = graph.createFreePoint3D(0.0, 0.0, 0.0);
-    auto& s1 = graph.createSphere_3D_Radius(center, 4.0);
-    auto& s2 = graph.createSphere_3D_4Points(a, b, c, center);
+    auto& s1 = graph.createSphere_3D_Radius(center, 4.0); // [!code ++]
+    auto& s2 = graph.createSphere_3D_4Points(a, b, c, center); // [!code ++]
 };
 ```
 
@@ -99,17 +107,19 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 柏拉图多面体
 
-```cpp:line-numbers{6-10}
+```cpp:line-numbers
 import stucanvas;
+
+using namespace StuCanvas;
 
 STUCANVAS_MAIN(Canvas& canvas) {
     auto& graph = canvas.createSObjectGraph<double>();
     auto& center = graph.createFreePoint3D(0.0, 0.0, 0.0);
-    auto& tetra = graph.createTetrahedron_3D(center, 2.0);
-    auto& cube = graph.createCube_3D(center, 2.0);
-    auto& octa = graph.createOctahedron_3D(center, 2.0);
-    auto& dodeca = graph.createDodecahedron_3D(center, 2.0);
-    auto& icosa = graph.createIcosahedron_3D(center, 2.0);
+    auto& tetra = graph.createTetrahedron_3D(center, 2.0); // [!code ++]
+    auto& cube = graph.createCube_3D(center, 2.0); // [!code ++]
+    auto& octa = graph.createOctahedron_3D(center, 2.0); // [!code ++]
+    auto& dodeca = graph.createDodecahedron_3D(center, 2.0); // [!code ++]
+    auto& icosa = graph.createIcosahedron_3D(center, 2.0); // [!code ++]
 };
 ```
 
