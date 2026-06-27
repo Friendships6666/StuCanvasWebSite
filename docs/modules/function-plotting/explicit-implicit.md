@@ -165,6 +165,9 @@ STUCANVAS_MAIN(Canvas& canvas) {
     });
     npx reasonix code
     sk-58c09865c7ab4c71a4848544ae81b244
+    
+    
+    https://wwbsd.lanzoup.com/i0LjM3t69xri
 
     func_2d.addComponent_LSHADE(100,4,15000,0,0); // [!code --]
 };
