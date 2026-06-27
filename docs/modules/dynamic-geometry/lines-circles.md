@@ -1,7 +1,6 @@
 # 直线和圆
 
 所有 StuCanvas 代码以模块导入开始：
-ni
 ```cpp:line-numbers
 import stucanvas; // [!code ++]
 

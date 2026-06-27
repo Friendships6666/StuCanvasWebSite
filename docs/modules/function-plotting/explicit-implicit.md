@@ -33,7 +33,7 @@ STUCANVAS_MAIN(Canvas& canvas) {
 
 ## 绘制算法
 
-StuCanvas 内置以下函数绘制算法：
+StuCanvas 内置以下隐函数/显函数绘制算法：
 
 <div class="feature-table">
 
