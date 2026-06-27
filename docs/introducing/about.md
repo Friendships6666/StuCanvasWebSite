@@ -1,6 +1,4 @@
 # StuCanvas 简介
-npx reasonix code
-sk-58c09865c7ab4c71a4848544ae81b244
 本章节将介绍 StuCanvas 的主要功能、适用场景、局限性及其开源许可。阅读完本页后，您将明确 StuCanvas 是否符合您的开发需求，以及在遇到后续疑问时该如何获取帮助。
 
 - **关于 StuCanvas**：基于 Vulkan 的渲染框架概览。
