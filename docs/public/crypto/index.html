@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StuCanvas Secure File Crypt - 本地端文件加解密</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #111827;
+            --border-color: #1f2937;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-primary: #3b82f6; /* 皇家蓝，呼应 Vulkan/StuCanvas 风格 */
+            --accent-primary-hover: #2563eb;
+            --accent-success: #10b981;
+            --accent-success-hover: #059669;
+            --focus-ring: rgba(59, 130, 246, 0.5);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 640px;
+            width: 100%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* 拖拽上传区域 */
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            background-color: rgba(31, 41, 55, 0.2);
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--accent-primary);
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .dropzone input[type="file"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .dropzone-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+        }
+
+        .file-info {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        .file-info .active-file {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        /* 密码输入框 */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        .input-group input[type="password"] {
+            width: 100%;
+            background-color: rgba(17, 24, 39, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .input-group input[type="password"]:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--focus-ring);
+        }
+
+        /* 按钮排版 */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.15s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-encrypt {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-encrypt:hover {
+            background-color: var(--accent-primary-hover);
+        }
+
+        .btn-decrypt {
+            background-color: var(--accent-success);
+            color: white;
+        }
+
+        .btn-decrypt:hover {
+            background-color: var(--accent-success-hover);
+        }
+
+        /* 解密即时播放容器 */
+        .preview-container {
+            margin-top: 25px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+            display: none;
+        }
+
+        .preview-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preview-box {
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            max-height: 400px;
+        }
+
+        .preview-box img {
+            max-width: 100%;
+            max-height: 380px;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+
+        .preview-box video {
+            width: 100%;
+            max-height: 380px;
+            border-radius: 4px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h3>StuCanvas Secure Crypt</h3>
+        <p>保护您的隐私与数据安全</p>
+    </div>
+
+    <!-- 拖拽区域 -->
+    <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput">
+        <div class="dropzone-icon">📁</div>
+        <div class="file-info" id="fileInfo">
+            <div>将文件拖拽至此，或 <span style="color: var(--accent-primary); text-decoration: underline;">点击浏览文件</span></div>
+            <div class="active-file" id="activeFile"></div>
+        </div>
+    </div>
+
+    <!-- 密码区域 -->
+    <div class="input-group">
+        <label for="password">保护密码</label>
+        <input type="password" id="password" placeholder="请输入密钥">
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="btn-group">
+        <button class="btn-encrypt" id="encBtn">
+            <span>🔒 加密为 StuEnc</span>
+        </button>
+        <button class="btn-decrypt" id="decBtn">
+            <span>🔓 还原并下载</span>
+        </button>
+    </div>
+
+    <!-- 多媒体播放展示容器 -->
+    <div class="preview-container" id="previewContainer">
+        <div class="preview-title">
+            <span>解密完成：</span>
+        </div>
+        <div class="preview-box" id="previewBox">
+            <!-- 动态渲染多媒体 -->
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import init, { encrypt_file, decrypt_file } from './wasm_enc.js';
+
+    async function main() {
+        await init(); // 启动 WebAssembly 引擎
+
+        const fileInput = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const activeFile = document.getElementById('activeFile');
+        const passwordInput = document.getElementById('password');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewBox = document.getElementById('previewBox');
+
+        let selectedFile = null;
+
+        // 处理文件选择逻辑
+        function updateFileDisplay(file) {
+            if (file) {
+                selectedFile = file;
+                activeFile.textContent = `已选文件: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                // 当选择新文件时，重置旧的预览
+                previewContainer.style.display = 'none';
+                previewBox.innerHTML = '';
+            }
+        }
+
+        fileInput.onchange = (e) => {
+            updateFileDisplay(e.target.files[0]);
+        };
+
+        // 拖拽文件反馈效果
+        dropzone.ondragover = () => { dropzone.classList.add('dragover'); return false; };
+        dropzone.ondragleave = () => { dropzone.classList.remove('dragover'); return false; };
+        dropzone.ondrop = (e) => {
+            dropzone.classList.remove('dragover');
+            e.preventDefault();
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                updateFileDisplay(e.dataTransfer.files[0]);
+            }
+            return false;
+        };
+
+        // 浏览器本地下载文件封装
+        const triggerDownload = (data, filename) => {
+            const blob = new Blob([data], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // 识别文件扩展名，返回 MIME 类型分类
+        const getMimeInfo = (filename) => {
+            const ext = filename.split('.').pop().toLowerCase();
+            const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'];
+            const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'm4v'];
+
+            if (imageExts.includes(ext)) {
+                return { type: 'image', mime: `image/${ext === 'jpg' ? 'jpeg' : ext}` };
+            } else if (videoExts.includes(ext)) {
+                return { type: 'video', mime: `video/${ext === 'mov' ? 'mp4' : ext}` };
+            }
+            return { type: 'other', mime: 'application/octet-stream' };
+        };
+
+        // 1. 加密流程（扩展名修改为 .StuEnc）
+        document.getElementById('encBtn').onclick = async () => {
+            const pwd = passwordInput.value;
+            if (!selectedFile || !pwd) return alert("请先选择要加密的文件并设置密码");
+
+            try {
+                const buf = new Uint8Array(await selectedFile.arrayBuffer());
+                const encryptedData = encrypt_file(buf, pwd);
+
+                // 将输出后缀固定为 .StuEnc
+                const outName = selectedFile.name + ".StuEnc";
+                triggerDownload(encryptedData, outName);
+            } catch (e) {
+                alert("加密失败: " + e);
+            }
+        };
+
+        // 2. 解密流程与多媒体自动预览
+        document.getElementById('decBtn').onclick = async () => {
+            const pwd = passwordInput.value;
+            if (!selectedFile || !pwd) return alert("请先选择已加密的文件并输入对应解密密码");
+
+            try {
+                const buf = new Uint8Array(await selectedFile.arrayBuffer());
+                const decryptedData = decrypt_file(buf, pwd);
+
+                // 还原文件名（自动移除 .StuEnc 后缀）
+                const originalName = selectedFile.name.replace(/\.StuEnc$/i, '');
+
+                // 1. 先触发本地解密后的文件下载
+                triggerDownload(decryptedData, originalName);
+
+                // 2. 检测原文件媒体格式，提供即时本地解码预览展示
+                const mediaInfo = getMimeInfo(originalName);
+                previewBox.innerHTML = ''; // 清空可能残留的上一次展示
+
+                if (mediaInfo.type === 'image') {
+                    const blob = new Blob([decryptedData], { type: mediaInfo.mime });
+                    const mediaUrl = URL.createObjectURL(blob);
+
+                    const img = document.createElement('img');
+                    img.src = mediaUrl;
+                    img.alt = "Decrypted Preview";
+                    previewBox.appendChild(img);
+                    previewContainer.style.display = 'block';
+
+                } else if (mediaInfo.type === 'video') {
+                    const blob = new Blob([decryptedData], { type: mediaInfo.mime });
+                    const mediaUrl = URL.createObjectURL(blob);
+
+                    const video = document.createElement('video');
+                    video.src = mediaUrl;
+                    video.controls = true;
+                    video.autoplay = true; // 自动开始播放
+                    previewBox.appendChild(video);
+                    previewContainer.style.display = 'block';
+                } else {
+                    // 非多媒体文件不展示播放框
+                    previewContainer.style.display = 'none';
+                }
+
+            } catch (e) {
+                alert("解密失败：可能由于您输入了错误的密码，或者文件已损坏。");
+                previewContainer.style.display = 'none';
+                previewBox.innerHTML = '';
+            }
+        };
+    }
+
+    main();
+</script>
+</body>
+</html>

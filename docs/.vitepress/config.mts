@@ -74,6 +74,12 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: '文档说明', link: '/' },
+      {
+        text: '工具箱',
+        items: [
+          { text: '文件加解密', link: '/crypto/index.html', target: '_blank' }
+        ]
+      },
       { text: 'GitHub', link: 'https://github.com/friendships6666/StuCanvas' }
     ],
 
@@ -125,8 +131,8 @@ export default defineConfig({
         text: '世界映射',
         collapsed: true,
         items: [
-          { text: 'RTS变换', link: '/modules/rts-transform' },
-          { text: '相机变换', link: '/modules/camera-transform' },
+          { text: 'RTS变换', link: '/modules/world_transformation/rts-transform' },
+          { text: '相机变换', link: '/modules/world_transformation/camera-transform' },
         ]
       },
       {
