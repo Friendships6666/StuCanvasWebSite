@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StuCanvas Secure File Crypt - 本地端文件加解密</title>
+    <title>StuCanvas Secure File Crypt - 单文件自解密打包器</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -11,11 +11,13 @@
             --border-color: #1f2937;
             --text-primary: #f3f4f6;
             --text-secondary: #9ca3af;
-            --accent-primary: #3b82f6; /* 皇家蓝，呼应 Vulkan/StuCanvas 风格 */
+            --accent-primary: #3b82f6; /* 皇家蓝 */
             --accent-primary-hover: #2563eb;
             --accent-success: #10b981;
             --accent-success-hover: #059669;
             --focus-ring: rgba(59, 130, 246, 0.5);
+            --accent-warning: #f59e0b;
+            --accent-error: #ef4444;
         }
 
         body {
@@ -51,7 +53,6 @@
             margin: 0 0 8px 0;
             font-size: 1.5rem;
             font-weight: 700;
-            letter-spacing: -0.025em;
             background: linear-gradient(to right, #60a5fa, #3b82f6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -59,7 +60,7 @@
 
         .header p {
             margin: 0;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
         }
 
@@ -95,7 +96,7 @@
         }
 
         .file-info {
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             word-break: break-all;
         }
@@ -106,9 +107,22 @@
             margin-top: 5px;
         }
 
+        /* 状态提示栏 */
+        .status-msg {
+            background-color: rgba(31, 41, 55, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+            line-height: 1.4;
+        }
+
         /* 密码输入框 */
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .input-group label {
@@ -137,12 +151,34 @@
             box-shadow: 0 0 0 3px var(--focus-ring);
         }
 
+        /* 复选框区域 */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent-primary);
+            cursor: pointer;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(17, 24, 39, 0.8);
+        }
+
         /* 按钮排版 */
         .btn-group {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         button {
@@ -152,7 +188,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.15s, transform 0.1s;
+            transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -164,65 +200,14 @@
         }
 
         .btn-encrypt {
-            background-color: var(--accent-primary);
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
             color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
 
         .btn-encrypt:hover {
-            background-color: var(--accent-primary-hover);
-        }
-
-        .btn-decrypt {
-            background-color: var(--accent-success);
-            color: white;
-        }
-
-        .btn-decrypt:hover {
-            background-color: var(--accent-success-hover);
-        }
-
-        /* 解密即时播放容器 */
-        .preview-container {
-            margin-top: 25px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 20px;
-            display: none;
-        }
-
-        .preview-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .preview-box {
-            background-color: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            max-height: 400px;
-        }
-
-        .preview-box img {
-            max-width: 100%;
-            max-height: 380px;
-            border-radius: 4px;
-            object-fit: contain;
-        }
-
-        .preview-box video {
-            width: 100%;
-            max-height: 380px;
-            border-radius: 4px;
-            outline: none;
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
         }
     </style>
 </head>
@@ -230,78 +215,68 @@
 
 <div class="container">
     <div class="header">
-        <h3>StuCanvas Secure Crypt</h3>
-        <p>保护您的隐私与数据安全</p>
+        <h3>StuCanvas 静态离线加密工具</h3>
+        <p>本地 Wasm 编译器 · 将任意文件一键打包输出为“自解密 HTML 网页”</p>
+        <p style="font-size: 0.75rem; color: var(--accent-primary); margin-top: 8px; opacity: 0.8; font-weight: 600;">By Friendships666</p>
     </div>
 
     <!-- 拖拽区域 -->
     <div class="dropzone" id="dropzone">
         <input type="file" id="fileInput">
-        <div class="dropzone-icon">📁</div>
+        <div class="dropzone-icon">🎁</div>
         <div class="file-info" id="fileInfo">
-            <div>将文件拖拽至此，或 <span style="color: var(--accent-primary); text-decoration: underline;">点击浏览文件</span></div>
+            <div>将源文件拖拽至此，或 <span style="color: var(--accent-primary); text-decoration: underline;">点击浏览文件</span></div>
             <div class="active-file" id="activeFile"></div>
         </div>
     </div>
 
+    <!-- 智能状态反馈栏 -->
+    <div class="status-msg" id="statusMsg"></div>
+
     <!-- 密码区域 -->
     <div class="input-group">
-        <label for="password">保护密码</label>
-        <input type="password" id="password" placeholder="请输入密钥">
+        <label for="password">安全解锁密码</label>
+        <input type="password" id="password" placeholder="请输入将来用于解锁本文件的密码">
+    </div>
+
+    <!-- 防忘密码：复选框选项 -->
+    <div class="checkbox-group">
+        <input type="checkbox" id="includeKeyCheckbox">
+        <label for="includeKeyCheckbox">将密码明文写入网页文件名中（防止忘记密码）</label>
     </div>
 
     <!-- 操作按钮 -->
     <div class="btn-group">
         <button class="btn-encrypt" id="encBtn">
-            <span>🔒 加密为 StuEnc</span>
+            <span>🔒 一键打包生成自解密 HTML</span>
         </button>
-        <button class="btn-decrypt" id="decBtn">
-            <span>🔓 还原并下载</span>
-        </button>
-    </div>
-
-    <!-- 多媒体播放展示容器 -->
-    <div class="preview-container" id="previewContainer">
-        <div class="preview-title">
-            <span>解密完成：</span>
-        </div>
-        <div class="preview-box" id="previewBox">
-            <!-- 动态渲染多媒体 -->
-        </div>
     </div>
 </div>
 
 <script type="module">
-    import init, { encrypt_file, decrypt_file } from './wasm_enc.js';
+    import init, { encrypt_file } from './wasm_enc.js';
 
     async function main() {
-        await init(); // 启动 WebAssembly 引擎
+        await init(); // 启动基础 Wasm 模块
 
         const fileInput = document.getElementById('fileInput');
         const dropzone = document.getElementById('dropzone');
         const activeFile = document.getElementById('activeFile');
         const passwordInput = document.getElementById('password');
-        const previewContainer = document.getElementById('previewContainer');
-        const previewBox = document.getElementById('previewBox');
+        const includeKeyCheckbox = document.getElementById('includeKeyCheckbox');
+        const statusMsg = document.getElementById('statusMsg');
 
         let selectedFile = null;
 
-        // 处理文件选择逻辑
         function updateFileDisplay(file) {
             if (file) {
                 selectedFile = file;
-                activeFile.textContent = `已选文件: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-                // 当选择新文件时，重置旧的预览
-                previewContainer.style.display = 'none';
-                previewBox.innerHTML = '';
+                activeFile.textContent = `准备打包: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                statusMsg.style.display = 'none';
             }
         }
 
-        fileInput.onchange = (e) => {
-            updateFileDisplay(e.target.files[0]);
-        };
-
-        // 拖拽文件反馈效果
+        fileInput.onchange = (e) => { updateFileDisplay(e.target.files[0]); };
         dropzone.ondragover = () => { dropzone.classList.add('dragover'); return false; };
         dropzone.ondragleave = () => { dropzone.classList.remove('dragover'); return false; };
         dropzone.ondrop = (e) => {
@@ -313,9 +288,29 @@
             return false;
         };
 
-        // 浏览器本地下载文件封装
-        const triggerDownload = (data, filename) => {
-            const blob = new Blob([data], { type: 'application/octet-stream' });
+        // 修复重名/残缺文件名
+        function repairFilename(name) {
+            let workingName = name;
+            workingName = workingName.replace(/\.(\w+)\s*\(\d+\)/gi, '.$1');
+            workingName = workingName.replace(/\.(\w+)[_\s-]+\d+/gi, '.$1');
+            workingName = workingName.replace(/\s*\(\d+\)(?=\.\w+)/gi, '');
+            workingName = workingName.replace(/\s*-\s*副本/g, '');
+            workingName = workingName.replace(/\s*\(\d+\)$/gi, '');
+            return workingName;
+        }
+
+        // 超强内存友好型 Base64 数组转换器
+        function arrayBufferToBase64(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            const chunk = 8192; // 模块化分块防止内存调用栈溢出
+            for (let i = 0; i < bytes.length; i += chunk) {
+                binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+            }
+            return window.btoa(binary);
+        }
+
+        const triggerDownload = (blob, filename) => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -324,87 +319,366 @@
             URL.revokeObjectURL(url);
         };
 
-        // 识别文件扩展名，返回 MIME 类型分类
+        // ==========================================
+        // 核心打包器：动态读取当前服务器资产拼装独立 HTML
+        // ==========================================
+        document.getElementById('encBtn').onclick = async () => {
+            const pwd = passwordInput.value;
+            if (!selectedFile || !pwd) return alert("请先选择源文件并设置密码");
+
+            if (selectedFile.name.toLowerCase().endsWith('.html')) {
+                alert("防呆提示：该文件已是一个网页格式文件，无需再次进行自解密网页打包。");
+                return;
+            }
+
+            statusMsg.innerHTML = `⏳ 正在本地抽取核心底层引擎...`;
+            statusMsg.style.color = "var(--accent-primary)";
+            statusMsg.style.display = "block";
+
+            try {
+                // 1. 动态自获取当前服务器上的 Wasm 编译核心和绑定脚本
+                const wasmBinaryRes = await fetch('./wasm_enc_bg.wasm');
+                if (!wasmBinaryRes.ok) throw new Error("无法拉取 Wasm 字节码核心");
+                const wasmBinaryBuffer = await wasmBinaryRes.arrayBuffer();
+
+                const wasmJsRes = await fetch('./wasm_enc.js');
+                if (!wasmJsRes.ok) throw new Error("无法拉取 JS 脚手架核心");
+                const wasmJsText = await wasmJsRes.text();
+
+                statusMsg.innerHTML = `⏳ 正在对源文件执行本地加密与打包包装...`;
+
+                // 2. 调用 Wasm 加密
+                const fileBytes = new Uint8Array(await selectedFile.arrayBuffer());
+                const encryptedBytes = encrypt_file(fileBytes, pwd);
+
+                // 3. 将全部资源转码为安全的 Base64
+                const wasmBinaryBase64 = arrayBufferToBase64(wasmBinaryBuffer);
+                const wasmJsBase64 = window.btoa(unescape(encodeURIComponent(wasmJsText))); // 保护 UTF-8 字符集
+                const encryptedBase64 = arrayBufferToBase64(encryptedBytes);
+
+                const cleanedBaseName = repairFilename(selectedFile.name);
+
+                // 4. 判定是否将密码明文写入网页文件名中
+                let outName = "";
+                if (includeKeyCheckbox.checked) {
+                    outName = `${cleanedBaseName}_StuKey${pwd}End.html`;
+                } else {
+                    outName = `${cleanedBaseName}.html`;
+                }
+
+                // 5. 动态生成不依赖任何外链、可在完全断网下双击运行的自解密网页代码（传入纯净的 base 文件名）
+                const standaloneHtml = generateStandaloneHtml(cleanedBaseName, wasmJsBase64, wasmBinaryBase64, encryptedBase64);
+
+                // 6. 触发浏览器下载
+                const blob = new Blob([standaloneHtml], { type: 'text/html;charset=utf-8' });
+                triggerDownload(blob, outName);
+
+                statusMsg.innerHTML = `✨ <strong>打包成功！</strong> 已经生成专属独立网页 <strong>${outName}</strong> 并开始下载。该文件支持在手机/电脑上完全脱离本网站单独运行！`;
+                statusMsg.style.color = "var(--accent-success)";
+
+            } catch (e) {
+                alert("自解密 HTML 生成失败: " + e.message);
+                statusMsg.style.display = 'none';
+            }
+        };
+
+        // ==========================================
+        // 独立 HTML 自解密模版生成器
+        // ==========================================
+        function generateStandaloneHtml(filename, wasmJsBase64, wasmBinaryBase64, encryptedBase64) {
+            return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StuCanvas Secure Archive - ${filename}</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #111827;
+            --border-color: #1f2937;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-primary: #3b82f6;
+            --accent-primary-hover: #2563eb;
+            --accent-success: #10b981;
+            --accent-success-hover: #059669;
+            --focus-ring: rgba(59, 130, 246, 0.5);
+            --accent-error: #ef4444;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 40px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h3 {
+            margin: 0 0 6px 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        .input-group input[type="password"] {
+            width: 100%;
+            background-color: rgba(17, 24, 39, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .input-group input[type="password"]:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--focus-ring);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.15s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-decrypt {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+        .btn-decrypt:hover {
+            background-color: var(--accent-primary-hover);
+        }
+        .btn-download {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            display: none;
+        }
+        .btn-download:hover {
+            background: linear-gradient(135deg, #047857 0%, #059669 100%);
+        }
+        .status-msg {
+            text-align: center;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .preview-container {
+            margin-top: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+            display: none;
+        }
+        .preview-box {
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .preview-box img {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+        .preview-box video {
+            width: 100%;
+            max-height: 350px;
+            border-radius: 4px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h3>StuCanvas 文件解密</h3>
+            <p>归档文件名：<strong id="displayName">${filename}</strong></p>
+            <p style="font-size: 0.75rem; color: var(--accent-primary); margin-top: 8px; opacity: 0.8; font-weight: 600;">By Friendships666</p>
+        </div>
+        <div class="input-group">
+            <label for="password">解密密钥密码</label>
+            <input type="password" id="password" placeholder="请输入解锁密码">
+        </div>
+        <button class="btn-decrypt" id="decBtn">🔓 验证解密并播放</button>
+        <button class="btn-download" id="downloadBtn">📥 保存原文件到本地</button>
+        <div class="status-msg" id="statusMsg"></div>
+        <div class="preview-container" id="previewContainer">
+            <div class="preview-box" id="previewBox"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        const wasmJsBase64 = "${wasmJsBase64}";
+        const wasmBinaryBase64 = "${wasmBinaryBase64}";
+        const encryptedBase64 = "${encryptedBase64}";
+        const originalFilename = "${filename}";
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        const jsModuleUrl = "data:text/javascript;base64," + wasmJsBase64;
+
+        let decrypt_file_fn = null;
+        let init_fn = null;
+
+        async function initEngine() {
+            const module = await import(jsModuleUrl);
+            init_fn = module.default;
+            decrypt_file_fn = module.decrypt_file;
+
+            const wasmBytes = new Uint8Array(base64ToArrayBuffer(wasmBinaryBase64));
+            await init_fn(wasmBytes);
+        }
+
         const getMimeInfo = (filename) => {
             const ext = filename.split('.').pop().toLowerCase();
             const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'];
             const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'm4v'];
+            const audioExts = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus', 'm4r'];
 
-            if (imageExts.includes(ext)) {
-                return { type: 'image', mime: `image/${ext === 'jpg' ? 'jpeg' : ext}` };
-            } else if (videoExts.includes(ext)) {
-                return { type: 'video', mime: `video/${ext === 'mov' ? 'mp4' : ext}` };
-            }
+            if (imageExts.includes(ext)) return { type: 'image', mime: 'image/' + (ext === 'jpg' ? 'jpeg' : ext) };
+            if (videoExts.includes(ext)) return { type: 'video', mime: 'video/' + (ext === 'mov' ? 'mp4' : ext) };
+            if (audioExts.includes(ext)) return { type: 'audio', mime: 'audio/' + (ext === 'mp3' ? 'mpeg' : ext === 'm4a' ? 'mp4' : ext) };
             return { type: 'other', mime: 'application/octet-stream' };
         };
 
-        // 1. 加密流程（扩展名修改为 .StuEnc）
-        document.getElementById('encBtn').onclick = async () => {
-            const pwd = passwordInput.value;
-            if (!selectedFile || !pwd) return alert("请先选择要加密的文件并设置密码");
+        let decryptedBytesCache = null;
 
-            try {
-                const buf = new Uint8Array(await selectedFile.arrayBuffer());
-                const encryptedData = encrypt_file(buf, pwd);
-
-                // 将输出后缀固定为 .StuEnc
-                const outName = selectedFile.name + ".StuEnc";
-                triggerDownload(encryptedData, outName);
-            } catch (e) {
-                alert("加密失败: " + e);
-            }
-        };
-
-        // 2. 解密流程与多媒体自动预览
         document.getElementById('decBtn').onclick = async () => {
-            const pwd = passwordInput.value;
-            if (!selectedFile || !pwd) return alert("请先选择已加密的文件并输入对应解密密码");
+            const pwd = document.getElementById('password').value;
+            const statusMsg = document.getElementById('statusMsg');
+            if (!pwd) return alert("请输入解锁密码");
+
+            statusMsg.textContent = "⏳ 正在本地无网转码中...";
+            statusMsg.style.color = "var(--accent-primary)";
+            statusMsg.style.display = "block";
 
             try {
-                const buf = new Uint8Array(await selectedFile.arrayBuffer());
-                const decryptedData = decrypt_file(buf, pwd);
-
-                // 还原文件名（自动移除 .StuEnc 后缀）
-                const originalName = selectedFile.name.replace(/\.StuEnc$/i, '');
-
-                // 1. 先触发本地解密后的文件下载
-                triggerDownload(decryptedData, originalName);
-
-                // 2. 检测原文件媒体格式，提供即时本地解码预览展示
-                const mediaInfo = getMimeInfo(originalName);
-                previewBox.innerHTML = ''; // 清空可能残留的上一次展示
-
-                if (mediaInfo.type === 'image') {
-                    const blob = new Blob([decryptedData], { type: mediaInfo.mime });
-                    const mediaUrl = URL.createObjectURL(blob);
-
-                    const img = document.createElement('img');
-                    img.src = mediaUrl;
-                    img.alt = "Decrypted Preview";
-                    previewBox.appendChild(img);
-                    previewContainer.style.display = 'block';
-
-                } else if (mediaInfo.type === 'video') {
-                    const blob = new Blob([decryptedData], { type: mediaInfo.mime });
-                    const mediaUrl = URL.createObjectURL(blob);
-
-                    const video = document.createElement('video');
-                    video.src = mediaUrl;
-                    video.controls = true;
-                    video.autoplay = true; // 自动开始播放
-                    previewBox.appendChild(video);
-                    previewContainer.style.display = 'block';
-                } else {
-                    // 非多媒体文件不展示播放框
-                    previewContainer.style.display = 'none';
+                if (!decrypt_file_fn) {
+                    await initEngine();
                 }
 
-            } catch (e) {
-                alert("解密失败：可能由于您输入了错误的密码，或者文件已损坏。");
-                previewContainer.style.display = 'none';
+                const encryptedBytes = new Uint8Array(base64ToArrayBuffer(encryptedBase64));
+                const decrypted = decrypt_file_fn(encryptedBytes, pwd);
+                decryptedBytesCache = decrypted;
+
+                document.getElementById('downloadBtn').style.display = 'flex';
+
+                const mediaInfo = getMimeInfo(originalFilename);
+                const previewBox = document.getElementById('previewBox');
+                const previewContainer = document.getElementById('previewContainer');
                 previewBox.innerHTML = '';
+                previewContainer.style.display = 'block';
+
+                if (mediaInfo.type === 'image') {
+                    const blob = new Blob([decrypted], { type: mediaInfo.mime });
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(blob);
+                    previewBox.appendChild(img);
+                } else if (mediaInfo.type === 'video') {
+                    const blob = new Blob([decrypted], { type: mediaInfo.mime });
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(blob);
+                    video.controls = true;
+                    video.autoplay = true;
+                    video.playsInline = true;
+                    previewBox.appendChild(video);
+                } else if (mediaInfo.type === 'audio') {
+                    const blob = new Blob([decrypted], { type: mediaInfo.mime });
+                    previewBox.innerHTML = \`
+                        <div style="text-align: center; width: 100%; padding: 15px 0;">
+                            <div style="font-size: 3rem; margin-bottom: 12px;">🎵</div>
+                            <div style="font-size: 0.9rem; margin-bottom: 15px; word-break: break-all; font-weight: 500;">\${originalFilename}</div>
+                            <audio src="\${URL.createObjectURL(blob)}" controls autoplay style="width: 100%; max-width: 440px; margin: 0 auto; display: block;"></audio>
+                        </div>\`;
+                } else {
+                    previewBox.innerHTML = \`<div style="color: var(--text-secondary); font-size: 0.85rem;">📂 此文件类型不支持直接在网页播放，请点击下方绿色按钮下载查看。</div>\`;
+                }
+
+                statusMsg.textContent = "✨ 密码验证正确！多媒体内容已加载。";
+                statusMsg.style.color = "var(--accent-success)";
+
+            } catch (e) {
+                statusMsg.textContent = "❌ 解密失败，可能密码输入有误。";
+                statusMsg.style.color = "var(--accent-error)";
+                document.getElementById('downloadBtn').style.display = 'none';
+                document.getElementById('previewContainer').style.display = 'none';
             }
         };
+
+        document.getElementById('downloadBtn').onclick = () => {
+            if (decryptedBytesCache) {
+                const blob = new Blob([decryptedBytesCache], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = originalFilename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        };
+    <\/script>
+</body>
+</html>`;
+        }
     }
 
     main();
