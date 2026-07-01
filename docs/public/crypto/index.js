@@ -1,9 +1,6 @@
-import init, { encrypt_file } from './wasm_enc.js';
-import { generateStandaloneHtml } from './template.js';
+import { generateStandaloneHtmlHeader, generateStandaloneHtmlFooter } from './template.js';
 
 async function main() {
-    await init(); // 启动基础 Wasm 模块
-
     const fileInput = document.getElementById('fileInput');
     const dropzone = document.getElementById('dropzone');
     const activeFile = document.getElementById('activeFile');
@@ -13,35 +10,28 @@ async function main() {
     const statusMsg = document.getElementById('statusMsg');
     const selectedFilesContainer = document.getElementById('selectedFilesContainer');
     const selectedFilesList = document.getElementById('selectedFilesList');
+    const progressBar = document.getElementById('progressBar');
+    const progressContainer = document.getElementById('progressContainer');
 
-    // 内存中维护待打包的文件列表
+    // 维护当前待打包的文件数组
     let selectedFilesArray = [];
     let generatedObjectUrls = [];
 
+    // 释放预览 ObjectURL
     function revokePreviewUrls() {
         generatedObjectUrls.forEach(url => URL.revokeObjectURL(url));
         generatedObjectUrls = [];
     }
 
-    // 状态进度条渲染函数
+    // 状态与进度条渲染
     function updateProgress(percent, text) {
-        let container = document.getElementById('progressContainer');
-        if (!container) {
-            // 动态创建进度条
-            container = document.createElement('div');
-            container.id = 'progressContainer';
-            container.className = 'progress-container';
-            container.innerHTML = '<div id="progressBar" class="progress-bar"></div>';
-            statusMsg.parentNode.insertBefore(container, statusMsg);
-        }
-        const bar = document.getElementById('progressBar');
-        container.style.display = 'block';
-        bar.style.width = percent + '%';
+        progressContainer.style.display = 'block';
+        progressBar.style.width = percent + '%';
         statusMsg.innerHTML = text;
         statusMsg.style.display = 'block';
     }
 
-    // 辅助判定多媒体格式
+    // 多媒体格式判定
     const getMimeInfo = (filename) => {
         const ext = filename.split('.').pop().toLowerCase();
         const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'];
@@ -54,7 +44,16 @@ async function main() {
         return { type: 'other', mime: 'application/octet-stream' };
     };
 
-    // 渲染待打包列表及多媒体大预览卡片 (与解密端同款排版，长图、视频绝不畸变，列表在最下方滚动)
+    // 格式化体积
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    // 渲染待打包列表及多媒体大预览卡片
     function updateFilesList() {
         revokePreviewUrls();
         selectedFilesList.innerHTML = '';
@@ -62,27 +61,38 @@ async function main() {
         if (selectedFilesArray.length === 0) {
             selectedFilesContainer.style.display = 'none';
             activeFile.textContent = '未选择任何文件';
+            statusMsg.style.display = 'none';
             return;
         }
 
         selectedFilesContainer.style.display = 'block';
-        activeFile.textContent = `已选择 ${selectedFilesArray.length} 个文件`;
+
+        // 计算总文件大小
+        let totalBytes = 0;
+        selectedFilesArray.forEach(file => totalBytes += file.size);
+        const totalSizeStr = formatBytes(totalBytes);
+
+        activeFile.innerHTML = `已选择 ${selectedFilesArray.length} 个文件，总大小：<strong>${totalSizeStr}</strong>`;
+
+        // 大小预警：如果超过 1GB，显示红字醒目警告
+        const limitBytes = 1024 * 1024 * 1024; // 1GB
+        if (totalBytes > limitBytes) {
+            statusMsg.style.display = 'block';
+            statusMsg.innerHTML = `<span style="color: var(--accent-error); font-weight: bold;">⚠️ 警告：当前文件总大小（${totalSizeStr}）已超过 1GB 上限！自解密单 HTML 归档在浏览器内执行本地 DOM 词法解析时容易 OOM 崩溃，建议减少打包文件。</span>`;
+        } else {
+            statusMsg.style.display = 'block';
+            statusMsg.innerHTML = `<span style="color: var(--accent-success);">🟢 当前文件大小在安全范围内，可以顺利打包。</span>`;
+        }
 
         selectedFilesArray.forEach((file, index) => {
             const card = document.createElement('div');
             card.className = 'preview-card';
 
-            const header = document.createElement('div');
-            header.className = 'preview-card-header';
-            header.innerHTML = `
-                <span>📄 ${file.name} (<span style="color: var(--text-secondary);">${(file.size / 1024 / 1024).toFixed(2)} MB</span>)</span>
-                <button class="btn-remove-file" data-idx="${index}">移除</button>
-            `;
-            card.appendChild(header);
+            const mediaWrapper = document.createElement('div');
+            mediaWrapper.className = 'preview-media-wrapper';
 
-            // 预览大盒
-            const body = document.createElement('div');
-            body.className = 'preview-card-body';
+            const infoPanel = document.createElement('div');
+            infoPanel.className = 'preview-info-panel';
 
             const mimeInfo = getMimeInfo(file.name);
             if (mimeInfo.type !== 'other') {
@@ -92,34 +102,62 @@ async function main() {
                 if (mimeInfo.type === 'image') {
                     const img = document.createElement('img');
                     img.src = previewUrl;
-                    body.appendChild(img);
+                    mediaWrapper.appendChild(img);
                 } else if (mimeInfo.type === 'video') {
                     const video = document.createElement('video');
                     video.src = previewUrl;
-                    video.controls = true;
+                    video.muted = true;
                     video.playsInline = true;
-                    body.appendChild(video);
+                    mediaWrapper.appendChild(video);
                 } else if (mimeInfo.type === 'audio') {
-                    const audioDiv = document.createElement('div');
-                    audioDiv.style.width = '100%';
-                    audioDiv.innerHTML = `<audio src="${previewUrl}" controls style="width: 100%; display: block;"></audio>`;
-                    body.appendChild(audioDiv);
+                    const audio = document.createElement('audio');
+                    audio.src = previewUrl;
+                    audio.controls = true;
+                    mediaWrapper.appendChild(audio);
                 }
-                card.appendChild(body);
             } else {
-                body.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">📦 此文件类型非标准多媒体，无法在本地预览，打包后可在解密端直接下载原文件。</div>`;
-                card.appendChild(body);
+                mediaWrapper.innerHTML = `<span style="font-size: 1.8rem;">📂</span>`;
             }
 
-            selectedFilesList.appendChild(card);
-        });
+            infoPanel.innerHTML = `
+                <div class="preview-file-name" title="${file.name}">📄 ${file.name}</div>
+                <div class="preview-file-meta">大小：${formatBytes(file.size)} | 类型：${file.type || '未知'}</div>
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                    <div class="zoom-btn-group">
+                        <button class="zoom-btn btn-zoom-in" type="button">🔍 放大</button>
+                        <button class="zoom-btn btn-zoom-out" type="button">🔍 缩小</button>
+                    </div>
+                    <button class="btn-remove-file" type="button" data-idx="${index}">移除</button>
+                </div>
+            `;
 
-        // 绑定移除事件
-        selectedFilesList.querySelectorAll('.btn-remove-file').forEach(btn => {
-            btn.onclick = (e) => {
-                const idx = parseInt(e.currentTarget.getAttribute('data-idx'));
-                selectedFilesArray.splice(idx, 1);
-                updateFilesList();
+            card.appendChild(mediaWrapper);
+            card.appendChild(infoPanel);
+            selectedFilesList.appendChild(card);
+
+            // 绑定缩放事件
+            const zoomInBtn = infoPanel.querySelector('.btn-zoom-in');
+            const zoomOutBtn = infoPanel.querySelector('.btn-zoom-out');
+            let currentWidth = 240;
+            let currentHeight = 180;
+
+            zoomInBtn.onclick = (e) => {
+                e.preventDefault();
+                if (currentWidth < 600) {
+                    currentWidth += 40;
+                    currentHeight += 30;
+                    mediaWrapper.style.width = currentWidth + 'px';
+                    mediaWrapper.style.height = currentHeight + 'px';
+                }
+            };
+            zoomOutBtn.onclick = (e) => {
+                e.preventDefault();
+                if (currentWidth > 120) {
+                    currentWidth -= 40;
+                    currentHeight -= 30;
+                    mediaWrapper.style.width = currentWidth + 'px';
+                    mediaWrapper.style.height = currentHeight + 'px';
+                }
             };
         });
     }
@@ -131,16 +169,8 @@ async function main() {
         }
     };
 
-    dropzone.ondragover = () => {
-        dropzone.classList.add('dragover');
-        return false;
-    };
-
-    dropzone.ondragleave = () => {
-        dropzone.classList.remove('dragover');
-        return false;
-    };
-
+    dropzone.ondragover = () => { dropzone.classList.add('dragover'); return false; };
+    dropzone.ondragleave = () => { dropzone.classList.remove('dragover'); return false; };
     dropzone.ondrop = (e) => {
         dropzone.classList.remove('dragover');
         e.preventDefault();
@@ -151,29 +181,21 @@ async function main() {
         return false;
     };
 
-    // 修复重名/残缺文件名
-    function repairFilename(name) {
-        let workingName = name;
-        workingName = workingName.replace(/\.(\w+)\s*\(\d+\)/gi, '.$1');
-        workingName = workingName.replace(/\.(\w+)[_\s-]+\d+/gi, '.$1');
-        workingName = workingName.replace(/\s*\(\d+\)(?=\.\w+)/gi, '');
-        workingName = workingName.replace(/\s*-\s*副本/g, '');
-        workingName = workingName.replace(/\s*\(\d+\)$/gi, '');
-        return workingName;
-    }
-
-    // 内存友好型 Base64 转换器
-    function arrayBufferToBase64(buffer) {
-        const bytes = new Uint8Array(buffer);
-        let binary = '';
-        const chunk = 8192;
-        for (let i = 0; i < bytes.length; i += chunk) {
-            binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    // 内存安全级防堆栈溢出 Base64 转换器
+    function uint8ArrayToBase64(uint8) {
+        if (typeof uint8.toBase64 === 'function') {
+            return uint8.toBase64();
         }
-        return window.btoa(binary);
+        let binary = "";
+        const len = uint8.length;
+        const chunk = 16384;
+        for (let i = 0; i < len; i += chunk) {
+            binary += String.fromCharCode.apply(null, uint8.subarray(i, Math.min(i + chunk, len)));
+        }
+        return btoa(binary);
     }
 
-    // 极简二进制打包
+    // 序列化打包器
     function packFiles(files) {
         let totalSize = 4;
         const encoder = new TextEncoder();
@@ -206,94 +228,124 @@ async function main() {
         return uint8;
     }
 
-    // 延时 10 秒内存回收机制下载，规避高吞吐量下的下载中断与并发拦截
-    const triggerDownload = (blob, filename) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => {
-            URL.revokeObjectURL(url);
-        }, 15000); // 为浏览器预留 15 秒建立通道时间
-    };
-
-    // 一键打包
+    // 一键打包主逻辑
     document.getElementById('encBtn').onclick = async () => {
         const pwd = passwordInput.value;
         const customName = archiveNameInput.value.trim();
         if (selectedFilesArray.length === 0 || !pwd) return alert("请先添加待打包的文件并设置密码");
 
-        updateProgress(15, "⏳ 正在本地抽取核心 Wasm 密码学资产...");
+        let totalBytes = 0;
+        selectedFilesArray.forEach(file => totalBytes += file.size);
+        if (totalBytes > 1024 * 1024 * 1024) {
+            const doubleCheck = confirm("当前打包体积已超过推荐的 1GB 极限，是否确认强行打包？（解密端容易崩溃）");
+            if (!doubleCheck) return;
+        }
+
+        updateProgress(15, "⏳ 正在加载并序列化多轨本地文件...");
         await new Promise(r => setTimeout(r, 200));
 
         try {
-            const wasmBinaryRes = await fetch('./wasm_enc_bg.wasm');
-            if (!wasmBinaryRes.ok) throw new Error("无法拉取 Wasm 字节码核心");
-            const wasmBinaryBuffer = await wasmBinaryRes.arrayBuffer();
-
-            const wasmJsRes = await fetch('./wasm_enc.js');
-            if (!wasmJsRes.ok) throw new Error("无法拉取 JS 脚手架核心");
-            const wasmJsText = await wasmJsRes.text();
-
-            // 串行大文件异步读取与进度长线渲染
+            // 1. 将文件转换为字节流
             const filesToPack = [];
             for (let i = 0; i < selectedFilesArray.length; i++) {
                 const file = selectedFilesArray[i];
-                const pct = Math.floor(20 + (i / selectedFilesArray.length) * 30);
+                const pct = Math.floor(15 + (i / selectedFilesArray.length) * 20);
                 updateProgress(pct, `⏳ 正在读取本地大文件内存 (${i + 1}/${selectedFilesArray.length}): ${file.name}...`);
-                await new Promise(r => setTimeout(r, 100)); // 让出 UI 主线程渲染 UI 进度
+                await new Promise(r => setTimeout(r, 50));
 
                 const arrBuffer = await file.arrayBuffer();
                 filesToPack.push({
-                    name: repairFilename(file.name),
+                    name: file.name,
                     data: new Uint8Array(arrBuffer)
                 });
             }
 
-            updateProgress(55, "⏳ 正在序列化多文件，打包打包为高性能二进制归档容器...");
-            await new Promise(r => setTimeout(r, 200));
-
+            // 2. 序列化为单个二进制容器
+            updateProgress(40, "⏳ 正在生成多轨道二进制打包序列...");
             const packedBytes = packFiles(filesToPack);
 
-            updateProgress(75, "⏳ 正在调用本地 Wasm 进行 AES-256 复合加密...");
-            await new Promise(r => setTimeout(r, 200));
+            // 3. 产生派生密钥
+            updateProgress(50, "⏳ 正在初始化浏览器硬件加速加密组件...");
+            const te = new TextEncoder();
+            const pwBytes = te.encode(pwd);
+            const salt = crypto.getRandomValues(new Uint8Array(16));
 
-            const encryptedBytes = encrypt_file(packedBytes, pwd);
+            const baseKey = await crypto.subtle.importKey(
+                "raw",
+                pwBytes,
+                "PBKDF2",
+                false,
+                ["deriveKey"]
+            );
 
-            updateProgress(90, "⏳ 正在对加密资产进行 Base64 编译并构建自解密网页模版...");
-            await new Promise(r => setTimeout(r, 200));
+            const derivedKey = await crypto.subtle.deriveKey(
+                { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+                baseKey,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["encrypt"]
+            );
 
-            const wasmBinaryBase64 = arrayBufferToBase64(wasmBinaryBuffer);
-            const wasmJsBase64 = window.btoa(unescape(encodeURIComponent(wasmJsText)));
-            const encryptedBase64 = arrayBufferToBase64(encryptedBytes);
+            // 4. 对打包后的数据进行硬件级加密并切片
+            const CHUNK_SIZE = 50 * 1024 * 1024;
+            const totalChunks = Math.ceil(packedBytes.length / CHUNK_SIZE);
+            const outputChunks = [];
 
-            let displayBundleName = "";
-            if (customName) {
-                displayBundleName = repairFilename(customName);
-            } else {
-                const firstFileNameCleaned = filesToPack[0].name.split('.')[0];
-                displayBundleName = filesToPack.length > 1 ? `${firstFileNameCleaned}_等多文件归档` : firstFileNameCleaned;
+            const displayBundleName = customName ? customName : filesToPack[0].name.split('.')[0] + (filesToPack.length > 1 ? "_等多文件" : "");
+            const saltB64 = uint8ArrayToBase64(salt);
+            const htmlHeader = generateStandaloneHtmlHeader(displayBundleName, saltB64);
+            outputChunks.push(new Blob([htmlHeader]));
+
+            for (let i = 0; i < totalChunks; i++) {
+                const pct = Math.floor(60 + (i / totalChunks) * 30);
+                updateProgress(pct, `⏳ 正在通过芯片硬件加速加密分块 (${i + 1}/${totalChunks})...`);
+
+                const offset = i * CHUNK_SIZE;
+                const chunkBytes = packedBytes.subarray(offset, Math.min(offset + CHUNK_SIZE, packedBytes.length));
+
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+
+                const encryptedBuffer = await crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv: iv, tagLength: 128 },
+                    derivedKey,
+                    chunkBytes
+                );
+
+                const encryptedArray = new Uint8Array(encryptedBuffer);
+
+                const packedChunkBytes = new Uint8Array(12 + encryptedArray.length);
+                packedChunkBytes.set(iv, 0);
+                packedChunkBytes.set(encryptedArray, 12);
+
+                const base64Str = uint8ArrayToBase64(packedChunkBytes);
+
+                const htmlChunk = `<div id="c${i}" style="display:none">${base64Str}</div><script>p("c${i}");<\/script>\n`;
+                outputChunks.push(new Blob([htmlChunk]));
+
+                await new Promise(r => setTimeout(r, 0));
             }
 
-            let outName = "";
-            if (includeKeyCheckbox.checked) {
-                outName = `${displayBundleName}_StuKey${pwd}End.html`;
-            } else {
-                outName = `${displayBundleName}.html`;
-            }
+            updateProgress(95, "⏳ 正在注入物理自解密引导引擎...");
+            const htmlFooter = generateStandaloneHtmlFooter(displayBundleName);
+            outputChunks.push(new Blob([htmlFooter]));
 
-            const standaloneHtml = generateStandaloneHtml(displayBundleName, wasmJsBase64, wasmBinaryBase64, encryptedBase64);
-            const blob = new Blob([standaloneHtml], { type: 'text/html;charset=utf-8' });
+            const finalHtmlBlob = new Blob(outputChunks, { type: "text/html;charset=utf-8" });
 
-            updateProgress(100, `✨ <strong>归档成功！</strong> 正在保存单网页：${outName}`);
-            triggerDownload(blob, outName);
+            let outName = includeKeyCheckbox.checked ? `${displayBundleName}_StuCanvas${pwd}End.html` : `${displayBundleName}.html`;
+            updateProgress(100, `✨ <strong>打包成功！</strong> 正在保存单网页归档：${outName}`);
+
+            const url = URL.createObjectURL(finalHtmlBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = outName;
+            a.click();
+
+            setTimeout(() => URL.revokeObjectURL(url), 45000);
 
         } catch (e) {
-            alert("多文件打包 HTML 失败: " + e.message);
-            document.getElementById('progressContainer').style.display = 'none';
+            console.error(e);
+            alert("多文件加密打包失败: " + e.message);
+            progressContainer.style.display = 'none';
         }
     };
 }

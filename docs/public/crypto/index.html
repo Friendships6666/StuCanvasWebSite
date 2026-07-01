@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StuCanvas Web-Archiver - 单文件自解密打包器</title>
-    <!-- 引入独立的外部样式表 -->
+    <title>StuCanvas Web-Archiver - 原生多文件加密器</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -12,11 +11,11 @@
 <div class="container">
     <div class="header">
         <h3>StuCanvas Web-Archiver</h3>
-        <p>本地 Wasm 编译器 · 支持多文件一键打包输出为“单网页自解密归档”</p>
+        <p>支持多文件一键打包输出为“单网页自解密归档”</p>
         <p style="font-size: 0.75rem; color: var(--accent-primary); margin-top: 8px; opacity: 0.8; font-weight: 600;">By Friendships666</p>
     </div>
 
-    <!-- 拖拽上传区域 (支持多选) -->
+    <!-- 拖拽上传区域 (多选) -->
     <div class="dropzone" id="dropzone">
         <input type="file" id="fileInput" multiple>
         <div class="dropzone-icon">🎁</div>
@@ -26,7 +25,7 @@
         </div>
     </div>
 
-    <!-- 极客风进度条 -->
+    <!-- 极速进度条 -->
     <div class="progress-container" id="progressContainer">
         <div class="progress-bar" id="progressBar"></div>
     </div>
@@ -59,14 +58,13 @@
         </button>
     </div>
 
-    <!-- [高级预览定位] 采用和解密端一模一样的 .preview-card 卡片列表呈现，比例不失真，高度受限不挤压 -->
+    <!-- 待打包多媒体预览卡片区 -->
     <div class="selected-files-container" id="selectedFilesContainer" style="margin-top: 25px;">
         <div class="selected-files-title">📁 待打包归档内的文件列表与即时预览：</div>
         <div id="selectedFilesList"></div>
     </div>
 </div>
 
-<!-- 原生 ES 模块脚本 -->
 <script type="module" src="./index.js"></script>
 </body>
 </html>

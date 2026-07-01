@@ -1,15 +1,14 @@
 /**
- * 导出独立的自解密 HTML 模版生成器 (静默预加载初始化，彻底解决首击卡死及二次点击Bug)
- * 100% 消除 IDE 嵌套反引号转义报错，恢复清爽绿标
+ * 导出原生的自解密 HTML 头部模版
  * By Friendships666
  */
-export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase64, encryptedBase64) {
+export function generateStandaloneHtmlHeader(bundleName, saltBase64) {
     return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StuCanvas Secure Archive - ${bundleName}</title>
+    <title>StuCanvas Web 归档工具 - ${bundleName}</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -27,7 +26,7 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
             padding: 40px 10px;
             display: flex;
@@ -102,38 +101,16 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
             justify-content: center;
             gap: 8px;
             margin-bottom: 12px;
-        }
-        button:active {
-            transform: scale(0.98);
-        }
-        .btn-decrypt {
             background-color: var(--accent-primary);
             color: white;
         }
-        .btn-decrypt:hover {
-            background-color: var(--accent-primary-hover);
-        }
+        button:hover { background-color: var(--accent-primary-hover); }
+        button:active { transform: scale(0.98); }
         .status-msg {
             text-align: center;
             font-size: 0.85rem;
             margin-bottom: 15px;
-            display: none;
-        }
-        /* 进度条组件 */
-        .progress-container {
-            width: 100%;
-            height: 6px;
-            background-color: var(--border-color);
-            border-radius: 3px;
-            margin: 15px 0;
-            overflow: hidden;
-            display: none;
-        }
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-success) 100%);
-            transition: width 0.25s ease-out;
+            color: var(--text-secondary);
         }
         /* 解密后的文件列表 */
         .file-list-card {
@@ -160,8 +137,8 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
             font-size: 0.8rem;
             width: auto;
             margin: 0;
-            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
         }
+        .btn-download-all:hover { background-color: var(--accent-success-hover); }
         .file-item-row {
             display: flex;
             justify-content: space-between;
@@ -170,9 +147,7 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
             border-bottom: 1px solid rgba(255,255,255,0.05);
             font-size: 0.85rem;
         }
-        .file-item-row:last-child {
-            border-bottom: none;
-        }
+        .file-item-row:last-child { border-bottom: none; }
         .btn-single-download {
             background-color: rgba(59, 130, 246, 0.15);
             color: #60a5fa;
@@ -183,9 +158,8 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
             margin: 0;
             border-radius: 4px;
         }
-        .btn-single-download:hover {
-            background-color: rgba(59, 130, 246, 0.3);
-        }
+        .btn-single-download:hover { background-color: rgba(59, 130, 246, 0.3); }
+        
         /* 多媒体预览区域 */
         .preview-container {
             margin-top: 25px;
@@ -199,76 +173,133 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
             color: var(--text-secondary);
             margin-bottom: 15px;
         }
+        
+        /* 列表卡片 */
         .preview-card {
+            display: flex;
+            align-items: center;
             background-color: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            margin-bottom: 15px;
-            overflow: hidden;
+            margin-bottom: 12px;
+            padding: 12px;
+            gap: 18px;
+            box-sizing: border-box;
         }
-        .preview-card-header {
-            background-color: rgba(255,255,255,0.03);
-            padding: 8px 12px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            border-bottom: 1px solid var(--border-color);
-            word-break: break-all;
-        }
-        .preview-card-body {
-            padding: 15px;
+        .preview-card:last-child { margin-bottom: 0; }
+
+        /* 左侧：物理固定分辨率的多媒体容器（默认大小调整为 240x180） */
+        .preview-media-wrapper {
+            width: 240px;
+            height: 180px;
+            background-color: #0b0f19;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: width 0.2s ease-out, height 0.2s ease-out; /* 缩放过渡平滑动效 */
         }
-        .preview-card-body img {
-            max-width: 100%;
-            max-height: 350px;
-            border-radius: 4px;
+        .preview-media-wrapper img,
+        .preview-media-wrapper video {
+            width: 100%;
+            height: 100%;
             object-fit: contain;
         }
-        .preview-card-body video {
-            width: 100%;
-            max-height: 350px;
-            border-radius: 4px;
-            outline: none;
+        .preview-media-wrapper audio {
+            width: 90%;
+        }
+
+        /* 右侧：信息与控制面板 */
+        .preview-info-panel {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 0;
+        }
+        .preview-file-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-all;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .preview-file-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* 缩放按钮样式 */
+        .zoom-btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        .zoom-btn {
+            width: auto !important;
+            padding: 6px 12px !important;
+            font-size: 0.75rem !important;
+            margin-bottom: 0 !important;
+            border-radius: 4px !important;
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+            cursor: pointer;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+        .zoom-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15) !important;
         }
     </style>
+    <script>
+        window.encryptedChunks = [];
+        window.saltBase64 = "${saltBase64}";
+        
+        function base64ToBytes(b64) {
+            if (typeof Uint8Array.fromBase64 === 'function') {
+                return Uint8Array.fromBase64(b64);
+            }
+            const binString = atob(b64);
+            const len = binString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binString.charCodeAt(i);
+            }
+            return bytes;
+        }
+
+        window.p = function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const b64 = el.textContent;
+            el.remove(); 
+            const bytes = base64ToBytes(b64);
+            window.encryptedChunks.push(new Blob([bytes]));
+        };
+    </script>
 </head>
 <body>
-
-    <!-- 极轻快秒开的数据流缓冲屏 (默认展示) -->
-    <div class="container" id="loadingScreen">
-        <div class="header" style="margin-bottom: 15px;">
-            <h3>StuCanvas 归档读取中</h3>
-            <p>正在从本网页中安全解析并解压缩大文件资产...</p>
-        </div>
-        <div class="progress-container" style="display:block;">
-            <div class="progress-bar" id="loadProgressBar" style="width: 0%;"></div>
-        </div>
-        <div class="status-msg" id="loadStatusMsg" style="display:block;">正在建立本地解码管道...</div>
-    </div>
-
-    <!-- 主交互解密端 (预加载完毕后激活呈现) -->
-    <div class="container" id="mainContainer" style="display:none;">
+    <div class="container">
         <div class="header">
-            <h3>StuCanvas 安全加密归档</h3>
-            <p>归档文件：<strong>${bundleName}</strong></p>
+            <h3>StuCanvas Web-Archive</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">由 stucanvas.org 生成本文件</p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;">归档内容：<strong>${bundleName}</strong></p>
             <p style="font-size: 0.75rem; color: var(--accent-primary); margin-top: 8px; opacity: 0.8; font-weight: 600;">By Friendships666</p>
         </div>
         <div class="input-group">
             <label for="password">解密密钥密码</label>
             <input type="password" id="password" placeholder="请输入解锁密码">
         </div>
-        <button class="btn-decrypt" id="decBtn">🔓 验证解密并展开归档</button>
-        
-        <!-- 核心解密进度条 -->
-        <div class="progress-container" id="progressContainer">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
+        <button id="decBtn">🔓 验证解密并展开归档</button>
+        <div class="status-msg" id="statusMsg">等待输入密码...</div>
 
-        <div class="status-msg" id="statusMsg"></div>
-
-        <!-- 解密后的文件列表卡片 -->
+        <!-- 解密后的多文件列表卡片 -->
         <div class="file-list-card" id="fileListCard">
             <div class="file-list-title">
                 <span>📦 归档内的文件：</span>
@@ -283,45 +314,39 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
             <div id="previewItemsList"></div>
         </div>
     </div>
+`;
+}
 
-    <!-- 极高能性能优化手段：使用 text/plain DOM 容器避开浏览器对 100MB+ Base64 的 AST 树深度解析，缩短开屏等待时间 -->
-    <script id="wasmJsData" type="text/plain">${wasmJsBase64}</script>
-    <script id="wasmBinaryData" type="text/plain">${wasmBinaryBase64}</script>
-    <script id="encryptedData" type="text/plain">${encryptedBase64}</script>
+/**
+ * 导出原生的自解密 HTML 尾部模版
+ * By Friendships666
+ */
+export function generateStandaloneHtmlFooter(bundleName) {
+    return `
+    <script>
+        const statusMsg = document.getElementById('statusMsg');
+        const decBtn = document.getElementById('decBtn');
+        const fileListCard = document.getElementById('fileListCard');
+        const fileItemsList = document.getElementById('fileItemsList');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewItemsList = document.getElementById('previewItemsList');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
 
-    <script type="module">
-        // 彻底杜绝使用繁重的 JS 文本字面量。利用 DOM 的 textContent 获取大字符串。
-        // 这避开了 Chrome 编译器对巨型字符串做编译语法分析（AST）所产生的卡顿死锁，速度提升极多。
-        const wasmJsBase64 = document.getElementById('wasmJsData').textContent.trim();
-        const wasmBinaryBase64 = document.getElementById('wasmBinaryData').textContent.trim();
-        const encryptedBase64 = document.getElementById('encryptedData').textContent.trim();
-        const bundleName = "${bundleName}";
+        let unpackedFilesCache = null;
 
-        // 异步分块 Base64 解码器
-        async function base64ToUint8ArrayAsync(base64, onProgress) {
-            const len = base64.length;
-            const result = new Uint8Array(Math.floor((len * 3) / 4));
-            let resultOffset = 0;
-            const chunkSize = 1024 * 1024; // 严格以 1MB 为一个处理块（4的倍数）
-            
-            for (let offset = 0; offset < len; offset += chunkSize) {
-                const end = Math.min(offset + chunkSize, len);
-                const chunk = base64.substring(offset, end);
-                const binaryString = window.atob(chunk);
-                for (let i = 0; i < binaryString.length; i++) {
-                    result[resultOffset++] = binaryString.charCodeAt(i);
-                }
-                if (onProgress) {
-                    const percent = Math.floor((offset / len) * 100);
-                    onProgress(percent);
-                }
-                // 让出主线程时间片给浏览器，渲染进度条
-                await new Promise(resolve => setTimeout(resolve, 0));
+        function base64ToBytes(b64) {
+            if (typeof Uint8Array.fromBase64 === 'function') {
+                return Uint8Array.fromBase64(b64);
             }
-            return result.subarray(0, resultOffset);
+            const binString = atob(b64);
+            const len = binString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binString.charCodeAt(i);
+            }
+            return bytes;
         }
 
-        // 二进制解包核心算法
         function unpackFiles(packedBytes) {
             let offset = 0;
             const view = new DataView(packedBytes.buffer, packedBytes.byteOffset, packedBytes.byteLength);
@@ -350,10 +375,6 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
             return files;
         }
 
-        // ==========================================
-        // 核心亮点：手写原生极轻量级 40 行 uncompressed ZIP 压缩生成器
-        // 杜绝对多文件并发下载的拦截，产出标准的 .zip 格式下载！
-        // ==========================================
         function crc32(arr) {
             let crc = -1;
             const tbl = [];
@@ -430,13 +451,6 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
             return new Blob(records, { type: 'application/zip' });
         }
 
-        const jsModuleUrl = "data:text/javascript;base64," + wasmJsBase64;
-        
-        let decrypt_file_fn = null;
-        let init_fn = null;
-        let engineReady = false; 
-        let encryptedBytes = null; // 全局缓存解码完毕的加密字节流
-
         const getMimeInfo = (filename) => {
             const ext = filename.split('.').pop().toLowerCase();
             const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'];
@@ -457,9 +471,6 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
             return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
         }
 
-        let unpackedFilesCache = null;
-
-        // 安全延时内存垃圾回收机制
         const triggerDownload = (blob, filename) => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -468,115 +479,91 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            setTimeout(() => {
-                URL.revokeObjectURL(url);
-            }, 15000); 
+            setTimeout(() => URL.revokeObjectURL(url), 15000); 
         };
 
-        // 解密控制阶段进度条
-        function updateProgress(percent, text) {
-            const container = document.getElementById('progressContainer');
-            const bar = document.getElementById('progressBar');
-            const status = document.getElementById('statusMsg');
-
-            container.style.display = 'block';
-            bar.style.width = percent + '%';
-            status.innerHTML = text;
-            status.style.display = 'block';
-        }
-
-        // ==========================================
-        // 静默预初始化流：开屏载入
-        // ==========================================
-        function updateLoadProgress(percent, text) {
-            const bar = document.getElementById('loadProgressBar');
-            const status = document.getElementById('loadStatusMsg');
-            bar.style.width = percent + '%';
-            status.innerHTML = text;
-        }
-
-        async function initEngineAndData() {
-            try {
-                // 1. 动态加载 Wasm 绑定层
-                updateLoadProgress(5, "⏳ 正在提取解密脚手架模块...");
-                await new Promise(r => setTimeout(r, 100));
-                
-                const module = await import(jsModuleUrl);
-                init_fn = module.default;
-                decrypt_file_fn = module.decrypt_file;
-
-                // 2. 异步分块加载 Wasm 字节码核心 (约 1MB 左右，极快)
-                updateLoadProgress(15, "⏳ 正在提取 Wasm 算力核心模块...");
-                const wasmBytes = await base64ToUint8ArrayAsync(wasmBinaryBase64, (p) => {
-                    updateLoadProgress(15 + Math.floor(p * 0.15), '⏳ 正在提取 Wasm 算力核心模块 (' + p + '%)...');
-                });
-
-                // 3. 编译 Wasm 引擎
-                updateLoadProgress(30, "⏳ 正在本地编译 Wasm 密码学引擎...");
-                await new Promise(r => setTimeout(r, 100));
-                await init_fn(wasmBytes);
-
-                // 4. 异步分块解析大文本归档 (100MB+ 专属分块加载，进度条主要展现期，绝不卡死)
-                updateLoadProgress(40, "⏳ 正在载入大文件归档数据...");
-                encryptedBytes = await base64ToUint8ArrayAsync(encryptedBase64, (p) => {
-                    updateLoadProgress(40 + Math.floor(p * 0.55), '⏳ 正在解开归档高熵数据流 (' + p + '%)...');
-                });
-
-                updateLoadProgress(100, "✨ 数据加载完毕！");
-                await new Promise(r => setTimeout(r, 150));
-
-                // 预加载完毕，瞬间切换显示，体验行云流水
-                document.getElementById('loadingScreen').style.display = 'none';
-                document.getElementById('mainContainer').style.display = 'block';
-                engineReady = true;
-
-            } catch (err) {
-                console.error("Initialization error:", err);
-                updateLoadProgress(0, '<span style="color: var(--accent-error);">❌ 归档加载失败：' + (err.message || err) + '</span>');
-            }
-        }
-
-        // 页面打开瞬间启动
-        initEngineAndData();
-
-        document.getElementById('decBtn').onclick = async () => {
+        decBtn.onclick = async () => {
             const pwd = document.getElementById('password').value;
-            const statusMsg = document.getElementById('statusMsg');
             if (!pwd) return alert("请输入解锁密码");
 
-            // 极速检测
-            if (!engineReady || !decrypt_file_fn || !encryptedBytes) {
-                return alert("归档数据仍在初始化中，请稍候再试。");
-            }
-
-            updateProgress(30, "⏳ 正在对归档执行本地 AES-256-GCM 算力解密...");
-            await new Promise(r => setTimeout(r, 100));
+            decBtn.disabled = true;
+            statusMsg.innerHTML = "⏳ 正在初始化...";
 
             try {
-                // 使用已经异步解码出来的全局缓存，此处耗时仅在微秒级
-                const decryptedBytes = decrypt_file_fn(encryptedBytes, pwd);
-                
-                updateProgress(75, "⏳ 解密成功，正在还原多文件结构体归档...");
-                await new Promise(r => setTimeout(r, 100));
+                const te = new TextEncoder();
+                const pwBytes = te.encode(pwd);
 
-                unpackedFilesCache = unpackFiles(decryptedBytes);
+                const baseKey = await crypto.subtle.importKey(
+                    "raw",
+                    pwBytes,
+                    "PBKDF2",
+                    false,
+                    ["deriveKey"]
+                );
 
-                // 1. 渲染文件列表
-                const fileItemsList = document.getElementById('fileItemsList');
+                const derivedKey = await crypto.subtle.deriveKey(
+                    {
+                        name: "PBKDF2",
+                        salt: base64ToBytes(window.saltBase64),
+                        iterations: 100000,
+                        hash: "SHA-256"
+                    },
+                    baseKey,
+                    {
+                        name: "AES-GCM",
+                        length: 256
+                    },
+                    false,
+                    ["decrypt"]
+                );
+
+                const decryptedChunks = [];
+                const total = window.encryptedChunks.length;
+
+                for (let i = 0; i < total; i++) {
+                    statusMsg.innerHTML = \`⏳ 正在调用 CPU 硬件加速解密物理分块 (\${i + 1}/\${total})...\`;
+                    
+                    const encBlob = window.encryptedChunks[i];
+                    const encBuffer = await encBlob.arrayBuffer();
+                    const encBytes = new Uint8Array(encBuffer);
+
+                    const iv = encBytes.subarray(0, 12);
+                    const ciphertext = encBytes.subarray(12);
+
+                    const decryptedBuffer = await crypto.subtle.decrypt(
+                        {
+                            name: "AES-GCM",
+                            iv: iv,
+                            tagLength: 128
+                        },
+                        derivedKey,
+                        ciphertext
+                    );
+
+                    const decBlob = new Blob([decryptedBuffer]);
+                    decryptedChunks.push(decBlob);
+
+                    await new Promise(r => setTimeout(r, 0));
+                }
+
+                statusMsg.innerHTML = "⏳ 正在重构并还原打包文件...";
+                const finalDecryptedBlob = new Blob(decryptedChunks, { type: "application/octet-stream" });
+                const packedBuffer = await finalDecryptedBlob.arrayBuffer();
+                const packedBytes = new Uint8Array(packedBuffer);
+
+                unpackedFilesCache = unpackFiles(packedBytes);
+
+                // 渲染多文件列表
                 fileItemsList.innerHTML = '';
-                
                 unpackedFilesCache.forEach((file, index) => {
                     const row = document.createElement('div');
                     row.className = 'file-item-row';
-                    // 彻底避免任何模板反引号、转义插值表达式。使用最纯净安全的单引号与字符串拼接
                     row.innerHTML = '<span>📄 ' + file.name + ' (<span style="color: var(--text-secondary);">' + formatBytes(file.data.length) + '</span>)</span>' +
                                     '<button class="btn-single-download" data-idx="' + index + '">下载</button>';
                     fileItemsList.appendChild(row);
                 });
+                fileListCard.style.display = 'block';
 
-                document.getElementById('fileListCard').style.display = 'block';
-
-                // 绑定单文件手动下载事件
                 fileItemsList.querySelectorAll('.btn-single-download').forEach(btn => {
                     btn.onclick = (e) => {
                         const idx = parseInt(e.target.getAttribute('data-idx'));
@@ -585,8 +572,7 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
                     };
                 });
 
-                // 2. 批量渲染媒体预览卡片
-                const previewItemsList = document.getElementById('previewItemsList');
+                // 渲染多媒体即时预览
                 previewItemsList.innerHTML = '';
                 let hasMedia = false;
 
@@ -598,13 +584,11 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
                     const card = document.createElement('div');
                     card.className = 'preview-card';
                     
-                    const header = document.createElement('div');
-                    header.className = 'preview-card-header';
-                    header.textContent = '📄 ' + file.name;
-                    card.appendChild(header);
+                    const mediaWrapper = document.createElement('div');
+                    mediaWrapper.className = 'preview-media-wrapper';
 
-                    const body = document.createElement('div');
-                    body.className = 'preview-card-body';
+                    const infoPanel = document.createElement('div');
+                    infoPanel.className = 'preview-info-panel';
 
                     const blob = new Blob([file.data], { type: mediaInfo.mime });
                     const mediaUrl = URL.createObjectURL(blob);
@@ -612,53 +596,83 @@ export function generateStandaloneHtml(bundleName, wasmJsBase64, wasmBinaryBase6
                     if (mediaInfo.type === 'image') {
                         const img = document.createElement('img');
                         img.src = mediaUrl;
-                        body.appendChild(img);
+                        mediaWrapper.appendChild(img);
                     } else if (mediaInfo.type === 'video') {
                         const video = document.createElement('video');
                         video.src = mediaUrl;
                         video.controls = true;
-                        video.autoplay = false; 
                         video.playsInline = true;
-                        body.appendChild(video);
+                        mediaWrapper.appendChild(video);
                     } else if (mediaInfo.type === 'audio') {
-                        const audioDiv = document.createElement('div');
-                        audioDiv.style.width = '100%';
-                        audioDiv.innerHTML = '<audio src="' + mediaUrl + '" controls style="width: 100%; display: block;"></audio>';
-                        body.appendChild(audioDiv);
+                        const audio = document.createElement('audio');
+                        audio.src = mediaUrl;
+                        audio.controls = true;
+                        mediaWrapper.appendChild(audio);
                     }
 
-                    card.appendChild(body);
+                    infoPanel.innerHTML = \`
+                        <div class="preview-file-name" title="\${file.name}">📄 \${file.name}</div>
+                        <div class="preview-file-meta">大小：\${formatBytes(file.data.length)}</div>
+                        <div class="zoom-btn-group">
+                            <button class="zoom-btn btn-zoom-in">🔍 放大</button>
+                            <button class="zoom-btn btn-zoom-out">🔍 缩小</button>
+                        </div>
+                    \`;
+
+                    card.appendChild(mediaWrapper);
+                    card.appendChild(infoPanel);
                     previewItemsList.appendChild(card);
+
+                    // 绑定缩放事件
+                    const zoomInBtn = infoPanel.querySelector('.btn-zoom-in');
+                    const zoomOutBtn = infoPanel.querySelector('.btn-zoom-out');
+                    let currentWidth = 240;
+                    let currentHeight = 180;
+
+                    zoomInBtn.onclick = (e) => {
+                        e.preventDefault();
+                        if (currentWidth < 600) {
+                            currentWidth += 40;
+                            currentHeight += 30;
+                            mediaWrapper.style.width = currentWidth + 'px';
+                            mediaWrapper.style.height = currentHeight + 'px';
+                        }
+                    };
+                    zoomOutBtn.onclick = (e) => {
+                        e.preventDefault();
+                        if (currentWidth > 120) {
+                            currentWidth -= 40;
+                            currentHeight -= 30;
+                            mediaWrapper.style.width = currentWidth + 'px';
+                            mediaWrapper.style.height = currentHeight + 'px';
+                        }
+                    };
                 });
 
                 if (hasMedia) {
-                    document.getElementById('previewContainer').style.display = 'block';
-                } else {
-                    document.getElementById('previewContainer').style.display = 'none';
+                    previewContainer.style.display = 'block';
                 }
 
-                updateProgress(100, "✨ <strong>验证成功！</strong> 归档内容已全部解出。");
+                statusMsg.innerHTML = "✨ <strong>验证成功！</strong> 归档内容已全部展开解出。";
 
-            } catch (e) {
-                updateProgress(0, "❌ 解密失败，可能密码输入有误。");
-                document.getElementById('progressContainer').style.display = 'none';
-                document.getElementById('fileListCard').style.display = 'none';
-                document.getElementById('previewContainer').style.display = 'none';
+            } catch (err) {
+                console.error(err);
+                statusMsg.innerHTML = "<span style='color: var(--accent-error);'>❌ 解密失败，密码输入有误或归档损坏。</span>";
+                decBtn.disabled = false;
             }
         };
 
-        // 一键打包为 ZIP 下载，彻底避开浏览器的“疑似并发自动下载”拦截
-        document.getElementById('downloadAllBtn').onclick = () => {
+        downloadAllBtn.onclick = () => {
             if (unpackedFilesCache) {
                 try {
                     const zipBlob = generateZipBlob(unpackedFilesCache);
-                    triggerDownload(zipBlob, "${bundleName}_StuFiles.zip");
+                    triggerDownload(zipBlob, "${bundleName}_DecryptArchive.zip");
                 } catch(e) {
-                    alert("ZIP 打包失败，请点击各文件旁边的「下载」按钮单独保存。");
+                    alert("ZIP打包合并失败，请点击各文件旁边的「下载」按钮单独下载。");
                 }
             }
         };
-    </script>
+    <\/script>
 </body>
 </html>`;
 }
