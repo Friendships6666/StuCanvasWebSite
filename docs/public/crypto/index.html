@@ -3,19 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StuCanvas Web-Archiver - 原生多文件加密器</title>
+    <title>StuCanvas Web-Archiver - 原生加密打包终端</title>
     <link rel="stylesheet" href="./style.css">
+    <style>
+        .section-divider {
+            border-top: 1px solid var(--border-color);
+            margin: 40px 0 25px 0;
+            padding-top: 25px;
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .sub-section-card {
+            background-color: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .sub-section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            text-align: left;
+            border-left: 3px solid var(--accent-primary);
+            padding-left: 8px;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- ==================== 版块 1：HTML 归档打包 ==================== -->
     <div class="header">
         <h3>StuCanvas Web-Archiver</h3>
         <p>支持多文件一键打包输出为“单网页自解密归档”</p>
         <p style="font-size: 0.75rem; color: var(--accent-primary); margin-top: 8px; opacity: 0.8; font-weight: 600;">By Friendships666</p>
     </div>
 
-    <!-- 拖拽上传区域 (多选) -->
     <div class="dropzone" id="dropzone">
         <input type="file" id="fileInput" multiple>
         <div class="dropzone-icon">🎁</div>
@@ -25,46 +58,124 @@
         </div>
     </div>
 
-    <!-- 极速进度条 -->
     <div class="progress-container" id="progressContainer">
         <div class="progress-bar" id="progressBar"></div>
     </div>
-
-    <!-- 智能状态反馈栏 -->
     <div class="status-msg" id="statusMsg"></div>
 
-    <!-- 归档包命名配置 -->
     <div class="input-group">
         <label for="archiveName">自定义网页文件名（可选）</label>
         <input type="text" id="archiveName" placeholder="不填写则默认以首个文件名命名">
     </div>
 
-    <!-- 密码区域 -->
     <div class="input-group">
         <label for="password">安全解锁密码</label>
         <input type="password" id="password" placeholder="请输入将来用于解锁本归档的密码">
     </div>
 
-    <!-- 防忘密码：复选框选项 -->
     <div class="checkbox-group">
         <input type="checkbox" id="includeKeyCheckbox">
         <label for="includeKeyCheckbox">将密码明文写入网页文件名中（防止忘记密码）</label>
     </div>
 
-    <!-- 操作按钮 -->
     <div class="btn-group">
         <button class="btn-encrypt" id="encBtn">
             <span>🔒 一键打包生成自解密 HTML</span>
         </button>
     </div>
 
-    <!-- 待打包多媒体预览卡片区 -->
+    <!-- HTML 打包的多媒体即时大预览区 -->
     <div class="selected-files-container" id="selectedFilesContainer" style="margin-top: 25px;">
         <div class="selected-files-title">📁 待打包归档内的文件列表与即时预览：</div>
         <div id="selectedFilesList"></div>
     </div>
+
+
+    <!-- ==================== 版块 2：StuCanvas 视频隐写安全终端 ==================== -->
+    <div class="section-divider"></div>
+    <div class="section-title">🎬 StuCanvas 视频隐写</div>
+
+    <!-- 子面板 A：视频隐写加密打包 -->
+    <div class="sub-section-card">
+        <div class="sub-section-title">1. 视频隐写加密打包</div>
+
+        <div class="input-group" style="text-align: left; margin-top: 10px;">
+            <label>① 选取需要隐藏的源文件（支持多选、任何文件类型）</label>
+            <div class="dropzone" id="secretDropzone" style="padding: 20px 10px; margin-top: 5px;">
+                <input type="file" id="secretFilesInput" multiple>
+                <div class="dropzone-icon" style="font-size: 1.5rem; margin-bottom: 5px;">🔒</div>
+                <div class="file-info" style="font-size: 0.8rem;">拖拽或点击，添加需要隐藏的文件</div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="archiveNameVideo">② 自定义视频文件名（可选）</label>
+            <input type="text" id="archiveNameVideo" placeholder="不填写则默认以首个隐藏文件名命名">
+        </div>
+
+        <div class="input-group">
+            <label for="passwordVideoPack">③ 设置安全解锁密码</label>
+            <input type="password" id="passwordVideoPack" placeholder="请输入保护密码">
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="includeKeyCheckboxVideo">
+            <label for="includeKeyCheckboxVideo">将密码明文写入视频文件名中（防止忘记密码）</label>
+        </div>
+
+        <button class="btn-encrypt" id="btnVideoPack" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">🎬 一键打包合成隐写 MP4 视频</button>
+
+        <!-- 视频加密端专用的隐藏文件预览区 -->
+        <div class="selected-files-container" id="secretFilesContainer" style="margin-top: 15px;">
+            <div class="selected-files-title">📁 待隐藏的文件列表与即时预览：</div>
+            <div id="secretFilesList"></div>
+        </div>
+    </div>
+
+    <!-- 子面板 B：视频隐写安全解密 -->
+    <div class="sub-section-card">
+        <div class="sub-section-title">2. 视频隐写安全解密</div>
+
+        <div class="dropzone" id="encVideoDropzone" style="padding: 25px 10px;">
+            <input type="file" id="encVideoInput" accept="video/mp4">
+            <div class="dropzone-icon" style="font-size: 1.8rem; margin-bottom: 5px;">🔓</div>
+            <div class="file-info">
+                <div>将隐写视频拖拽至此，或 <span style="color: var(--accent-primary); text-decoration: underline;">点击从相册/文件选择视频</span></div>
+                <div id="activeEncVideoName" style="color: var(--text-primary); font-weight: 600; margin-top: 5px;">未选择任何视频</div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="passwordVideoUnpack">输入解锁密码</label>
+            <input type="password" id="passwordVideoUnpack" placeholder="请输入解密密码">
+        </div>
+
+        <button class="btn-encrypt" id="btnVideoUnpack" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">🔓 提取/在线播放隐藏数据</button>
+
+        <!-- 视频解密端专用的多文件提取列表卡片 -->
+        <div class="file-list-card" id="decryptedFileListCard" style="margin-top: 15px; display: none;">
+            <div class="file-list-title">
+                <span>📦 视频归档内隐藏的文件：</span>
+                <button class="btn-download-all" id="decryptedDownloadAllBtn">📥 一键下载全部 (ZIP)</button>
+            </div>
+            <div id="decryptedFileItemsList"></div>
+        </div>
+
+        <!-- 视频解密端专用的隐藏多媒体预览区 -->
+        <div class="selected-files-container" id="decryptedMediaPreviewContainer" style="margin-top: 15px; display: none;">
+            <div class="selected-files-title">👁️ 视频内隐藏的多媒体即时预览列表：</div>
+            <div id="decryptedMediaPreviewList"></div>
+        </div>
+    </div>
+
+    <!-- 视频加密解密专用进度条与反馈 -->
+    <div class="progress-container" id="videoPackProgressContainer">
+        <div class="progress-bar" id="videoPackProgressBar"></div>
+    </div>
+    <div class="status-msg" id="videoPackStatusMsg"></div>
 </div>
 
 <script type="module" src="./index.js"></script>
+<script type="module" src="./video_crypto.js"></script>
 </body>
 </html>

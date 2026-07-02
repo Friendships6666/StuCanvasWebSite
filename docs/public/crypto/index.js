@@ -1,3 +1,4 @@
+// public/crypto/index.js
 import { generateStandaloneHtmlHeader, generateStandaloneHtmlFooter } from './template.js';
 
 async function main() {
@@ -13,17 +14,14 @@ async function main() {
     const progressBar = document.getElementById('progressBar');
     const progressContainer = document.getElementById('progressContainer');
 
-    // 维护当前待打包的文件数组
     let selectedFilesArray = [];
     let generatedObjectUrls = [];
 
-    // 释放预览 ObjectURL
     function revokePreviewUrls() {
         generatedObjectUrls.forEach(url => URL.revokeObjectURL(url));
         generatedObjectUrls = [];
     }
 
-    // 状态与进度条渲染
     function updateProgress(percent, text) {
         progressContainer.style.display = 'block';
         progressBar.style.width = percent + '%';
@@ -31,7 +29,6 @@ async function main() {
         statusMsg.style.display = 'block';
     }
 
-    // 多媒体格式判定
     const getMimeInfo = (filename) => {
         const ext = filename.split('.').pop().toLowerCase();
         const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'];
@@ -44,7 +41,6 @@ async function main() {
         return { type: 'other', mime: 'application/octet-stream' };
     };
 
-    // 格式化体积
     function formatBytes(bytes) {
         if (bytes === 0) return '0 B';
         const k = 1024;
@@ -53,7 +49,6 @@ async function main() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 
-    // 渲染待打包列表及多媒体大预览卡片
     function updateFilesList() {
         revokePreviewUrls();
         selectedFilesList.innerHTML = '';
@@ -67,18 +62,16 @@ async function main() {
 
         selectedFilesContainer.style.display = 'block';
 
-        // 计算总文件大小
         let totalBytes = 0;
         selectedFilesArray.forEach(file => totalBytes += file.size);
         const totalSizeStr = formatBytes(totalBytes);
 
         activeFile.innerHTML = `已选择 ${selectedFilesArray.length} 个文件，总大小：<strong>${totalSizeStr}</strong>`;
 
-        // 大小预警：如果超过 1GB，显示红字醒目警告
         const limitBytes = 1024 * 1024 * 1024; // 1GB
         if (totalBytes > limitBytes) {
             statusMsg.style.display = 'block';
-            statusMsg.innerHTML = `<span style="color: var(--accent-error); font-weight: bold;">⚠️ 警告：当前文件总大小（${totalSizeStr}）已超过 1GB 上限！自解密单 HTML 归档在浏览器内执行本地 DOM 词法解析时容易 OOM 崩溃，建议减少打包文件。</span>`;
+            statusMsg.innerHTML = `<span style="color: var(--accent-error); font-weight: bold;">⚠️ 警告：当前文件总大小（${totalSizeStr}）已超过 1GB 上限！自解密单 HTML 归档加载时容易 OOM 崩溃，建议减少打包文件。</span>`;
         } else {
             statusMsg.style.display = 'block';
             statusMsg.innerHTML = `<span style="color: var(--accent-success);">🟢 当前文件大小在安全范围内，可以顺利打包。</span>`;
@@ -109,6 +102,16 @@ async function main() {
                     video.muted = true;
                     video.playsInline = true;
                     mediaWrapper.appendChild(video);
+
+                    video.addEventListener('error', () => {
+                        if (file.size < 35 * 1024 * 1024) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => { video.src = e.target.result; };
+                            reader.readAsDataURL(file);
+                        } else {
+                            mediaWrapper.innerHTML = '<div style="text-align: center; color: var(--accent-error); font-size: 0.75rem; padding: 8px; font-weight: 500;">⚠️ Edge 暂不支持播放大体积本地流视频，请直接点击下方「下载」保存后观看。</div>';
+                        }
+                    }, { once: true });
                 } else if (mimeInfo.type === 'audio') {
                     const audio = document.createElement('audio');
                     audio.src = previewUrl;
@@ -121,7 +124,7 @@ async function main() {
 
             infoPanel.innerHTML = `
                 <div class="preview-file-name" title="${file.name}">📄 ${file.name}</div>
-                <div class="preview-file-meta">大小：${formatBytes(file.size)} | 类型：${file.type || '未知'}</div>
+                <div class="preview-file-meta">大小：${formatBytes(file.size)}</div>
                 <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
                     <div class="zoom-btn-group">
                         <button class="zoom-btn btn-zoom-in" type="button">🔍 放大</button>
@@ -135,7 +138,6 @@ async function main() {
             card.appendChild(infoPanel);
             selectedFilesList.appendChild(card);
 
-            // 绑定缩放事件
             const zoomInBtn = infoPanel.querySelector('.btn-zoom-in');
             const zoomOutBtn = infoPanel.querySelector('.btn-zoom-out');
             let currentWidth = 240;
@@ -160,6 +162,14 @@ async function main() {
                 }
             };
         });
+
+        selectedFilesList.querySelectorAll('.btn-remove-file').forEach(btn => {
+            btn.onclick = (e) => {
+                const idx = parseInt(e.currentTarget.getAttribute('data-idx'));
+                selectedFilesArray.splice(idx, 1);
+                updateFilesList();
+            };
+        });
     }
 
     fileInput.onchange = (e) => {
@@ -181,7 +191,6 @@ async function main() {
         return false;
     };
 
-    // 内存安全级防堆栈溢出 Base64 转换器
     function uint8ArrayToBase64(uint8) {
         if (typeof uint8.toBase64 === 'function') {
             return uint8.toBase64();
@@ -195,7 +204,6 @@ async function main() {
         return btoa(binary);
     }
 
-    // 序列化打包器
     function packFiles(files) {
         let totalSize = 4;
         const encoder = new TextEncoder();
@@ -228,7 +236,17 @@ async function main() {
         return uint8;
     }
 
-    // 一键打包主逻辑
+    function triggerDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 15000);
+    }
+
     document.getElementById('encBtn').onclick = async () => {
         const pwd = passwordInput.value;
         const customName = archiveNameInput.value.trim();
@@ -241,11 +259,10 @@ async function main() {
             if (!doubleCheck) return;
         }
 
-        updateProgress(15, "⏳ 正在加载并序列化多轨本地文件...");
+        updateProgress(15, "⏳ 正在串行加载并序列化多轨本地文件...");
         await new Promise(r => setTimeout(r, 200));
 
         try {
-            // 1. 将文件转换为字节流
             const filesToPack = [];
             for (let i = 0; i < selectedFilesArray.length; i++) {
                 const file = selectedFilesArray[i];
@@ -260,11 +277,9 @@ async function main() {
                 });
             }
 
-            // 2. 序列化为单个二进制容器
             updateProgress(40, "⏳ 正在生成多轨道二进制打包序列...");
             const packedBytes = packFiles(filesToPack);
 
-            // 3. 产生派生密钥
             updateProgress(50, "⏳ 正在初始化浏览器硬件加速加密组件...");
             const te = new TextEncoder();
             const pwBytes = te.encode(pwd);
@@ -286,7 +301,6 @@ async function main() {
                 ["encrypt"]
             );
 
-            // 4. 对打包后的数据进行硬件级加密并切片
             const CHUNK_SIZE = 50 * 1024 * 1024;
             const totalChunks = Math.ceil(packedBytes.length / CHUNK_SIZE);
             const outputChunks = [];
@@ -331,16 +345,10 @@ async function main() {
 
             const finalHtmlBlob = new Blob(outputChunks, { type: "text/html;charset=utf-8" });
 
-            let outName = includeKeyCheckbox.checked ? `${displayBundleName}_StuCanvas${pwd}End.html` : `${displayBundleName}.html`;
+            let outName = includeKeyCheckbox.checked ? `${displayBundleName}_Key${pwd}End.html` : `${displayBundleName}.html`;
             updateProgress(100, `✨ <strong>打包成功！</strong> 正在保存单网页归档：${outName}`);
 
-            const url = URL.createObjectURL(finalHtmlBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = outName;
-            a.click();
-
-            setTimeout(() => URL.revokeObjectURL(url), 45000);
+            triggerDownload(finalHtmlBlob, outName);
 
         } catch (e) {
             console.error(e);
