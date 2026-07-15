@@ -77,7 +77,10 @@ export default defineConfig({
       {
         text: '工具箱',
         items: [
-          { text: '文件加解密', link: '/crypto/index.html', target: '_blank' }
+          { text: '文件加解密', link: '/crypto/index.html', target: '_blank' },
+          { text: 'Vulkan提交信号量生成', link: '/semaphore/index.html', target: '_blank' },
+          { text: 'Vulkan图片屏障生成', link: '/image_barrier/index.html', target: '_blank' },
+          { text: '枚举谓词生成', link: '/enum_predicate/index.html', target: '_blank' }
         ]
       },
       { text: 'GitHub', link: 'https://github.com/friendships6666/StuCanvas' }
