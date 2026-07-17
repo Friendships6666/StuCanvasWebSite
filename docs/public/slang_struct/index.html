@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slang to C++ Struct Layout Converter</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+<!-- Header -->
+<header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+        <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-sm">GPU</div>
+        <div>
+            <h1 class="text-lg font-bold">Slang to C++ 结构体对齐转换工具</h1>
+            <p class="text-xs text-slate-400">严格遵循 std430 布局标准，支持嵌套结构体与显式 Padding 插入</p>
+        </div>
+    </div>
+    <div class="text-xs text-slate-500">当前对齐基准: Vulkan std430</div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+
+    <!-- Left Column: JSON Input -->
+    <div class="lg:col-span-5 flex flex-col space-y-4">
+        <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-slate-300">1. 输入 Slang 结构体声明 (JSON 格式)</span>
+            <button onclick="formatJSON()" class="px-3 py-1 text-xs bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 transition">
+                格式化 JSON
+            </button>
+        </div>
+        <textarea id="jsonInput" class="flex-1 w-full p-4 bg-slate-900 border border-slate-800 rounded-xl focus:outline-none focus:border-blue-500 code-font text-sm leading-relaxed resize-none h-[400px] lg:h-[calc(100vh-220px)]" placeholder="请输入 JSON 格式数据..."></textarea>
+        <div id="errorMsg" class="hidden p-3 bg-red-950/50 border border-red-800 text-red-400 text-xs rounded-lg"></div>
+    </div>
+
+    <!-- Right Column: C++ Output -->
+    <div class="lg:col-span-7 flex flex-col space-y-4">
+        <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-slate-300">2. 生成的 C++ 结构体 (Strict Alignment & Padded)</span>
+            <button onclick="copyCode()" class="px-4 py-1 text-xs bg-blue-600 hover:bg-blue-500 rounded border border-blue-500 font-medium transition flex items-center space-x-1">
+                <span id="copyText">复制 C++ 代码</span>
+            </button>
+        </div>
+
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 h-[400px] lg:h-[calc(100vh-220px)]">
+            <!-- Code Area -->
+            <div class="md:col-span-2 relative bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col">
+                <pre class="flex-1 p-4 overflow-auto code-font text-xs leading-relaxed text-blue-300"><code id="cppOutput">// 等待输入正确的 JSON...</code></pre>
+            </div>
+            <!-- Structural Metas -->
+            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-4 overflow-auto flex flex-col space-y-4">
+                <div id="infoDiv" class="text-xs space-y-2 text-slate-300">
+                    <p class="text-slate-500">暂无对齐分析数据</p>
+                </div>
+                <div class="border-t border-slate-800/80 pt-4">
+                    <h4 class="text-xs font-bold text-slate-400 mb-2">💡 对齐原则提示:</h4>
+                    <ul class="text-[10px] text-slate-500 space-y-1.5 list-disc pl-3 leading-relaxed">
+                        <li><strong class="text-slate-400">float3</strong> 的大小为 12 字节，但必须对齐至 <strong class="text-slate-400">16 字节</strong> 边界。</li>
+                        <li>结构体整体大小必须是其最大成员对齐量的整数倍（通常为 16 的倍数）。</li>
+                        <li>64 位 GPU 物理指针大小为 8，对齐为 8 字节。</li>
+                        <li>自动分析依赖关系，由底至上（拓扑顺序）输出 C++ 声明。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- JS Implementation -->
+<script>
+    // 默认填充的示例数据（完美还原您的具体点云和常量结构体情况）
+    const defaultExample = [
+        {
+            "name": "PointData",
+            "members": [
+                { "name": "worldPos", "type": "float3" },
+                { "name": "color", "type": "float4" }
+            ]
+        },
+        {
+            "name": "PointSDFConstants",
+            "members": [
+                { "name": "vp", "type": "float4x4" },
+                { "name": "camPos", "type": "float3" },
+                { "name": "imageSize", "type": "float2" },
+                { "name": "pointRadius", "type": "float" },
+                { "name": "points", "type": "PointData*" }
+            ]
+        }
+    ];
+
+    // 页面初始化
+    document.addEventListener("DOMContentLoaded", () => {
+        const inputArea = document.getElementById("jsonInput");
+        inputArea.value = JSON.stringify(defaultExample, null, 4);
+        inputArea.addEventListener("input", updateOutput);
+        updateOutput();
+    });
+
+    // 格式化 JSON
+    function formatJSON() {
+        const inputArea = document.getElementById("jsonInput");
+        try {
+            const parsed = JSON.parse(inputArea.value);
+            inputArea.value = JSON.stringify(parsed, null, 4);
+            updateOutput();
+        } catch (err) {
+            showError("JSON 格式错误，无法排版: " + err.message);
+        }
+    }
+
+    // 报错信息展示
+    function showError(msg) {
+        const errorDiv = document.getElementById("errorMsg");
+        errorDiv.classList.remove("hidden");
+        errorDiv.innerText = msg;
+    }
+
+    // 更新输出
+    function updateOutput() {
+        const jsonInput = document.getElementById("jsonInput").value;
+        const errorDiv = document.getElementById("errorMsg");
+        const cppOutput = document.getElementById("cppOutput");
+        const infoDiv = document.getElementById("infoDiv");
+
+        errorDiv.classList.add("hidden");
+        errorDiv.innerText = "";
+
+        try {
+            const structList = JSON.parse(jsonInput);
+            if (!Array.isArray(structList)) {
+                throw new Error("输入必须是一个代表结构体列表的 JSON 数组。");
+            }
+
+            const resolved = {};
+            const structsMap = {};
+            const orderedStructNames = [];
+
+            structList.forEach(s => {
+                if (!s.name) throw new Error("每个结构体都必须有 'name' 字段。");
+                if (!Array.isArray(s.members)) throw new Error(`结构体 '${s.name}' 必须拥有 'members' 数组。`);
+                structsMap[s.name] = s;
+            });
+
+            // std430 类型系统基准计算器
+            function getTypeInfo(type) {
+                type = type.trim();
+                const builtins = {
+                    "float":  { size: 4,  align: 4,  cppType: "float",  dims: "" },
+                    "int":    { size: 4,  align: 4,  cppType: "int32_t", dims: "" },
+                    "uint":   { size: 4,  align: 4,  cppType: "uint32_t",dims: "" },
+
+                    "float2": { size: 8,  align: 8,  cppType: "float",  dims: "[2]" },
+                    "int2":   { size: 8,  align: 8,  cppType: "int32_t", dims: "[2]" },
+                    "uint2":  { size: 8,  align: 8,  cppType: "uint32_t",dims: "[2]" },
+
+
+                        "float3": { size: 12, align: 16, cppType: "float",  dims: "[3]" },
+                "int3":   { size: 12, align: 16, cppType: "int32_t", dims: "[3]" },
+                "uint3":  { size: 12, align: 16, cppType: "uint32_t",dims: "[3]" },
+
+                "float4": { size: 16, align: 16, cppType: "float",  dims: "[4]" },
+                "int4":   { size: 16, align: 16, cppType: "int32_t", dims: "[4]" },
+                "uint4":  { size: 16, align: 16, cppType: "uint32_t",dims: "[4]" },
+
+
+                "float4x4": { size: 64, align: 16, cppType: "float", dims: "[4][4]" },
+                "float3x3": { size: 48, align: 16, cppType: "float", dims: "[3][4]" } // std430 规定 float3x3 的每列也必须按 16 字节对齐
+            };
+
+                if (builtins[type]) return builtins[type];
+
+                // 处理物理显存指针 (e.g., PointData*)
+                if (type.endsWith("*")) {
+                    const base = type.slice(0, -1).trim();
+                    return { size: 8, align: 8, cppType: base + "*", dims: "" };
+                }
+
+                // 处理嵌套结构体
+                if (structsMap[type]) {
+                    if (!resolved[type]) {
+                        computeStruct(type);
+                    }
+                    const s = resolved[type];
+                    return { size: s.size, align: s.align, cppType: s.name, dims: "" };
+                }
+
+                throw new Error(`无法识别的成员类型: '${type}'`);
+            }
+
+            // 递归计算结构体对齐布局
+            function computeStruct(name) {
+                if (resolved[name] === "resolving") {
+                    throw new Error(`检测到结构体间存在循环嵌套引用: '${name}'`);
+                }
+                if (resolved[name]) return;
+
+                resolved[name] = "resolving";
+
+                const structDef = structsMap[name];
+                let currentOffset = 0;
+                let maxAlign = 4;
+                const layoutMembers = [];
+
+                structDef.members.forEach(m => {
+                    if (!m.name) throw new Error(`在结构体 '${name}' 的成员中检测到缺失 'name'。`);
+                    if (!m.type) throw new Error(`成员 '${m.name}' 在结构体 '${name}' 中没有声明类型 'type'。`);
+
+                    const info = getTypeInfo(m.type);
+
+                    // 计算内存对齐位置偏移
+                    const alignedOffset = Math.ceil(currentOffset / info.align) * info.align;
+                    const paddingBytes = alignedOffset - currentOffset;
+
+                    // 自动在错位地方塞入显式 Padding
+                    if (paddingBytes > 0) {
+                        layoutMembers.push({
+                            isPadding: true,
+                            size: paddingBytes,
+                            offset: currentOffset
+                        });
+                    }
+
+                    layoutMembers.push({
+                        isPadding: false,
+                        name: m.name,
+                        type: m.type,
+                        cppType: info.cppType,
+                        dims: info.dims,
+                        size: info.size,
+                        align: info.align,
+                        offset: alignedOffset
+                    });
+
+                    currentOffset = alignedOffset + info.size;
+                    maxAlign = Math.max(maxAlign, info.align);
+                });
+
+                // 结构体总大小必须是其最大成员对齐常量的整数倍
+                const finalSize = Math.ceil(currentOffset / maxAlign) * maxAlign;
+                const tailPadding = finalSize - currentOffset;
+                if (tailPadding > 0) {
+                    layoutMembers.push({
+                        isPadding: true,
+                        size: tailPadding,
+                        offset: currentOffset
+                    });
+                }
+
+                resolved[name] = {
+                    name: name,
+                    size: finalSize,
+                    align: maxAlign,
+                    members: layoutMembers
+                };
+                orderedStructNames.push(name);
+            }
+
+            // 按拓扑依赖链递归构建所有输入结构体
+            structList.forEach(s => {
+                computeStruct(s.name);
+            });
+
+            // --- 开始渲染 C++ 源代码 ---
+            let cppCode = `// =====================================================================\n`;
+            cppCode += `//  Auto-generated C++ structs matching Slang GPU alignment rules (std430)\n`;
+            cppCode += `// =====================================================================\n\n`;
+            cppCode += `#pragma once\n`;
+            cppCode += `#include <stdint.h>\n\n`;
+
+            cppCode += `// --- 1. Forward Declarations (前置声明防止跨类型依赖失效) ---\n`;
+            orderedStructNames.forEach(name => {
+                cppCode += `struct ${name};\n`;
+            });
+            cppCode += `\n`;
+
+            let padCount = 0;
+            cppCode += `// --- 2. Struct Definitions ---\n`;
+            orderedStructNames.forEach(name => {
+                const s = resolved[name];
+                cppCode += `// GPU Struct Layout Reference - Size: ${s.size} Bytes, Align: ${s.align} Bytes\n`;
+                cppCode += `struct alignas(${s.align}) ${s.name}\n{\n`;
+                s.members.forEach(m => {
+                    if (m.isPadding) {
+                        // 优先通过 float 对齐形式插入 Padding（如果整除4），可读性最强
+                        if (m.size % 4 === 0) {
+                            const numFloats = m.size / 4;
+                            if (numFloats === 1) {
+                                cppCode += `    float _pad${padCount}; // Offset ${m.offset}, Size 4 (Padding)\n`;
+                                padCount++;
+                            } else {
+                                cppCode += `    float _pad${padCount}[${numFloats}]; // Offset ${m.offset}, Size ${m.size} (Padding)\n`;
+                                padCount++;
+                            }
+                        } else {
+                            // 备用字节填充方案
+                            cppCode += `    char _pad${padCount}[${m.size}]; // Offset ${m.offset}, Size ${m.size} (Padding)\n`;
+                            padCount++;
+                        }
+                    } else {
+                        cppCode += `    ${m.cppType} ${m.name}${m.dims}; // Offset ${m.offset}, Size ${m.size}\n`;
+                    }
+                });
+                cppCode += `};\n\n`;
+            });
+
+            cppOutput.textContent = cppCode;
+
+            // 侧边栏对齐元数据可视化
+            let infoHtml = "<h3 class='text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3'>结构体布局分析</h3>";
+            orderedStructNames.forEach(name => {
+                const s = resolved[name];
+                infoHtml += `
+                        <div class='mb-3 p-3 bg-slate-900 border border-slate-800 rounded-lg'>
+                            <div class='text-blue-400 font-bold font-mono text-sm'>struct ${s.name}</div>
+                            <div class='text-[11px] text-slate-400 mt-2 flex flex-col space-y-1'>
+                                <div class='flex justify-between'><span>总字节大小 (Size):</span><strong class='text-slate-100 font-mono'>${s.size} B</strong></div>
+                                <div class='flex justify-between'><span>最大对齐限制 (Align):</span><strong class='text-slate-100 font-mono'>${s.align} B</strong></div>
+                            </div>
+                        </div>
+                    `;
+            });
+            infoDiv.innerHTML = infoHtml;
+
+        } catch (err) {
+            showError("转换失败: " + err.message);
+            cppOutput.textContent = "// 解析发生错误，等待您输入正确的 JSON...";
+            infoDiv.innerHTML = "<p class='text-slate-500'>暂无对齐分析数据</p>";
+        }
+    }
+
+    // 复制 C++ 代码至剪切板
+    function copyCode() {
+        const codeText = document.getElementById("cppOutput").textContent;
+        navigator.clipboard.writeText(codeText).then(() => {
+            const btnText = document.getElementById("copyText");
+            btnText.innerText = "已复制到剪切板！";
+            setTimeout(() => {
+                btnText.innerText = "复制 C++ 代码";
+            }, 2000);
+        }).catch(err => {
+            alert("复制失败: " + err);
+        });
+    }
+</script>
+</body>
+</html>
