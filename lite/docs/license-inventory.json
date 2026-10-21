@@ -1,0 +1,1738 @@
+{
+  "auditDate": "2026-10-21",
+  "intendedDistribution": "worldwide open-source; MulanPSL-2.0 under consideration, not adopted by this audit",
+  "scope": "identified project dependencies, embedded third-party code and artwork, bundled fonts and sounds, project artwork and inline SVG hosts; not an operating-system/toolchain inventory or a global patent/trademark clearance",
+  "counts": {
+    "lockedPackages": 34,
+    "installedPackages": 9,
+    "lockfileLicenses": {
+      "MIT": 33,
+      "ISC": 1
+    },
+    "optionalEsbuildPlatforms": 26,
+    "projectSVG": 102,
+    "projectPNG": 9,
+    "bundledFonts": 20,
+    "packageSounds": 5
+  },
+  "dependencyManifests": [
+    {
+      "path": "package.json",
+      "size": 2376,
+      "sha256": "0fe791da4657bc8da6692486d82381140084d7c39dbba17eeffd6bd1cb0b827a"
+    },
+    {
+      "path": "package-lock.json",
+      "size": 17105,
+      "sha256": "c0d51a544a05e766bdfa8b185cbd05ec816f2aa7cdaab64afed78b61580f8a07"
+    }
+  ],
+  "packages": [
+    {
+      "path": "node_modules/@esbuild/aix-ppc64",
+      "name": "@esbuild/aix-ppc64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.28.2.tgz",
+      "integrity": "sha512-XExcO+dvLKvVtNTibSTBej1NCAbaGhWn9Ww1ZPx80qsahhPFe/8jgWP0IchNe0F3HwkU7n8ejhH8bjonqht8mQ==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/android-arm",
+      "name": "@esbuild/android-arm",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/android-arm/-/android-arm-0.28.2.tgz",
+      "integrity": "sha512-kXXoiPVVGQcnIYGOeaovwOURpniDBpSq4A03qkQ+BMQqtGG6HYap3xne9C1O1yo4TR3qxlCX5IqqmX6fFo2Lqg==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/android-arm64",
+      "name": "@esbuild/android-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/android-arm64/-/android-arm64-0.28.2.tgz",
+      "integrity": "sha512-5YfKeeI8qWfBZIX+u2xZC3Zlb3Os/gLS2sbEKM+I4ZOcsWmHS2WLysCcQZDAFRslDUU5Oiq44gf6PYN1vGwG5A==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/android-x64",
+      "name": "@esbuild/android-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/android-x64/-/android-x64-0.28.2.tgz",
+      "integrity": "sha512-O387ite7SzUyCcy3JQX4P4bLtEA7bLLkx+esve5JHnyYfNTxcVpXZo9jhdB0lTKN44gztELTdU7nS8Nr16Fs1Q==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/darwin-arm64",
+      "name": "@esbuild/darwin-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.28.2.tgz",
+      "integrity": "sha512-n4KqkOQrraxHJcgjM1RvwbigfQKIKJVpM7xp+KsxiyUSrRdIXnt73VhrPAx0fV44hgfmIVKjxMN9J1t5jySVkw==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/darwin-x64",
+      "name": "@esbuild/darwin-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-0.28.2.tgz",
+      "integrity": "sha512-uq6suIWYP37qzGddBKPw5QEQPi6HiLGsO7UmkpfyaYNQ3D+rN6w6WfwH+nuqcGXWvawGwxOEroO4YGnFh95azw==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/freebsd-arm64",
+      "name": "@esbuild/freebsd-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/freebsd-arm64/-/freebsd-arm64-0.28.2.tgz",
+      "integrity": "sha512-n+I0BTSRIoy+d6RPKnEVwql5UwBJolytvY4mAOIEJorKlqgPII8ix6slVVrfZ5Tnj7glIZvloylbB/EJPMWEXw==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/freebsd-x64",
+      "name": "@esbuild/freebsd-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/freebsd-x64/-/freebsd-x64-0.28.2.tgz",
+      "integrity": "sha512-78XJTJkvPs0kz2w61301PJjXl4g7q3JqiYMZ/M/yVI73EHBrCRTgkhu9oqG7vPqq+a/yadEW8aD+agKlk5xrmg==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/linux-arm",
+      "name": "@esbuild/linux-arm",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-arm/-/linux-arm-0.28.2.tgz",
+      "integrity": "sha512-XlDnu2q5yoqems+xay6wSAcg9DDD7K9RLKZEBOMZm3ckNpJBvOX20tSfby8KfrrhINDyv9V2YVZKY/SpoGJI8w==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/linux-arm64",
+      "name": "@esbuild/linux-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.28.2.tgz",
+      "integrity": "sha512-pW4AC0P3it8c7do9MVM4p51FzHzdM/TZrerurgRcHJ2WTa1VQ1CIq18xncfpBJw4ojkiZZrKW2yIBWBP92j6Ug==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/linux-ia32",
+      "name": "@esbuild/linux-ia32",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.28.2.tgz",
+      "integrity": "sha512-CYbnj78HsIeA+DhgUKgFCfvNsTHFhMMrinUrMZpDXJXKN8T3XViTZ/+wtHeVxEWY8ewSzTFN+nRmSwO2tZaLUQ==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/linux-loong64",
+      "name": "@esbuild/linux-loong64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-loong64/-/linux-loong64-0.28.2.tgz",
+      "integrity": "sha512-buwkd8nsph4R+ajRvw0qM5Hja/TXQow3ptzWO2EbG/cqcIkHloRrdlBtQlshyYGTNFvfkfJ5tpPLVkY4DtsPfQ==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/linux-mips64el",
+      "name": "@esbuild/linux-mips64el",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-mips64el/-/linux-mips64el-0.28.2.tgz",
+      "integrity": "sha512-ZVykbDyk7519VwiNb9Lcj9m8XM6v5V9uKPvrEMkkEedVewf+0itkhahp4HDpgERXhwLRpWFypsGbG/J8s0QjJA==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/linux-ppc64",
+      "name": "@esbuild/linux-ppc64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-ppc64/-/linux-ppc64-0.28.2.tgz",
+      "integrity": "sha512-CAXl+Dtd9UUuJd8pKKdwh6MLm3MUMiqMPmhZ3tTSXPqfyQ3vDl6R5hZdZ/kYojK4ofXtdfSv1tFq8XzWx3heNQ==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/linux-riscv64",
+      "name": "@esbuild/linux-riscv64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-riscv64/-/linux-riscv64-0.28.2.tgz",
+      "integrity": "sha512-GeXCej4IQtU1B+QlDV8W/RRvbzI3O/Stss+/bCXv4lZls5WGRtu2a+3JkA3i4qIUlMXpcHebWpF8AkJhATowuA==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/linux-s390x",
+      "name": "@esbuild/linux-s390x",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-s390x/-/linux-s390x-0.28.2.tgz",
+      "integrity": "sha512-3H1weTYZPxt/WOhByszQZybS9w5lKzUn1FDMsgEChbHWQwHYQQRfBxgCcZvPhjHfKyJjIievvMmEUawJrdY9Dg==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/linux-x64",
+      "name": "@esbuild/linux-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.28.2.tgz",
+      "integrity": "sha512-4xTZr1FUmSoQW4XIWmit3tzQrUTZM+N3P0XV8xROKYF50XfI7xeO90+1bZvNwxIufQ9hDQVRJH5YhgPVF8A/HQ==",
+      "dev": true,
+      "optional": true,
+      "installed": true,
+      "installedDeclaredLicense": "MIT",
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/netbsd-arm64",
+      "name": "@esbuild/netbsd-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/netbsd-arm64/-/netbsd-arm64-0.28.2.tgz",
+      "integrity": "sha512-sSATRjPeDBg3pdgHoQfoYBob11Kk1FGa9lui5RIHZCoCkJa9QKlvl3/vKz2usCmYYjs7ymJR/2Nnsqe+Hjt5nw==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/netbsd-x64",
+      "name": "@esbuild/netbsd-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/netbsd-x64/-/netbsd-x64-0.28.2.tgz",
+      "integrity": "sha512-lqnzCV+mM0gIADaKihiCg6ifgfU2L3h5E33rNQBN1Y4MaVGnzryzmvvf7UHxprpQdE8hpqLolJ9Rl+SkIRDpyw==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/openbsd-arm64",
+      "name": "@esbuild/openbsd-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/openbsd-arm64/-/openbsd-arm64-0.28.2.tgz",
+      "integrity": "sha512-AL2qJILH7lNjrDmCQDvdxMfAUIv8KMNZOvrwAQ8i8//ntL9FflhOyMJ8OZSMBb8/AWXe3/5v5S20y3zCoZWKoQ==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/openbsd-x64",
+      "name": "@esbuild/openbsd-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/openbsd-x64/-/openbsd-x64-0.28.2.tgz",
+      "integrity": "sha512-QtiuPytchRyC4rwUKhexJdQKvDuZ6hWloi3igqPQNUJCS1/v9EiO3UTOXR6A3FoMo4fnAKbWJdqaIwhOzh8qEw==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/openharmony-arm64",
+      "name": "@esbuild/openharmony-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/openharmony-arm64/-/openharmony-arm64-0.28.2.tgz",
+      "integrity": "sha512-WkhYDmpTjLvGlScA1rwjRUmhl4k8oXR3cIbtqWmELgU/dFeHHlEllxDvdWcNJV9rbzCexB5vz8gtNewWLgCT7Q==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/sunos-x64",
+      "name": "@esbuild/sunos-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/sunos-x64/-/sunos-x64-0.28.2.tgz",
+      "integrity": "sha512-GPMSkTOtMnv2U2F8gxe4Io6qmVs+YKyp832Etqqxr0hFngmXQ3rzwytelm3GIn7T4VviRUlf3sOgBOiTdvaf7g==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/win32-arm64",
+      "name": "@esbuild/win32-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/win32-arm64/-/win32-arm64-0.28.2.tgz",
+      "integrity": "sha512-PIhhEkE9uPBleRBrQEJpUn7MBnibZzbGzYWPmY3x+YoVg/95zbjB4CxPPOQ8l5tYYM4mMaCthF8/1DIfBQQyWQ==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/win32-ia32",
+      "name": "@esbuild/win32-ia32",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-0.28.2.tgz",
+      "integrity": "sha512-YmJbfTlvU7Sdn9BB+4PRES4oB6pxgS37MAONj+hBr/cpXS1aBPKXxNnDbu+QCWPj0o9dgyxeq79g6c5P8KeuYA==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@esbuild/win32-x64",
+      "name": "@esbuild/win32-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.28.2.tgz",
+      "integrity": "sha512-5ebpxr3nWMzrL/rnUI755Jkuee0bHL/Gq0WTF9lvcpv73wAp5eu8MfBUgWK9bhWvZjj7yX8etf/8tI8Ney695g==",
+      "dev": true,
+      "optional": true,
+      "installed": false,
+      "installedDeclaredLicense": null,
+      "licenseFiles": []
+    },
+    {
+      "path": "node_modules/@lezer/common",
+      "name": "@lezer/common",
+      "version": "1.5.3",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@lezer/common/-/common-1.5.3.tgz",
+      "integrity": "sha512-H0iErY4e43LpXbYDyBci5W4v/RwTgGV3YzYOlJPiGZ8RY8w51kVE+xLn1tg3Z6UmSfyETvtsUK3r7YsgDQEI7Q==",
+      "dev": false,
+      "optional": false,
+      "installed": true,
+      "installedDeclaredLicense": "MIT",
+      "licenseFiles": [
+        {
+          "path": "node_modules/@lezer/common/LICENSE",
+          "size": 1113,
+          "sha256": "568902fb66eaf1f11750e966b33fd7b5d7c618e65af09f35ef843635bcf5f1ba"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/@lezer/highlight",
+      "name": "@lezer/highlight",
+      "version": "1.2.5",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@lezer/highlight/-/highlight-1.2.5.tgz",
+      "integrity": "sha512-O1GMVKgtf5YspFaRzpmqkVgMtIk2HG9uMAbH6wdAIdNh3TVzCsch/+cRi+6l2//UGDKe6NB9BW3cvuR5ezMQ0w==",
+      "dev": false,
+      "optional": false,
+      "installed": true,
+      "installedDeclaredLicense": "MIT",
+      "licenseFiles": [
+        {
+          "path": "node_modules/@lezer/highlight/LICENSE",
+          "size": 1113,
+          "sha256": "568902fb66eaf1f11750e966b33fd7b5d7c618e65af09f35ef843635bcf5f1ba"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/@lezer/javascript",
+      "name": "@lezer/javascript",
+      "version": "1.5.6",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@lezer/javascript/-/javascript-1.5.6.tgz",
+      "integrity": "sha512-sEvOqpl4vJQca0NugSQK02vQPbc5KrvoojnYGoqqFgFO0MtcYhwGiHKVEB+LuXYJnfyXo4QPA8ztbrEa4Fw5NA==",
+      "dev": false,
+      "optional": false,
+      "installed": true,
+      "installedDeclaredLicense": "MIT",
+      "licenseFiles": [
+        {
+          "path": "node_modules/@lezer/javascript/LICENSE",
+          "size": 1113,
+          "sha256": "568902fb66eaf1f11750e966b33fd7b5d7c618e65af09f35ef843635bcf5f1ba"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/@lezer/lr",
+      "name": "@lezer/lr",
+      "version": "1.4.11",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/@lezer/lr/-/lr-1.4.11.tgz",
+      "integrity": "sha512-UwgZcl1R66H2hDzBrA7kWyYmX6s8p5TQ+e/t7CuvgCtBEPxbEPaHYHu+pJBvTvDotEJpuQkJjbXuHiw5Cixxgw==",
+      "dev": false,
+      "optional": false,
+      "installed": true,
+      "installedDeclaredLicense": "MIT",
+      "licenseFiles": [
+        {
+          "path": "node_modules/@lezer/lr/LICENSE",
+          "size": 1113,
+          "sha256": "568902fb66eaf1f11750e966b33fd7b5d7c618e65af09f35ef843635bcf5f1ba"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/earcut",
+      "name": "earcut",
+      "version": "3.2.4",
+      "license": "ISC",
+      "resolved": "https://registry.npmjs.org/earcut/-/earcut-3.2.4.tgz",
+      "integrity": "sha512-FHc6yNpnTORB0tM5kmZ03iD2mDuNakDE2lvf4Hw1XkfxtEHIGVi01B/GqUSwx+NcC1WGjidAfpTXzeALtPtfpg==",
+      "dev": false,
+      "optional": false,
+      "installed": true,
+      "installedDeclaredLicense": "ISC",
+      "licenseFiles": [
+        {
+          "path": "node_modules/earcut/LICENSE",
+          "size": 738,
+          "sha256": "0b348fff56384b43dbb37593906904e56d0f9deb51eae590d4dc6d427fbf1808"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/esbuild",
+      "name": "esbuild",
+      "version": "0.28.2",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.28.2.tgz",
+      "integrity": "sha512-HKVLS8dvII+xoKW9kmqxbRKrnWEXfJJr/FZhhJmiqIB0e053QNYFqOBouTMO/k5sID4MvCiUCvv8b9M4h32wIA==",
+      "dev": true,
+      "optional": false,
+      "installed": true,
+      "installedDeclaredLicense": "MIT",
+      "licenseFiles": [
+        {
+          "path": "node_modules/esbuild/LICENSE.md",
+          "size": 1069,
+          "sha256": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/mathlive",
+      "name": "mathlive",
+      "version": "0.111.1",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/mathlive/-/mathlive-0.111.1.tgz",
+      "integrity": "sha512-RVaC7NO02Lmx3ZNUxOHR2xCRpcvTfBb2BtdgV60cTanAMufaUkWcPPB2VxChcsNeL+0rTQKqOPDYxXLPOXJI+A==",
+      "dev": false,
+      "optional": false,
+      "installed": true,
+      "installedDeclaredLicense": "MIT",
+      "licenseFiles": [
+        {
+          "path": "node_modules/mathlive/LICENSE.txt",
+          "size": 1099,
+          "sha256": "3caebd18611959ca725ab976a004d408017eb1d7093d6c9b9b09c5a4790eaff8"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/matter-js",
+      "name": "matter-js",
+      "version": "0.20.0",
+      "license": "MIT",
+      "resolved": "https://registry.npmjs.org/matter-js/-/matter-js-0.20.0.tgz",
+      "integrity": "sha512-iC9fYR7zVT3HppNnsFsp9XOoQdQN2tUyfaKg4CHLH8bN+j6GT4Gw7IH2rP0tflAebrHFw730RR3DkVSZRX8hwA==",
+      "dev": false,
+      "optional": false,
+      "installed": true,
+      "installedDeclaredLicense": "MIT",
+      "licenseFiles": [
+        {
+          "path": "node_modules/matter-js/LICENSE",
+          "size": 1092,
+          "sha256": "ed182087be5b26734aa6d4789743de3a97417950e8c1e3ff2e3d19c6462720d3"
+        }
+      ]
+    }
+  ],
+  "fonts": [
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_AMS-Regular.woff2",
+      "size": 28076,
+      "sha256": "0cdd387c9590a1a9f9794560022dbb59654a7d86f187aa0c81495ad42d3a7308",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_AMS.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Caligraphic-Bold.woff2",
+      "size": 6912,
+      "sha256": "de7701e42cf1f4cf0b766c03fb27977207eee2f4fd5d76fa82188406da43ea4c",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Caligraphic.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "size": 6908,
+      "sha256": "5d53e70ad607c2352162dec9e0923fb54ecdafaccbf604cd8dcf7d00facb989b",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Caligraphic.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Fraktur-Bold.woff2",
+      "size": 11348,
+      "sha256": "74444efd593c005e3f4573b44524704c0af0a937fe911cca9e94068d0d140d3f",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Fraktur.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Fraktur-Regular.woff2",
+      "size": 11316,
+      "sha256": "51814d270d06ff0255dba0799994fa4d8c84d11f09951d47595f4abb1f3602dc",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Fraktur.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Main-Bold.woff2",
+      "size": 25324,
+      "sha256": "0f60d1b897938ec918c8ce073092411baf9438f6739465693ff18b0f9d20b021",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Main.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Main-BoldItalic.woff2",
+      "size": 16780,
+      "sha256": "99cd42a3c072d918f2f44984a807cf7aa16e13545fd0875fc07c6c65f99e715b",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Main.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Main-Italic.woff2",
+      "size": 16988,
+      "sha256": "97479ca6cce906abc961ecac96faa5f9ca2e61b8e7670d475826bcdee9a7c267",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Main.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Main-Regular.woff2",
+      "size": 26272,
+      "sha256": "c2342cd8b869e01752a9321dc17213fc40d4d04c79688c1d43f2cf316abd7866",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Main.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Math-BoldItalic.woff2",
+      "size": 16400,
+      "sha256": "dc47344dbb6cb5b655c8460d561f4df5f501b90c804ad3c6cec65fe322351ab1",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Math.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Math-Italic.woff2",
+      "size": 16440,
+      "sha256": "7af58c5ec8f132a2ddde9027c6d7814decce4d3b822a11192a42a20e2e973264",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Math.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_SansSerif-Bold.woff2",
+      "size": 12216,
+      "sha256": "e99ae51144bf1232efcc1bfe5add36262c6866b0faab24fa75740e1b98577a62",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_SansSerif.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_SansSerif-Italic.woff2",
+      "size": 12028,
+      "sha256": "00b26ac825e2095056396e0553b8ac26d3f8ad158c3826e28b4c45b385c4714a",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_SansSerif.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_SansSerif-Regular.woff2",
+      "size": 10344,
+      "sha256": "68e8c73ef42afd3ccec58bf0fba302cce448938e7fc020a5e31f8a952eee1342",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_SansSerif.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Script-Regular.woff2",
+      "size": 9644,
+      "sha256": "036d4e95149b69ff9bcc0cd55771efeb25ffa3947293e69acd78d5ac328c684b",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Script.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Size1-Regular.woff2",
+      "size": 5468,
+      "sha256": "6b47c40166b6dbe21a5dfca7718413f2147fd2399be1ba605d8ad39cedf25dfe",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Size1.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Size2-Regular.woff2",
+      "size": 5208,
+      "sha256": "d04c54219f9eaec6d4d4fd42dfb28785975a4794d6b2fc71e566b9cd6db842dd",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Size2.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Size3-Regular.woff2",
+      "size": 3624,
+      "sha256": "73d591271b1604960cb10bb90fee021670af7297017e0e98480b332d11f51995",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Size3.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Size4-Regular.woff2",
+      "size": 4928,
+      "sha256": "a4af7d414440a1c1790825cfb700cf9cf43b0f2c4b04f0ebc523011ad9853ec0",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Size4.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    },
+    {
+      "path": "node_modules/mathlive/fonts/KaTeX_Typewriter-Regular.woff2",
+      "size": 13568,
+      "sha256": "71d517d67827787cfabdf186914cc3358eda539e37931941f2b2fd4a21f68c0b",
+      "license": "OFL-1.1",
+      "embeddedNameRecords": {
+        "0": "Copyright (c) 2009-2010 Design Science, Inc.\nCopyright (c) 2014-2018 Khan Academy",
+        "13": "Copyright (c) 2009-2010, Design Science, Inc. (<www.mathjax.org>)\nCopyright (c) 2014-2018 Khan Academy (<www.khanacademy.org>),\nwith Reserved Font Name KaTeX_Typewriter.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license available with a FAQ at:\nhttp://scripts.sil.org/OFL",
+        "14": "http://scripts.sil.org/OFL"
+      }
+    }
+  ],
+  "sounds": [
+    {
+      "path": "node_modules/mathlive/sounds/keypress-delete.wav",
+      "size": 64252,
+      "sha256": "66ce5505c7a224196bad7bfea8bcfceefb1307c68977693c85277e674bf69ac9",
+      "license": "MIT",
+      "evidence": "MathLive 0.111.1 root license; all five files match npm gitHead; no separate WAV metadata notice; app disables sounds"
+    },
+    {
+      "path": "node_modules/mathlive/sounds/keypress-return.wav",
+      "size": 49332,
+      "sha256": "3203e6b8cab71154ae09f8883e6bd40865125a0618675b360557badba96aae7c",
+      "license": "MIT",
+      "evidence": "MathLive 0.111.1 root license; all five files match npm gitHead; no separate WAV metadata notice; app disables sounds"
+    },
+    {
+      "path": "node_modules/mathlive/sounds/keypress-spacebar.wav",
+      "size": 29824,
+      "sha256": "b4e698a82d66179fbb40d9594fcef2fdbb0e9f0091c880d919b646888c9d3e6d",
+      "license": "MIT",
+      "evidence": "MathLive 0.111.1 root license; all five files match npm gitHead; no separate WAV metadata notice; app disables sounds"
+    },
+    {
+      "path": "node_modules/mathlive/sounds/keypress-standard.wav",
+      "size": 17924,
+      "sha256": "2a73d5303f5d80cd22ba991b6e6f2a9dd58c5bbff3b36f95b24348c81c172088",
+      "license": "MIT",
+      "evidence": "MathLive 0.111.1 root license; all five files match npm gitHead; no separate WAV metadata notice; app disables sounds"
+    },
+    {
+      "path": "node_modules/mathlive/sounds/plonk.wav",
+      "size": 71212,
+      "sha256": "bc0fc69c4c5536be9212aac02fcaafc345e7ba60e3702236846db545d66ea11a",
+      "license": "MIT",
+      "evidence": "MathLive 0.111.1 root license; all five files match npm gitHead; no separate WAV metadata notice; app disables sounds"
+    }
+  ],
+  "projectArtwork": [
+    {
+      "path": "logo/01-spline-s-dark.svg",
+      "size": 4717,
+      "sha256": "15d4add602e5d5dcd2b8a2c261b8bc4a073c6d61b485eddf9be61db1e6cfdc12",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/01-spline-s-icon.svg",
+      "size": 876,
+      "sha256": "a1c8027183fcf89207b06b911b32e93e1dfa84870035aa69a88f5a120d744b3c",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/01-spline-s.svg",
+      "size": 4701,
+      "sha256": "b3098701566b354f7b3bce35bf5162cb8aca879cde190091c9f7529f549ec682",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/02-intersection-c-dark.svg",
+      "size": 4549,
+      "sha256": "770cb256b5622c8af4f915afcbc226bc54a0228fe96c66556bad7f2432f28ac8",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/02-intersection-c-icon.svg",
+      "size": 708,
+      "sha256": "fdea78a20587c2c4833d2728c2fd704208a377d282cb8eb07ac9b51bd759ea08",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/02-intersection-c.svg",
+      "size": 4533,
+      "sha256": "4d988200aad7f04beee606759e7cf7bb319fb7a1dd839056fe86832b1975fd13",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/03-folded-canvas-dark.svg",
+      "size": 4493,
+      "sha256": "7ff3090217036af10d5a61195673da31773db4d852483888ad2d03d3b2852827",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/03-folded-canvas-icon.svg",
+      "size": 652,
+      "sha256": "b40b46dbde68e5c11d4a19945688f29d16b819b1ebf96d1564924c8dbf32d574",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/03-folded-canvas.svg",
+      "size": 4477,
+      "sha256": "da28ed6095a3236bd91085cbd43e8adbe5e6be0718146e7caaebee13e276fced",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/04-bezier-s-dark.svg",
+      "size": 4611,
+      "sha256": "328a01c5affd1dd542453b4544ffbcd4ad5d41a0584fdc7dbf7de45922dfc190",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/04-bezier-s-icon.svg",
+      "size": 770,
+      "sha256": "3bc9c0816af5ea47bf8f5ba8ccb3c52a670f6b2b6e8526428bbc3638a16e1b96",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/04-bezier-s.svg",
+      "size": 4595,
+      "sha256": "faacf9ae5936fa7b265643ee1e1e6715475703998c80549e3dd0665fad8cae07",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/05-sc-monogram-dark.svg",
+      "size": 4451,
+      "sha256": "c2f9ee6c92884f462b3a3bd346f7264cae1dfce7e19bb7abfc9680f2e054bdee",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/05-sc-monogram-icon.svg",
+      "size": 610,
+      "sha256": "fb8883b5b3da2b756fbb29ed7c13956bc88bf26f524fea9b8574a1916cc2c7b8",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/05-sc-monogram.svg",
+      "size": 4435,
+      "sha256": "e8dd5593b56e1310426eceded2e65dd65941e939746f213eeea97493f05b1192",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/06-light-orbit-dark.svg",
+      "size": 4506,
+      "sha256": "5df2b5f9ef287b7371e99628b3300b47178c02802d3ac7c3dff34714e813bbb2",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/06-light-orbit-icon.svg",
+      "size": 665,
+      "sha256": "f2b18f6cfd3f0bf9f8a5d33f2f90f08754922215d48adfdef7d3922a5299e697",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/06-light-orbit.svg",
+      "size": 4490,
+      "sha256": "5356964e73a22bf3b4176f6b416828953d92c1596c285939214589882491c3c4",
+      "category": "project_logo_design_with_Fira_graphic_output",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/07-pulsar-dark.svg",
+      "size": 5363,
+      "sha256": "772fd7c3c5bd0742629e9f99695856319a62ff312a286528a4aad7302023211b",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/07-pulsar-gold.svg",
+      "size": 5363,
+      "sha256": "a28b53027ddbe2b8c131a2e7ec6a6bdd1a1b6744a64daeab3622e80ffb4e2f4f",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/07-pulsar-icon-dark.svg",
+      "size": 1432,
+      "sha256": "35837504c223834e91e31723a82430e8428b95e18f9c9ab6dd5e6f538d19e01d",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/07-pulsar-icon-gold.svg",
+      "size": 1432,
+      "sha256": "d838d10ef505831237107e22ee4987ee2c5fedcfd1d566597aa1f9903876b31a",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/07-pulsar-icon.svg",
+      "size": 1432,
+      "sha256": "84dbd03ba6b866162b4baf30e8813cb3429766f07df3b048ad71f2558b659827",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/07-pulsar-map-dark.svg",
+      "size": 12490,
+      "sha256": "55704f6bd69e9f3d66e260d252a833c88fdedcd5da7e3706372463c1ee253b62",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/07-pulsar-map-gold.svg",
+      "size": 12490,
+      "sha256": "1b21718e1865046dba9569a5ef1731a6944d8ce97a479b2ac998299a7a52182d",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/07-pulsar-map.svg",
+      "size": 12490,
+      "sha256": "9e25afac71c26a353a988571d0c66aca3c052f4cbe90116d3510e9d282454cc7",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/07-pulsar.svg",
+      "size": 5363,
+      "sha256": "84bf9f48dc36bbbdd24aa7dcb9ddb77fdda828e622bb65796248ecea1ee659c1",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/official/pulsar-auto.svg",
+      "size": 1594,
+      "sha256": "b1dcd9586eeee9e04cce0cdfe12b2f6e36ce971663f9f80c1c1b7b976552e920",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/official/pulsar-cyan.svg",
+      "size": 1493,
+      "sha256": "f7e3da2647924dda2d20a763c0f63ad57b6f1d160c215be0731b77ee74466e52",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/official/pulsar-wine.svg",
+      "size": 1493,
+      "sha256": "d66121a0b4ad1cf805c1551e3a106fc2e882df6a62856d2b2099af31a9edb28c",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/official/ui-cyan-dark.png",
+      "size": 150906,
+      "sha256": "dc5551b3d9957e1d7e6e9a649a14133e458fdd3bc474ca9563ca841294d7e899",
+      "category": "project_design_preview_or_UI_screenshot",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/official/ui-wine-light.png",
+      "size": 186950,
+      "sha256": "04188499e5f8378e90943476836d0766ec6743def3e34097acc5ad3e4ae25535",
+      "category": "project_design_preview_or_UI_screenshot",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/preview.png",
+      "size": 241008,
+      "sha256": "463df10b3a92c19ea6e012e6e0344ed2807a00c1d11abde02917e9fbf49bc91f",
+      "category": "project_design_preview_or_UI_screenshot",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-preview.png",
+      "size": 177685,
+      "sha256": "bf33a12be5faaf9202a8a0823f89a81c0983138ebf1ead94e9871b4ac7035881",
+      "category": "project_design_preview_or_UI_screenshot",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-auto.svg",
+      "size": 1594,
+      "sha256": "70bd29dcf3c231edb67072494f28676b96758f6dee9e101de3409e0899f048c4",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-gold-dark.svg",
+      "size": 1493,
+      "sha256": "27a04fbbd32d09db0050f4f4d2e18c774850ae4cdbb3ebda6c21829220183bfa",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-gold-light.svg",
+      "size": 1493,
+      "sha256": "e6449acfda120ee9d6a94a719f721e6f6c561678c6750703f6773653f5b7d537",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-header.svg",
+      "size": 1493,
+      "sha256": "3c824eca2e340920817fac03d9d20b669adc15fe2e7dbbbd17fffb91cc69d90b",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-slate-dark.svg",
+      "size": 1493,
+      "sha256": "fd6290873b30b9656bed2b7dbdb4ca3b1140ea87b71092f18aefb4cfe2782066",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-slate-light.svg",
+      "size": 1493,
+      "sha256": "ed337b63a7468a694ced0331a5af01e4ee90f808bf7a7c136416c50f886b1346",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-teal-dark.svg",
+      "size": 1493,
+      "sha256": "e62e0bd5706dbe96877f9f0c4e4ec9c75e2be91e2c5a645f7bfee29152e0b0c7",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-teal-light.svg",
+      "size": 1493,
+      "sha256": "ea4db2e68246f1452b1b419faf57f081099f2b77f32b1c5dc256c64247b73234",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-wine-dark.svg",
+      "size": 1493,
+      "sha256": "f50b125ab4a7af3a62e020e4ff22992969b0a873a561b9f28a8a931836a0d54e",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-wine-light.svg",
+      "size": 1493,
+      "sha256": "0d3717a6c4f0c8a3090fe33d9b9c4f8154aab23990b73446343e7ad8cbc02c58",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-wordmark-dark.svg",
+      "size": 5430,
+      "sha256": "82afab513970f46452eca3f8fcad0d037afa2145494adcea81b7357b2be85faa",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/a-original-wordmark-light.svg",
+      "size": 5430,
+      "sha256": "2d9f4cf2a54c02e22e4ea3833033965ad9f21c8f981fc4d1aaaba8ed4cfef991",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-auto.svg",
+      "size": 1141,
+      "sha256": "051b3e3a1f6f85d5d12ef700583010008315555e8224973567bf911c2eb65276",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-gold-dark.svg",
+      "size": 1040,
+      "sha256": "495d24f34b4892180cc11c2da1227b5f3f227341a57c59cefe3dd983a0c53e4a",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-gold-light.svg",
+      "size": 1040,
+      "sha256": "38b6233f9470899472bb0752dd6b6ffdc29aeff68c3d4ff1f07ddd35c3e368fc",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-header.svg",
+      "size": 1040,
+      "sha256": "b083aa48626414446bbda28c55a9532538c00f663caffbdd2135f7f844ef3b38",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-slate-dark.svg",
+      "size": 1040,
+      "sha256": "f9c8b2258ab51f499eb28f99c6235bf3d3419e882c570129464d18cdf21677c8",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-slate-light.svg",
+      "size": 1040,
+      "sha256": "37078dada180a29e4d0c3db0b30262d3fe8b322ff815e686b9b67e61ee176f65",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-teal-dark.svg",
+      "size": 1040,
+      "sha256": "5a8e8a14c7d7bd8dbab6a49508f162d119779ef3563c94f0714b76c3c49381b2",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-teal-light.svg",
+      "size": 1040,
+      "sha256": "d4e2f324fa74eac5a3953abe82bbb8be2c98b14466b183aea1580a1160918032",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-wine-dark.svg",
+      "size": 1040,
+      "sha256": "93d45fc6c5b344edd1e9c26664b846a16535c7924fc41be055470fb7d7ad304e",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-wine-light.svg",
+      "size": 1040,
+      "sha256": "9f3de6ab9c9994702b5b7e29245944011aa0e7074ed8508f5a18ef4fd86eb273",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-wordmark-dark.svg",
+      "size": 4977,
+      "sha256": "9d21232c9e6704f135287a79e7e63da8c46aa4c1dfe5eb062bf14656c4c92449",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/b-balanced-wordmark-light.svg",
+      "size": 4977,
+      "sha256": "87690ef441af4584ae7318856d34e457079fe0be579cf07291d5deebe4f2dd49",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-auto.svg",
+      "size": 1175,
+      "sha256": "73bc71ee82d24c2a4bc4feb1781bb9ffe752b072c5213c36980d87606261bb8c",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-gold-dark.svg",
+      "size": 1074,
+      "sha256": "0fbf1170e44a33aa2d1b0e67c93821a0f5459e1976a5942e6e734573d6d2f041",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-gold-light.svg",
+      "size": 1074,
+      "sha256": "808093cd21d04b9a7aed392f710131b25c7f3044922774768285b5998dbdbbca",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-header.svg",
+      "size": 1074,
+      "sha256": "3534f36be41c05060239d1643f5a6d740cd08973cb675e51bf154b7593761cbf",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-slate-dark.svg",
+      "size": 1074,
+      "sha256": "682af39250f14459e784642e9b41667db63c8b6c4792325ef819dfc83831be3a",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-slate-light.svg",
+      "size": 1074,
+      "sha256": "b1b42ed640ea81d1fcfc50eb7f079506528b8d3e21a19626ed9218d0aa770809",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-teal-dark.svg",
+      "size": 1074,
+      "sha256": "31176ae9f8b2b533b066f60fb44af44f35b485738a3124a3d713a725220619f6",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-teal-light.svg",
+      "size": 1074,
+      "sha256": "fdba0595a22065dd54067bd73a8498c53b511c28282ce51b7490487d268facd1",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-wine-dark.svg",
+      "size": 1074,
+      "sha256": "6997efc9ab283b13a639c7e93efeae1e9d5a5719601e82c5c83d58682985cac7",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-wine-light.svg",
+      "size": 1074,
+      "sha256": "39019f2c6a39f4e592709df64dc23083e5f143abdec0f6d783bece8fa7089639",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-wordmark-dark.svg",
+      "size": 5011,
+      "sha256": "40aacfabc5c281b88375db41b27798b1801516a3e190481f81a380165ebdb777",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/c-open-origin-wordmark-light.svg",
+      "size": 5011,
+      "sha256": "f42f747db4a6bd520aa5e9f2ba7fb1c10b18436061542fa210f54374c66d7935",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-auto.svg",
+      "size": 1182,
+      "sha256": "907b1e8483fda95d61e6a4a962abbf801a32e87bb5497536b0a8358abb2b5ebb",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-gold-dark.svg",
+      "size": 1081,
+      "sha256": "9b2b3ede9a49e32f335db04f7954595291cd17b6dabc2314e906bd9f733a8014",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-gold-light.svg",
+      "size": 1081,
+      "sha256": "8adc37ce602ccdb46b61d3b21faa393a362cd8edf9618f0b68ddf18af035a4ba",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-header.svg",
+      "size": 1081,
+      "sha256": "487ddb917ed78c23f7ed89be06e5c204958fafd41ca7251726fef481eeef2250",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-slate-dark.svg",
+      "size": 1081,
+      "sha256": "936fa9c2bd32a61de263ffc6b33e8484d8c88c0edfb32a5c01b4204097af47b1",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-slate-light.svg",
+      "size": 1081,
+      "sha256": "fa20a31bf2bd0f24866a0391034e2aa69ffe88879c7a52d34081734923972d6f",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-teal-dark.svg",
+      "size": 1081,
+      "sha256": "69ac9b1b173230c8371d295f0a81fc5e892d4aeadb0d4f3c3289216d90d9beec",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-teal-light.svg",
+      "size": 1081,
+      "sha256": "074173d8385ff3775a42530dbe0dc0c70daae367e2a6806459d368656d800ec2",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-wine-dark.svg",
+      "size": 1081,
+      "sha256": "0561dde06807c7a081d3ae264ed4f264b28c8ae183ecfdc04b775a3ad832411d",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-wine-light.svg",
+      "size": 1081,
+      "sha256": "d1e85f14a2987d6c1871e4fc1ad61d30879235123bcb604d0a1ebb43b0c01283",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-wordmark-dark.svg",
+      "size": 5018,
+      "sha256": "25066669c3b8609da12aaa9826b8c40ddfdb64e0776e565aefd302bcee2f6391",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/d-endpoints-wordmark-light.svg",
+      "size": 5018,
+      "sha256": "a1927b5b6ad5f950e359187b1bf27fbfed5468eb1dece17e05b381af14e9dac7",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-auto.svg",
+      "size": 1274,
+      "sha256": "45d13d292e3d15833fb5c40a1518f19adc0243582b6fbff4b464247f0fdd57e1",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-gold-dark.svg",
+      "size": 1173,
+      "sha256": "1c5c09a4ce318e00477285b12fa5ab4093dd8146c190ba91c5aa214f69f68d35",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-gold-light.svg",
+      "size": 1173,
+      "sha256": "ec4015a5c3af4160f7d95e4fd60e8dfdd2e048b2a4287c74897ef11538dee078",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-header.svg",
+      "size": 1173,
+      "sha256": "209f315f5e71a12364f5c5513d34ee0232678b811af3b04eb90fb6e6d74964ff",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-slate-dark.svg",
+      "size": 1173,
+      "sha256": "b22ee8758d4b7ebc974178ae3f4a9c9e58c5afab9850ffaad1651964a8fd13ce",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-slate-light.svg",
+      "size": 1173,
+      "sha256": "fef4eae7848949e80a2dc118ad6d1dc66e28834953289d66dee50cf83c1ed3a4",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-teal-dark.svg",
+      "size": 1173,
+      "sha256": "969c38774e3d5c90408afd13c67ff70add76d550a8fc38ac1905d8f73ac698cf",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-teal-light.svg",
+      "size": 1173,
+      "sha256": "1369bcb95b53b7db03bbfec0e188fe63574f238a59e26db90c3d269f18abaa1e",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-wine-dark.svg",
+      "size": 1173,
+      "sha256": "c710cc63aad8a3a332e643b8c5acc6737d4f2439f4fea35f96089a700c440a11",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-wine-light.svg",
+      "size": 1173,
+      "sha256": "9f721be8c845c89428224560e82b162935fdb2b4420d43e6c2032fef4687d72f",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-wordmark-dark.svg",
+      "size": 5110,
+      "sha256": "98a4cc7c4bc556f6f1fa9242d7a3933174c39db2af20fbfb30245ef6134c2749",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/e-seal-wordmark-light.svg",
+      "size": 5110,
+      "sha256": "5280f639d7e15689a0b529fadbc01a4dae61ded975cc18cbcc0d5e52de6d6018",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-auto.svg",
+      "size": 1267,
+      "sha256": "bb12d84f6c66a374357c30f452586b4d3c9d913b1a26cdb39aa2c40081e48483",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-gold-dark.svg",
+      "size": 1166,
+      "sha256": "4b3e3f7382599c357e6a41e3e885d2e7bae953e048d6d46553476918e4c08f9c",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-gold-light.svg",
+      "size": 1166,
+      "sha256": "de25ae80ba22413fe861652558ad0bdb469b5499da8a832a0493e0470400adde",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-header.svg",
+      "size": 1166,
+      "sha256": "95f96fea7c808d945a724da4184cd13b920beb417d911879569cda0906139aac",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-slate-dark.svg",
+      "size": 1166,
+      "sha256": "a1e8159690efe35f6899c83afb504566c9ffff06068c5c32454b088e71126dff",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-slate-light.svg",
+      "size": 1166,
+      "sha256": "c815d3b4c4e03876f5655540fc803e7f9ee9a7745050e6438e4850465f9e654e",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-teal-dark.svg",
+      "size": 1166,
+      "sha256": "04afa24deeaedc3459acafa30dc3148f72bae4a5516eadb6bd3ee7c224fda8d8",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-teal-light.svg",
+      "size": 1166,
+      "sha256": "bfab77108f6a28e184903f368da41ad5f8e8e1ed38db2b6acdc94b25626f7e36",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-wine-dark.svg",
+      "size": 1166,
+      "sha256": "e2f53a06226395c1baef0e524733e78588a82e569ca031dde87e3fd2d2371095",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-wine-light.svg",
+      "size": 1166,
+      "sha256": "2b95088857333b57b8804a0616a7680972429367f5ddf4c0ed0ba9fdb5b75822",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-wordmark-dark.svg",
+      "size": 5103,
+      "sha256": "1fed2a76ffc10c4255d6386ac0715257743f4fbb1f2f8a9fa0fe3fced836edef",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/f-app-tile-wordmark-light.svg",
+      "size": 5103,
+      "sha256": "3813f708c1045907c05dff343b80562b15581d6466bd6cd75df59455ab2ed326",
+      "category": "project_logo_based_on_owner_confirmed_public_domain_pulsar_diagram",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/preview-gold.png",
+      "size": 252187,
+      "sha256": "062ded258899294d6cc3776edc464d7e58bcf096437c242924b82d22a50c9055",
+      "category": "project_design_preview_or_UI_screenshot",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/preview-slate.png",
+      "size": 252605,
+      "sha256": "da52b18de941500113ce19d8a7fbeec7e8782a1f637a9508e148fca6dc2b4e15",
+      "category": "project_design_preview_or_UI_screenshot",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/preview-teal.png",
+      "size": 252320,
+      "sha256": "04f75275028affda1764dedf2aaaeb6ac8d57513356160876b4741538544ee93",
+      "category": "project_design_preview_or_UI_screenshot",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "logo/pulsar-refinements/preview-wine.png",
+      "size": 252539,
+      "sha256": "5020ffe560b1ff21a380838bcae38ea25dd0f66a8da0b5c9bbada2cd11768527",
+      "category": "project_design_preview_or_UI_screenshot",
+      "projectLicenseSelected": false
+    },
+    {
+      "path": "assets/textures/concrete.png",
+      "size": 170079,
+      "sha256": "c9d51216e9da6f5c559bdc255e0d6050364c86c52a4ceab0f83bcc827aa0e4b9",
+      "category": "project_procedural_texture",
+      "generator": "scripts/draw-concrete-texture.py",
+      "regenerationByteMatch": true,
+      "projectLicenseSelected": false
+    }
+  ],
+  "inlineArtworkHosts": [
+    {
+      "path": "index.html",
+      "size": 10689,
+      "sha256": "01a0294b95c87812944e3b7e4870beca98b7f87bfe7ddd7ac5bff859539d7f16",
+      "category": "inline_artwork_host"
+    },
+    {
+      "path": "logo/index.html",
+      "size": 21774,
+      "sha256": "2c1599e347e40fea9045fac7470e95ee4727af34db7693d2784692c96d4b077f",
+      "category": "inline_artwork_host"
+    },
+    {
+      "path": "src/app.js",
+      "size": 152312,
+      "sha256": "449cf9468a7dad650d57b4c33ea703eed4bb0efe201070baef2f2389f268f1d6",
+      "category": "inline_artwork_host"
+    },
+    {
+      "path": "src/object-status.js",
+      "size": 3125,
+      "sha256": "93a82bddfeadc931a9dffec8dae4fb7f47a8af256083dafdb9cf7d1a5795916d",
+      "category": "inline_artwork_host"
+    }
+  ],
+  "systemFonts": {
+    "bundled": false,
+    "examples": [
+      "Arial",
+      "Microsoft YaHei",
+      "Noto Sans CJK SC",
+      "system-ui",
+      "sans-serif"
+    ],
+    "note": "CSS fallback references, not font-file redistribution; also inspect MathLive fallback lists if adding local font binaries"
+  },
+  "embeddedThirdParty": [
+    {
+      "component": "Lezer",
+      "license": "MIT",
+      "bundle": {
+        "path": "assets/javascript-syntax.js",
+        "size": 136616,
+        "sha256": "03760f72eb1787308deaf03ec3f4ef06b34a4eae5336acfcddf5e874bb519d6e"
+      },
+      "notices": {
+        "path": "assets/javascript-syntax.LICENSE.txt",
+        "size": 4517,
+        "sha256": "11c589b02451298a9e9f43f44c357a677062e21d4bae472df7cfa101e3159a29"
+      }
+    },
+    {
+      "component": "Matter.js adapted solver",
+      "license": "MIT",
+      "file": {
+        "path": "src/physics-contact-friction.js",
+        "size": 9354,
+        "sha256": "9e8e8c821dc83136ffd34f40dd989c0a6365ebe82ac2fe56f1a9a7d1813ef1ed"
+      },
+      "originalNoticeInFile": true
+    },
+    {
+      "component": "KaTeX stretchy rendering code",
+      "license": "MIT",
+      "file": "node_modules/mathlive/mathlive.mjs",
+      "evidence": "Adapted from https://github.com/KaTeX/KaTeX/blob/master/src/stretchy.js; upstream embedded version not separately declared"
+    },
+    {
+      "component": "Font Awesome Free icon artwork",
+      "license": "CC-BY-4.0",
+      "file": "node_modules/mathlive/mathlive.min.mjs",
+      "icon": "trailing-chevron",
+      "upstreamIcon": "chevron-right",
+      "exactPathMatch": true,
+      "matchingUpstreamVersion": "5.15.4",
+      "pathSha256": "f85e51da2ad4911bace7be512fde95caacb45ffd2bda4f1df99db484b8044b7b",
+      "source": "https://github.com/FortAwesome/Font-Awesome/blob/5.15.4/svgs/solid/chevron-right.svg",
+      "note": "Matching artwork establishes an embedded third-party component, not the exact version of the complete Font Awesome collection used by MathLive"
+    }
+  ],
+  "sourceEvidence": [
+    {
+      "subject": "MathLive 0.111.1",
+      "npmGitHead": "30ad20a7a47ea43a2f6915808023202c78f37742",
+      "url": "https://github.com/arnog/mathlive/tree/30ad20a7a47ea43a2f6915808023202c78f37742",
+      "licenseByteMatch": true,
+      "representativeFontByteMatch": "css/fonts/KaTeX_Main-Regular.woff2",
+      "allFiveSoundsByteMatch": true
+    },
+    {
+      "subject": "KaTeX fonts",
+      "evidence": "All 20 distributed WOFF2 name tables declare OFL-1.1; a generic code-level MIT notice does not override these records"
+    },
+    {
+      "subject": "Fira graphic output",
+      "url": "https://openfontlicense.org/ofl-faq/",
+      "sections": [
+        "1.1",
+        "1.1.1",
+        "1.1.2"
+      ],
+      "sourceFontLicense": "https://github.com/mozilla/Fira/blob/master/LICENSE",
+      "localEvidence": "logo/README.md; original Fira font files are not distributed"
+    },
+    {
+      "subject": "pulsar diagram",
+      "publicDomainStatus": "confirmed by project owner in this conversation; not a blanket determination for all Golden Record contents or arbitrary photographs",
+      "url": "https://science.nasa.gov/mission/voyager/golden-record-cover/",
+      "mediaPolicy": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "referencePhotographSourceRecordedInRepository": false
+    },
+    {
+      "subject": "MulanPSL-2.0",
+      "url": "https://opensource.org/license/MulanPSL-2.0",
+      "text": "https://github.com/spdx/license-list-data/blob/main/text/MulanPSL-2.0.txt",
+      "note": "Original COSCL endpoint was unavailable; checked OSI and SPDX; project root LICENSE not created"
+    },
+    {
+      "subject": "CC-BY-4.0",
+      "url": "https://creativecommons.org/licenses/by/4.0/legalcode.en"
+    }
+  ],
+  "addedLicenseTexts": [
+    {
+      "path": "licenses/CC-BY-4.0.txt",
+      "size": 18657,
+      "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+    },
+    {
+      "path": "licenses/Earcut-ISC.txt",
+      "size": 738,
+      "sha256": "0b348fff56384b43dbb37593906904e56d0f9deb51eae590d4dc6d427fbf1808"
+    },
+    {
+      "path": "licenses/Fira-Sans-OFL-1.1.txt",
+      "size": 4479,
+      "sha256": "99bfb7c1e845b79d1031fcf37e678178eb4a8c7cc74a3f218ddf7223083a6fcd"
+    },
+    {
+      "path": "licenses/Font-Awesome-Free-NOTICE.txt",
+      "size": 1548,
+      "sha256": "e779748dfe75e84f974df3c7bc07f842011a100159158b0f1f49b2f2a5a515cb"
+    },
+    {
+      "path": "licenses/KaTeX-code-MIT.txt",
+      "size": 1107,
+      "sha256": "766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3"
+    },
+    {
+      "path": "licenses/KaTeX-fonts-OFL-1.1.txt",
+      "size": 4378,
+      "sha256": "c18355733963d3ae093cdb4816997feaf06ab9e465de6dee18e600b1b43b0d74"
+    },
+    {
+      "path": "licenses/MathLive-MIT.txt",
+      "size": 1099,
+      "sha256": "3caebd18611959ca725ab976a004d408017eb1d7093d6c9b9b09c5a4790eaff8"
+    },
+    {
+      "path": "licenses/Matter-js-MIT.txt",
+      "size": 1092,
+      "sha256": "ed182087be5b26734aa6d4789743de3a97417950e8c1e3ff2e3d19c6462720d3"
+    },
+    {
+      "path": "licenses/esbuild-MIT.txt",
+      "size": 1069,
+      "sha256": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+    }
+  ],
+  "remainingReleaseActions": [
+    "Choose/adopt the project license and confirm copyright holder and first-publication year",
+    "Retain third-party license exceptions instead of relicensing all distributed files",
+    "Ship the notices and license texts in source/build artifacts and make them accessible on the deployed website",
+    "Keep provenance records for public-domain diagram references; no original reference photograph is distributed here"
+  ]
+}

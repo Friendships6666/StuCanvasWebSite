@@ -1,0 +1,51 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StuVkUtils - AOT 静态提交类生成器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #1a1a1a; color: #cfcfcf; }
+        textarea { font-family: 'Fira Code', 'Courier New', Courier, monospace; }
+    </style>
+</head>
+<body class="h-screen flex flex-col font-sans text-sm">
+
+<header class="bg-[#242424] border-b border-[#333333] px-6 py-4 flex justify-between items-center shrink-0">
+    <div>
+        <h1 class="text-lg font-bold text-white">StuVkUtils AOT Persistent Submission Class Compiler</h1>
+        <p class="text-xs text-gray-400 mt-1">静态编译工具：支持外部句柄指针追踪、多批次合并提交的 C++ 控制类生成器</p>
+    </div>
+    <div class="space-x-2">
+        <button id="btn-load-sample" class="bg-[#333333] hover:bg-[#444444] text-white px-4 py-2 rounded text-xs transition">载入示例</button>
+        <button id="btn-compile" class="bg-blue-700 hover:bg-blue-600 text-white px-5 py-2 rounded text-xs font-semibold transition">生成静态控制类</button>
+    </div>
+</header>
+
+<main class="flex-1 flex overflow-hidden">
+    <div class="w-1/2 flex flex-col border-r border-[#333333]">
+        <div class="bg-[#1f1f1f] px-4 py-2 border-b border-[#333333] text-xs font-semibold uppercase tracking-wider text-gray-400">
+            JSON 任务依赖声明
+        </div>
+        <textarea id="json-input" class="flex-1 bg-[#151515] p-4 focus:outline-none resize-none overflow-y-auto leading-relaxed text-[#9cdcfe]" placeholder="请输入 JSON 配置..."></textarea>
+    </div>
+
+    <div class="w-1/2 flex flex-col">
+        <div class="bg-[#1f1f1f] px-4 py-2 border-b border-[#333333] flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <span>C++23 静态控制类 (.hpp)</span>
+            <button id="btn-copy" class="text-blue-400 hover:text-blue-300 font-semibold uppercase transition">复制源码</button>
+        </div>
+        <textarea id="cpp-output" class="flex-1 bg-[#151515] p-4 focus:outline-none resize-none overflow-y-auto leading-relaxed text-[#b5cea8]" readonly placeholder="等待编译..."></textarea>
+    </div>
+</main>
+
+<footer class="bg-[#242424] border-t border-[#333333] px-6 py-2 text-xs flex justify-between items-center shrink-0">
+    <span id="status-text" class="text-green-400">● 状态: 准备就绪</span>
+    <span class="text-gray-600">StuVkUtils v1.4.0</span>
+</footer>
+
+<script src="compiler.js"></script>
+</body>
+</html>

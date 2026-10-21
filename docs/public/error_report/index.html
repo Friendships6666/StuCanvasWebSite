@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StuCanvas 诊断系统 C++23 代码生成器 (Bug 修复版)</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --border-color: #30363d;
+            --accent-color: #f85149;
+            --accent-hover: #da3633;
+            --text-color: #c9d1d9;
+            --text-dim: #8b949e;
+            --code-bg: #010409;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 { font-size: 18px; color: #58a6ff; }
+        header .subtitle { font-size: 12px; color: var(--text-dim); }
+
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+
+        .pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .pane:last-child { border-right: none; }
+
+        .pane-header {
+            background-color: rgba(22, 27, 34, 0.8);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .btn-group { display: flex; gap: 8px; }
+
+        button {
+            background-color: #21262d;
+            color: #c9d1d9;
+            border: 1px solid var(--border-color);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: #30363d; border-color: #8b949e; }
+        button.btn-primary { background-color: #238636; color: #ffffff; }
+        button.btn-primary:hover { background-color: #2ea043; }
+        button.btn-danger { background-color: var(--accent-color); color: #ffffff; }
+        button.btn-danger:hover { background-color: var(--accent-hover); }
+
+        textarea {
+            flex: 1;
+            background-color: var(--code-bg);
+            color: #e6edf3;
+            border: none;
+            padding: 16px;
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+
+        #status-bar {
+            background-color: var(--panel-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 4px 16px;
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .status-success { color: #3fb950; }
+        .status-error { color: #f85149; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>🛡️ StuCanvas 诊断代码生成器 (OSC 8 超链接修复版)</h1>
+            <div class="subtitle">精准 ANSI 状态机 · 延迟链接包装 · 边框对齐极佳</div>
+        </div>
+        <div class="btn-group">
+            <button onclick="loadExample()">加载示例 JSON</button>
+            <button class="btn-primary" onclick="generateCppCode()">生成 C++23 代码</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="pane">
+            <div class="pane-header">
+                <span>输入 JSON (错误触发函数列表)</span>
+                <button onclick="formatJson()">格式化 JSON</button>
+            </div>
+            <textarea id="json-input" placeholder="在此粘贴 JSON 数据..."></textarea>
+        </div>
+
+        <div class="pane">
+            <div class="pane-header">
+                <span>生成的 C++23 头文件 (Diagnostics_Generated.hpp)</span>
+                <button class="btn-danger" onclick="copyCppCode()">复制 C++ 代码</button>
+            </div>
+            <textarea id="cpp-output" readonly placeholder="点击生成按钮..."></textarea>
+        </div>
+    </div>
+
+    <div id="status-bar">
+        <span id="status-text">就绪</span>
+        <span>OSC 8 Hyperlink Fix / Robust ANSI Parser</span>
+    </div>
+
+    <script>
+        const defaultJson = [
+            {
+                "function_name": "ReportNullPlayerPointer",
+                "translations": {
+                    "Chinese": [
+                        { "kind": "type",     "content": "【详细类型】 空指针解引用异常 (Null Pointer Exception)" },
+                        { "kind": "location", "content": "【错在哪里】 在函数 'EquipWeapon' 中，参数 'player' 传入了非法的空指针 (nullptr)。" },
+                        { "kind": "design",   "content": "【设计初衷】 StuCanvas 采用显式所有权管线，任何 API 入口均拒绝隐式 null 指针，以确保 Vulkan 内存分配与渲染管线的物理无锁高效运行。" },
+                        { "kind": "fix",      "content": "【如何解决】 请在调用 EquipWeapon 之前，检查并确保 player 对象已成功初始化。" },
+                        { "kind": "link",     "content": "https://github.com/friendships666/StuCanvas/issues" }
+                    ],
+                    "English": [
+                        { "kind": "type",     "content": "[Type] Null Pointer Exception" },
+                        { "kind": "location", "content": "[Where] In function 'EquipWeapon', parameter 'player' was passed as nullptr." },
+                        { "kind": "design",   "content": "[Rationale] StuCanvas utilizes an explicit ownership pipeline. All API boundaries strictly disallow implicit null pointers to guarantee lock-free Vulkan memory performance." },
+                        { "kind": "fix",      "content": "[Fix] Ensure 'player' is properly initialized before calling EquipWeapon." },
+                        { "kind": "link",     "content": "https://github.com/friendships666/StuCanvas/issues" }
+                    ]
+                }
+            },
+            {
+                "function_name": "ReportComponentTypeMismatch",
+                "translations": {
+                    "Chinese": [
+                        { "kind": "type",     "content": "【详细类型】 组件类型不匹配 (Component Type Mismatch)" },
+                        { "kind": "location", "content": "【错在哪里】 在 ECS 注册表中，期待组件 ID 为 [102]，但实体实际绑定的组件 ID 为 [205]。" },
+                        { "kind": "design",   "content": "【设计初衷】 StuCanvas 的 ECS 架构基于强类型内存对齐槽位（Type-Aligned Memory Slots），乱序类型注入会导致 GPU Cache-Miss 与内存污染。" },
+                        { "kind": "fix",      "content": "【如何解决】 请检查传入的实体类型，或者在调用前使用 HasComponent<102>() 进行类型校验。" },
+                        { "kind": "link",     "content": "https://github.com/friendships666/StuCanvas/issues" }
+                    ],
+                    "English": [
+                        { "kind": "type",     "content": "[Type] Component Type Mismatch" },
+                        { "kind": "location", "content": "[Where] In ECS registry, expected Component ID [102], but got [205]." },
+                        { "kind": "design",   "content": "[Rationale] StuCanvas ECS architecture relies on strict Type-Aligned Memory Slots. Incorrect type injection causes GPU Cache-Misses and memory corruption." },
+                        { "kind": "fix",      "content": "[Fix] Verify the entity type or check with HasComponent<102>() before calling this function." },
+                        { "kind": "link",     "content": "https://github.com/friendships666/StuCanvas/issues" }
+                    ]
+                }
+            }
+        ];
+
+        function loadExample() {
+            document.getElementById('json-input').value = JSON.stringify(defaultJson, null, 4);
+            updateStatus("已加载示例 JSON 数据", "success");
+            generateCppCode();
+        }
+
+        function formatJson() {
+            try {
+                const val = JSON.parse(document.getElementById('json-input').value);
+                document.getElementById('json-input').value = JSON.stringify(val, null, 4);
+                updateStatus("JSON 格式化成功", "success");
+            } catch (e) {
+                updateStatus("JSON 语法错误: " + e.message, "error");
+            }
+        }
+
+        function updateStatus(msg, type) {
+            const el = document.getElementById('status-text');
+            el.innerText = msg;
+            el.className = type === "error" ? "status-error" : (type === "success" ? "status-success" : "");
+        }
+
+        function escapeCppString(str) {
+            if (!str) return '""';
+            return '"' + str.replace(/\\/g, '\\\\')
+                            .replace(/"/g, '\\"')
+                            .replace(/\n/g, '\\n') + '"';
+        }
+
+        function kindToEnum(kind) {
+            switch ((kind || "").toLowerCase()) {
+                case "type": return "FieldKind::Type";
+                case "location": return "FieldKind::Location";
+                case "design": return "FieldKind::Design";
+                case "fix": return "FieldKind::Fix";
+                case "link": return "FieldKind::Link";
+                default: return "FieldKind::Default";
+            }
+        }
+
+        function generateCppCode() {
+            const jsonText = document.getElementById('json-input').value;
+            let data;
+            try {
+                data = JSON.parse(jsonText);
+            } catch (e) {
+                updateStatus("无法生成：JSON 格式不正确 (" + e.message + ")", "error");
+                return;
+            }
+
+            if (!Array.isArray(data) || data.length === 0) {
+                updateStatus("无法生成：JSON 必须是一个非空数组", "error");
+                return;
+            }
+
+            const langSet = new Set();
+            data.forEach(item => {
+                if (item.translations) {
+                    Object.keys(item.translations).forEach(lang => langSet.add(lang));
+                }
+            });
+            const languages = Array.from(langSet);
+            if (languages.length === 0) {
+                updateStatus("无法生成：未找到任何语言定义", "error");
+                return;
+            }
+
+            let cpp = `// ============================================================================
+// AUTO-GENERATED BY STUCANVAS DIAGNOSTIC GENERATOR - DO NOT EDIT!
+// ============================================================================
+#pragma once
+
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <vector>
+#include <span>
+#include <sstream>
+#include <algorithm>
+#include <cstdlib>
+#include <cstdio>
+#include <cstdint>
+#include <cpptrace/cpptrace.hpp>
+#include <cpptrace/utils.hpp>
+
+namespace StuCanvas {
+
+enum class Language : size_t {\n`;
+
+            languages.forEach((lang, index) => {
+                cpp += `    ${lang} = ${index},\n`;
+            });
+            cpp += `};\n\n`;
+
+            cpp += `enum class FieldKind : uint8_t {
+    Type,       // 红色加粗
+    Location,   // 亮黄色
+    Design,     // 青蓝色
+    Fix,        // 亮绿色
+    Link,       // 蓝色加下划线超链接
+    Default     // 亮白色
+};
+
+struct FieldEntry {
+    FieldKind kind;
+    const char* content;
+};
+
+class DiagnosticsEngine {
+private:
+    inline static Language s_Language = Language::${languages[0]};
+
+    // 精准的 ANSI / UTF-8 真实显示宽度计算器（完美支持 CSI 与 OSC 8 控制码）
+    static size_t GetDisplayWidth(std::string_view str) {
+        size_t width = 0;
+        size_t i = 0;
+        size_t n = str.size();
+
+        while (i < n) {
+            if (str[i] == '\\033') {
+                // 彻底精确识别 CSI (\\033[) 与 OSC (\\033]) 逃逸序列
+                if (i + 1 < n && str[i + 1] == '[') {
+                    i += 2;
+                    while (i < n && !(str[i] >= 0x40 && str[i] <= 0x7E)) i++;
+                    if (i < n) i++;
+                } else if (i + 1 < n && str[i + 1] == ']') {
+                    i += 2;
+                    while (i < n) {
+                        if (str[i] == '\\007') { i++; break; }
+                        if (str[i] == '\\033' && i + 1 < n && str[i + 1] == '\\\\') { i += 2; break; }
+                        i++;
+                    }
+                } else {
+                    i++;
+                }
+                continue;
+            }
+
+            unsigned char c = str[i];
+            size_t char_width = 1;
+            size_t char_bytes = 1;
+
+            if ((c & 0x80) == 0) { char_width = 1; char_bytes = 1; }
+            else if ((c & 0xE0) == 0xC0) { char_width = 1; char_bytes = 2; }
+            else if ((c & 0xF0) == 0xE0) { char_width = 2; char_bytes = 3; }
+            else if ((c & 0xF8) == 0xF0) { char_width = 2; char_bytes = 4; }
+
+            width += char_width;
+            i += char_bytes;
+        }
+        return width;
+    }
+
+    // 智能拆行算法：支持对 ANSI 文本的安全切分
+    static std::vector<std::string> WrapText(std::string_view str, size_t max_width) {
+        std::vector<std::string> lines;
+        std::string current_line;
+        size_t current_width = 0;
+
+        size_t i = 0;
+        size_t n = str.size();
+
+        while (i < n) {
+            if (str[i] == '\\033') {
+                size_t start = i;
+                if (i + 1 < n && str[i + 1] == '[') {
+                    i += 2;
+                    while (i < n && !(str[i] >= 0x40 && str[i] <= 0x7E)) i++;
+                    if (i < n) i++;
+                } else if (i + 1 < n && str[i + 1] == ']') {
+                    i += 2;
+                    while (i < n) {
+                        if (str[i] == '\\007') { i++; break; }
+                        if (str[i] == '\\033' && i + 1 < n && str[i + 1] == '\\\\') { i += 2; break; }
+                        i++;
+                    }
+                } else {
+                    i++;
+                }
+                current_line.append(str.substr(start, i - start));
+                continue;
+            }
+
+            unsigned char c = str[i];
+            size_t char_width = 1;
+            size_t char_bytes = 1;
+
+            if ((c & 0x80) == 0) { char_width = 1; char_bytes = 1; }
+            else if ((c & 0xE0) == 0xC0) { char_width = 1; char_bytes = 2; }
+            else if ((c & 0xF0) == 0xE0) { char_width = 2; char_bytes = 3; }
+            else if ((c & 0xF8) == 0xF0) { char_width = 2; char_bytes = 4; }
+
+            if (current_width + char_width > max_width && !current_line.empty()) {
+                lines.push_back(current_line);
+                current_line.clear();
+                current_width = 0;
+            }
+
+            current_line.append(str.substr(i, char_bytes));
+            current_width += char_width;
+            i += char_bytes;
+        }
+
+        if (!current_line.empty()) {
+            lines.push_back(current_line);
+        }
+
+        return lines;
+    }
+
+    static std::string MakeClickableLink(std::string_view url) {
+        return std::string("\\033]8;;") + std::string(url) + "\\033\\\\" + std::string(url) + "\\033]8;;\\033\\\\";
+    }
+
+    static const char* GetKindStyle(FieldKind kind) {
+        switch (kind) {
+            case FieldKind::Type:     return "\\033[1;31m";                 // 红色加粗
+            case FieldKind::Location: return "\\033[38;2;255;215;0m";       // 亮黄色
+            case FieldKind::Design:   return "\\033[38;2;135;206;235m";     // 青蓝色
+            case FieldKind::Fix:      return "\\033[38;2;80;200;120m";      // 亮绿色
+            case FieldKind::Link:     return "\\033[38;2;100;149;237m";     // 矢车菊蓝
+            default:                  return "\\033[38;2;240;240;240m";     // 亮白色
+        }
+    }
+
+public:
+    static void SetLanguage(Language lang) { s_Language = lang; }
+    static Language GetLanguage() { return s_Language; }
+
+    [[noreturn]] static void RenderBoxAndAbort(std::span<const FieldEntry> fields) {
+        const char* BORDER_COLOR = "\\033[38;2;255;85;85m";
+        const char* RED_BOLD     = "\\033[1;31m";
+        const char* DIM_CODE     = "\\033[38;2;180;180;180m";
+        const char* RESET        = "\\033[0m";
+
+        const size_t BOX_WIDTH = 88;
+        std::string title = "StuCanvas Error";
+
+        // 顶边框
+        std::cout << "\\n" << BORDER_COLOR << "╭";
+        for (size_t i = 0; i < BOX_WIDTH + 2; ++i) std::cout << "─";
+        std::cout << "╮\\n";
+
+        // 居中标题
+        size_t title_w = GetDisplayWidth(title);
+        size_t title_pad_total = (BOX_WIDTH > title_w) ? (BOX_WIDTH - title_w) : 0;
+        size_t title_pad_left = title_pad_total / 2;
+        size_t title_pad_right = title_pad_total - title_pad_left;
+
+        std::cout << BORDER_COLOR << "│ " << RESET 
+                  << std::string(title_pad_left, ' ') 
+                  << RED_BOLD << title << RESET 
+                  << std::string(title_pad_right, ' ') 
+                  << BORDER_COLOR << " │\\n";
+
+        std::cout << BORDER_COLOR << "│" << std::string(BOX_WIDTH + 2, ' ') << "│\\n";
+
+        // 字段渲染（先纯文本拆行，拆完后再施加 OSC 8 超链接包装）
+        for (const auto& item : fields) {
+            const char* style = GetKindStyle(item.kind);
+
+            // 对纯文本进行安全拆行
+            std::vector<std::string> wrapped_lines = WrapText(item.content, BOX_WIDTH);
+
+            for (auto line : wrapped_lines) {
+                // 如果是链接，在整行拆完后再包装成 OSC 8 超链接，防止破坏逃逸码！
+                std::string render_str = (item.kind == FieldKind::Link) ? MakeClickableLink(line) : line;
+                
+                size_t line_w = GetDisplayWidth(line);
+                size_t pad = (BOX_WIDTH > line_w) ? (BOX_WIDTH - line_w) : 0;
+
+                std::cout << BORDER_COLOR << "│ " << style << render_str << RESET
+                          << std::string(pad, ' ') << BORDER_COLOR << " │\\n";
+            }
+        }
+
+        std::cout << BORDER_COLOR << "│" << std::string(BOX_WIDTH + 2, ' ') << "│\\n";
+
+        // Traceback 标头
+        std::string tb_title = "Traceback (most recent call last):";
+        size_t tb_pad = (BOX_WIDTH > GetDisplayWidth(tb_title)) ? (BOX_WIDTH - GetDisplayWidth(tb_title)) : 0;
+        std::cout << BORDER_COLOR << "│ " << RED_BOLD << tb_title << RESET 
+                  << std::string(tb_pad, ' ') << BORDER_COLOR << " │\\n";
+
+        // 堆栈帧与源代码上下文
+        auto trace = cpptrace::generate_trace();
+        for (const auto& frame : trace.frames) {
+            std::string line_str = frame.line.has_value() ? std::to_string(frame.line.value()) : "0";
+            std::string frame_header = "#" + std::to_string(frame.raw_address) + " " + frame.symbol + " at " + frame.filename + ":" + line_str;
+
+            std::vector<std::string> wrapped_headers = WrapText(frame_header, BOX_WIDTH);
+            for (const auto& h_line : wrapped_headers) {
+                size_t h_w = GetDisplayWidth(h_line);
+                size_t pad = (BOX_WIDTH > h_w) ? (BOX_WIDTH - h_w) : 0;
+                std::cout << BORDER_COLOR << "│ \\033[38;2;240;240;240m" << h_line << RESET 
+                          << std::string(pad, ' ') << BORDER_COLOR << " │\\n";
+            }
+
+            if (frame.line.has_value() && !frame.filename.empty()) {
+                std::string snippet = cpptrace::get_snippet(frame.filename, frame.line.value(), 1, false);
+                if (!snippet.empty()) {
+                    std::stringstream ss(snippet);
+                    std::string code_line;
+                    while (std::getline(ss, code_line)) {
+                        std::string indented_code = "    " + code_line;
+                        std::vector<std::string> wrapped_code = WrapText(indented_code, BOX_WIDTH);
+                        for (const auto& c_line : wrapped_code) {
+                            size_t c_w = GetDisplayWidth(c_line);
+                            size_t pad = (BOX_WIDTH > c_w) ? (BOX_WIDTH - c_w) : 0;
+                            std::cout << BORDER_COLOR << "│ " << DIM_CODE << c_line << RESET 
+                                      << std::string(pad, ' ') << BORDER_COLOR << " │\\n";
+                        }
+                    }
+                }
+            }
+        }
+
+        // 底边框
+        std::cout << BORDER_COLOR << "╰";
+        for (size_t i = 0; i < BOX_WIDTH + 2; ++i) std::cout << "─";
+        std::cout << "╯\\n" << RESET << std::endl;
+
+        std::fflush(stdout);
+        std::fflush(stderr);
+        std::abort();
+    }
+};\n\n`;
+
+            cpp += `// ============================================================================\n`;
+            cpp += `// 纯文本零填充·错误触发函数定义 (包裹在 StuCanvas 命名空间内)\n`;
+            cpp += `// ============================================================================\n\n`;
+
+            data.forEach(item => {
+                const fnName = item.function_name || "ReportUnknownError";
+
+                cpp += `[[noreturn]] inline void ${fnName}() {\n`;
+
+                languages.forEach(lang => {
+                    const list = (item.translations && item.translations[lang]) ? item.translations[lang] : [];
+                    cpp += `    static constexpr FieldEntry ${lang}_fields[] = {\n`;
+                    list.forEach(f => {
+                        cpp += `        { ${kindToEnum(f.kind)}, ${escapeCppString(f.content)} },\n`;
+                    });
+                    cpp += `    };\n\n`;
+                });
+
+                cpp += `    static constexpr std::span<const FieldEntry> translations[] = {\n`;
+                languages.forEach(lang => {
+                    cpp += `        ${lang}_fields,\n`;
+                });
+                cpp += `    };\n\n`;
+
+                cpp += `    const auto& fields = translations[static_cast<size_t>(DiagnosticsEngine::GetLanguage())];\n`;
+                cpp += `    DiagnosticsEngine::RenderBoxAndAbort(fields);\n`;
+                cpp += `}\n\n`;
+            });
+
+            cpp += `} // namespace StuCanvas\n`;
+
+            document.getElementById('cpp-output').value = cpp;
+            updateStatus(`生成成功！已彻底修复 OSC 8 超链接断裂与错位问题。`, "success");
+        }
+
+        function copyCppCode() {
+            const code = document.getElementById('cpp-output').value;
+            if (!code) return;
+            navigator.clipboard.writeText(code).then(() => {
+                updateStatus("C++ 代码已成功复制到剪贴板！", "success");
+            });
+        }
+
+        window.onload = function() {
+            loadExample();
+        };
+    </script>
+</body>
+</html>

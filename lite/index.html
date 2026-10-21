@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+  <title>StuCanvas Lite</title>
+  <meta name="theme-color" content="#3e1019" />
+  <link rel="icon" href="/logo/official/pulsar-auto.svg" type="image/svg+xml" />
+  <script type="module" src="/src/themes.js"></script>
+  <link rel="stylesheet" href="/src/style.css" />
+  <link rel="stylesheet" href="/node_modules/mathlive/mathlive-static.css" />
+  <link rel="stylesheet" href="/node_modules/mathlive/mathlive-fonts.css" />
+</head>
+<body theme="light">
+  <header class="toolbar" data-i18n-aria-label="ui.toolbar">
+    <div class="brand" aria-label="StuCanvas Lite">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg"><g xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="4.1" stroke-linecap="round" stroke-linejoin="round">
+<path d="M108 139L55.100 103.120" />
+<path d="M108 139L95.580 61.720" />
+<path stroke-width="2.5" d="M100.676 72.000l-6.714 1.079" />
+<path d="M108 139L129.620 87.020" />
+<path d="M108 139L195.400 29.980" />
+<path stroke-width="2.5" d="M185.817 47.369l-5.306 -4.253" />
+<path d="M108 139L180.680 123.360" />
+<path d="M108 139L229.440 175.800" />
+<path stroke-width="2.5" d="M211.452 173.902l1.972 -6.508" />
+<path d="M108 139L180.680 252.620" />
+<path stroke-width="2.5" d="M167.641 238.545l5.728 -3.664" />
+<path d="M108 139L103.860 218.580" />
+<path stroke-width="2.5" d="M101.044 207.262l6.791 0.353" />
+<path d="M108 139L74.880 177.180" />
+<path d="M108 139L53.720 154.640" />
+<path d="M108 139L13.700 147.280" />
+<path stroke-width="2.5" d="M26.605 142.734l0.595 6.774" />
+<path d="M108 139L255 139" /><path d="M255 136V142" />
+</g>
+<circle xmlns="http://www.w3.org/2000/svg" cx="108" cy="139" r="3.8" fill="currentColor" />
+</svg></span>
+      <span class="brand-wordmark"><strong>StuCanvas Lite</strong></span>
+    </div>
+    <span class="toolbar-divider" aria-hidden="true"></span>
+    <div id="tools" class="tools"></div>
+    <div class="toolbar-spacer"></div>
+    <div class="toolbar-actions">
+      <button id="undo" type="button" data-i18n-title="ui.undoTitle" data-i18n-aria-label="ui.undo">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="m8 4.5-4.5 4.5L8 13.5M4 9h10.5a5 5 0 0 1 0 10H12" />
+          <path d="M4 19h3" /><circle cx="9.5" cy="19" r=".9" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+      <button id="redo" type="button" data-i18n-title="ui.redoTitle" data-i18n-aria-label="ui.redo">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="m16 4.5 4.5 4.5-4.5 4.5M20 9H9.5a5 5 0 0 0 0 10H12" />
+          <path d="M20 19h-3" /><circle cx="14.5" cy="19" r=".9" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+      <button id="settings-toggle" type="button" data-i18n-title="menu.settings" data-i18n-aria-label="menu.settings" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M7 3.5v4m0 5v8m10-17v8m0 5v4" />
+          <rect x="4" y="7.5" width="6" height="5" rx="1.5" />
+          <rect x="14" y="11.5" width="6" height="5" rx="1.5" />
+        </svg>
+      </button>
+    </div>
+    <div id="settings" class="settings" hidden>
+      <label class="language-setting"><span data-i18n="ui.language"></span><select id="language" data-i18n-aria-label="ui.language"></select></label>
+      <label class="theme-setting"><span data-i18n="theme.label"></span><select id="theme" data-i18n-aria-label="theme.label"></select></label>
+      <label><input id="grid" type="checkbox" checked /><span data-i18n="ui.grid"></span></label>
+      <label><input id="axes" type="checkbox" checked /><span data-i18n="ui.axes"></span></label>
+      <label><input id="snap" type="checkbox" /><span data-i18n="ui.snap"></span></label>
+      <div id="snap-options"></div>
+      <label><input id="touch-offset" type="checkbox" checked /><span data-i18n="mobile.offset"></span></label>
+      <div class="project-actions">
+        <button id="project-export" type="button" data-i18n="project.export"></button>
+        <button id="project-import" type="button" data-i18n="project.import"></button>
+        <input id="project-file" type="file" accept=".json,application/json" hidden />
+        <p id="project-status" class="project-status" role="status" aria-live="polite"></p>
+      </div>
+      <button id="export" data-i18n="ui.export"></button><button id="clear" data-i18n="ui.clear"></button>
+    </div>
+  </header>
+  <main class="workspace">
+    <aside class="algebra" data-i18n-aria-label="ui.objects">
+      <div class="algebra-tabs" role="tablist" data-i18n-aria-label="document.views">
+        <button id="view-objects" type="button" role="tab" aria-selected="true" aria-controls="object-panel" data-i18n="document.objects"></button>
+        <button id="view-json" type="button" role="tab" aria-selected="false" aria-controls="json-panel" tabindex="-1" data-i18n="document.json"></button>
+      </div>
+      <div id="object-panel" class="algebra-content" role="tabpanel" aria-labelledby="view-objects">
+      <div id="objects" class="object-list">
+      <form id="equation-form" class="equation-form">
+        <button type="submit" data-i18n-title="ui.addEquation" data-i18n-aria-label="ui.addEquation">+</button>
+        <div class="object-info"><div class="object-definition equation-definition"><span class="equation-name" hidden></span>
+        <math-field id="equation-input" data-i18n-aria-label="ui.equation" data-i18n-placeholder="ui.input" math-virtual-keyboard-policy="manual"></math-field>
+        </div><div class="object-detail" hidden></div><div class="formula-error" role="alert"></div></div>
+        <button class="object-more" type="button" data-i18n-title="menu.object" data-i18n-aria-label="menu.object" aria-haspopup="dialog" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg></button>
+      </form>
+      </div>
+      <div id="equation-error" class="equation-error" role="alert"></div>
+      </div>
+      <div id="json-panel" class="json-panel" role="tabpanel" aria-labelledby="view-json" hidden>
+        <div class="json-toolbar">
+          <span id="json-status" class="json-status" role="status" aria-live="polite" data-i18n="document.synced"></span>
+          <button id="json-format" type="button" data-i18n="document.format" data-i18n-title="document.formatTitle"></button>
+          <button id="json-revert" type="button" data-i18n="document.revert" data-i18n-title="document.revertTitle"></button>
+        </div>
+        <div class="json-editor">
+          <textarea id="json-input" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" data-i18n-aria-label="document.editor" aria-describedby="json-status json-error"></textarea>
+        </div>
+        <div id="json-error" class="json-error" role="alert"></div>
+      </div>
+      <footer class="algebra-footer"><span data-i18n="ui.support"></span><span>StuCanvas Lite</span></footer>
+    </aside>
+    <section id="canvas-wrap" class="canvas-wrap" data-i18n-aria-label="ui.canvas">
+      <canvas id="canvas" tabindex="0" data-i18n-aria-label="ui.drawingArea"></canvas>
+      <svg id="text-layer" class="text-layer" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+      <div id="gpu-error" class="gpu-error" role="alert" hidden></div>
+      <div class="touch-selection-actions" id="touch-selection-actions" hidden>
+        <button id="touch-properties" type="button" data-i18n="mobile.properties"></button>
+        <button id="touch-object-menu" type="button" data-i18n="menu.object"></button>
+      </div>
+      <div class="touch-help" data-i18n="mobile.help"></div>
+      <button id="touch-cancel" class="touch-cancel" type="button" data-i18n="mobile.cancelConstruction" hidden></button>
+      <div class="view-controls">
+        <button id="home" type="button" data-i18n-title="ui.home" data-i18n-aria-label="ui.home">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4.5 7.5a8.5 8.5 0 1 1-.8 7M4.5 3.5v4h4M9 12h6m-3-3v6" />
+          </svg>
+        </button>
+        <button id="zoom-in" type="button" data-i18n-title="ui.zoomIn" data-i18n-aria-label="ui.zoomIn">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="3.5" y="3.5" width="13" height="13" rx="4" />
+            <path d="m16 16 4.5 4.5M7 10h6m-3-3v6" />
+          </svg>
+        </button>
+        <button id="zoom-out" type="button" data-i18n-title="ui.zoomOut" data-i18n-aria-label="ui.zoomOut">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="3.5" y="3.5" width="13" height="13" rx="4" />
+            <path d="m16 16 4.5 4.5M7 10h6" />
+          </svg>
+        </button>
+        <button id="fullscreen" type="button" data-i18n-title="ui.fullscreen" data-i18n-aria-label="ui.fullscreen">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M14 4h6v6m0-6-6 6M4 14v6h6m-6 0 6-6M4 8V4h4m8 16h4v-4" />
+          </svg>
+        </button>
+      </div>
+      <div id="hint" class="hint" role="status" aria-live="polite"></div>
+    </section>
+  </main>
+  <dialog id="ratio-dialog" class="ratio-dialog" aria-labelledby="ratio-title" aria-describedby="ratio-help">
+    <form id="ratio-form" novalidate>
+      <h2 id="ratio-title" data-i18n="tool.ratioPoint"></h2>
+      <p id="ratio-help"></p>
+      <div class="ratio-inputs">
+        <label><span data-i18n="ratio.first"></span><input id="ratio-first" type="number" step="any" min="0" required value="1" aria-describedby="ratio-error" /></label>
+        <span aria-hidden="true">:</span>
+        <label><span data-i18n="ratio.second"></span><input id="ratio-second" type="number" step="any" min="0" required value="1" aria-describedby="ratio-error" /></label>
+      </div>
+      <p class="ratio-note" data-i18n="ratio.note"></p>
+      <p id="ratio-error" class="formula-error" role="alert"></p>
+      <div class="ratio-actions">
+        <button id="ratio-cancel" type="button" data-i18n="ratio.cancel"></button>
+        <button id="ratio-create" type="submit" data-i18n="ratio.create"></button>
+      </div>
+    </form>
+  </dialog>
+  <script src="/node_modules/matter-js/build/matter.min.js"></script>
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

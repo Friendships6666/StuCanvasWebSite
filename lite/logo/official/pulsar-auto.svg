@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc"><title id="title">StuCanvas Lite · 原型精简</title><desc id="desc">脉冲星坐标精简候选。原点、非对称射线与长基准线。刻度为设计简写。</desc><style>:root{--ink:#7C233A;--accent:#7C233A;--tile:#7C233A;color:#7C233A}@media(prefers-color-scheme:dark){:root{--ink:#39e8db;--accent:#39e8db;--tile:#39e8db;color:#39e8db}}</style><g transform="scale(.9142857143)"><g xmlns="http://www.w3.org/2000/svg" fill="none" stroke="var(--ink)" stroke-width="4.1" stroke-linecap="round" stroke-linejoin="round">
+<path d="M108 139L55.100 103.120" />
+<path d="M108 139L95.580 61.720" />
+<path stroke-width="2.5" d="M100.676 72.000l-6.714 1.079" />
+<path d="M108 139L129.620 87.020" />
+<path d="M108 139L195.400 29.980" />
+<path stroke-width="2.5" d="M185.817 47.369l-5.306 -4.253" />
+<path d="M108 139L180.680 123.360" />
+<path d="M108 139L229.440 175.800" />
+<path stroke-width="2.5" d="M211.452 173.902l1.972 -6.508" />
+<path d="M108 139L180.680 252.620" />
+<path stroke-width="2.5" d="M167.641 238.545l5.728 -3.664" />
+<path d="M108 139L103.860 218.580" />
+<path stroke-width="2.5" d="M101.044 207.262l6.791 0.353" />
+<path d="M108 139L74.880 177.180" />
+<path d="M108 139L53.720 154.640" />
+<path d="M108 139L13.700 147.280" />
+<path stroke-width="2.5" d="M26.605 142.734l0.595 6.774" />
+<path d="M108 139L255 139" /><path d="M255 136V142" />
+</g>
+<circle xmlns="http://www.w3.org/2000/svg" cx="108" cy="139" r="3.8" fill="var(--ink)" />
+</g></svg>

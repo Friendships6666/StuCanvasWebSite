@@ -1,0 +1,39 @@
+# Third-party notices
+
+This file identifies third-party components and assets in StuCanvas Lite. It does
+not select a license for the project's own work or replace any upstream license.
+Redistributions must retain the applicable notices and license texts below.
+
+| Component | Version / scope | License | License text |
+| --- | --- | --- | --- |
+| MathLive, Arno Gourdol | 0.111.1; JavaScript, CSS, bundled UI; package sounds currently disabled | MIT, subject to separately identified embedded components | [MIT](licenses/MathLive-MIT.txt) |
+| Matter.js, Liam Brummitt and contributors | 0.20.0; includes the adapted solver in `src/physics-contact-friction.js` | MIT | [MIT](licenses/Matter-js-MIT.txt) |
+| Earcut, Mapbox | 3.2.4 | ISC | [ISC](licenses/Earcut-ISC.txt) |
+| Lezer, Marijn Haverbeke and others | `@lezer/common` 1.5.3, `@lezer/highlight` 1.2.5, `@lezer/javascript` 1.5.6, `@lezer/lr` 1.4.11; bundled in `assets/javascript-syntax.js` | MIT | [All four notices](assets/javascript-syntax.LICENSE.txt) |
+| esbuild, Evan Wallace | 0.28.2; development build tool and platform packages | MIT | [MIT](licenses/esbuild-MIT.txt) |
+| KaTeX, Khan Academy and other contributors | Stretchy rendering code embedded in MathLive; upstream version not separately declared by MathLive | MIT | [MIT](licenses/KaTeX-code-MIT.txt) |
+| KaTeX fonts, Design Science and Khan Academy | All 20 WOFF2 font files supplied by MathLive | SIL Open Font License 1.1 | [Copyright, reserved names and OFL](licenses/KaTeX-fonts-OFL-1.1.txt) |
+| Font Awesome Free, Fonticons, Inc. | SVG icon artwork embedded in MathLive, including its menu chevron | CC BY 4.0 | [Upstream notice](licenses/Font-Awesome-Free-NOTICE.txt), [CC BY 4.0](licenses/CC-BY-4.0.txt) |
+| Fira Sans, The Mozilla Foundation and Telefonica S.A. | Font used to create outlined text in archived logo designs; font binaries are not included in the project | SIL OFL 1.1 for the font; ordinary graphic output is not subject to the font's license | [Font license for reference](licenses/Fira-Sans-OFL-1.1.txt) |
+
+Font Awesome attribution: Font Awesome Free by Fonticons, Inc.,
+<https://fontawesome.com/>, licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Its icon paths are incorporated into MathLive's menu UI, with presentation
+adapted by MathLive; no endorsement is implied. StuCanvas Lite has not modified
+the installed MathLive package. See the audit for the exact matching evidence.
+
+The KaTeX font files retain their own OFL license; they are not relicensed under
+the project's prospective license. System font family names in CSS do not mean
+that those fonts are distributed with this project.
+
+The pulsar logo references the public-domain pulsar diagram on the Voyager
+Golden Record cover, as confirmed by the project owner. Background information:
+[NASA's Golden Record cover explanation](https://science.nasa.gov/mission/voyager/golden-record-cover/).
+This source acknowledgement does not imply NASA/JPL endorsement. Public-domain
+source elements remain public domain; any license selected for the project's
+new design contributions does not create exclusive rights over those elements.
+
+For the inventory, evidence and release considerations, see
+[the license audit](docs/license-audit.md) and
+[the inventory with SHA-256 hashes](docs/license-inventory.json).

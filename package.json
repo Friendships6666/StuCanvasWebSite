@@ -1,0 +1,26 @@
+{
+  "name": "StuCanvasWebSite",
+  "version": "1.0.0",
+  "description": "StuCanvas Official Website and Tutorials",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs && node scripts/build-lite.mjs",
+    "docs:preview": "vitepress preview docs",
+    "lite:sync": "node scripts/sync-lite.mjs"
+  },
+  "devDependencies": {
+    "markdown-it-mathjax3": "^4.3.2",
+    "typescript": "^5.5.3",
+    "vitepress": "^1.2.4"
+  },
+  "private": true,
+  "dependencies": {
+    "earcut": "3.2.4",
+    "mathlive": "0.111.1",
+    "matter-js": "0.20.0",
+    "opusscript": "^0.1.1",
+    "resonix": "^0.2.6"
+  }
+}

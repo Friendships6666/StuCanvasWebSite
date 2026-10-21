@@ -1,0 +1,443 @@
+{
+  "source": "StuCanvas Lite",
+  "version": "0.2.0",
+  "dependencies": {
+    "mathlive": "0.111.1",
+    "matter-js": "0.20.0",
+    "earcut": "3.2.4"
+  },
+  "files": [
+    {
+      "path": "THIRD_PARTY_NOTICES.txt",
+      "sha256": "266879ae4c8be5be686b1b01eb3d6967a0936f6c40c267ecc81cdc2f99b60744"
+    },
+    {
+      "path": "assets/javascript-syntax.LICENSE.txt",
+      "sha256": "11c589b02451298a9e9f43f44c357a677062e21d4bae472df7cfa101e3159a29"
+    },
+    {
+      "path": "assets/javascript-syntax.js",
+      "sha256": "03760f72eb1787308deaf03ec3f4ef06b34a4eae5336acfcddf5e874bb519d6e"
+    },
+    {
+      "path": "assets/textures/concrete.png",
+      "sha256": "c9d51216e9da6f5c559bdc255e0d6050364c86c52a4ceab0f83bcc827aa0e4b9"
+    },
+    {
+      "path": "docs/license-inventory.json",
+      "sha256": "b7b0714cc451dc4b99216752c33a5d91bc915b2d397f44e8437e40f5cbc06f6b"
+    },
+    {
+      "path": "index.html",
+      "sha256": "01a0294b95c87812944e3b7e4870beca98b7f87bfe7ddd7ac5bff859539d7f16"
+    },
+    {
+      "path": "licenses/CC-BY-4.0.txt",
+      "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+    },
+    {
+      "path": "licenses/Earcut-ISC.txt",
+      "sha256": "0b348fff56384b43dbb37593906904e56d0f9deb51eae590d4dc6d427fbf1808"
+    },
+    {
+      "path": "licenses/Fira-Sans-OFL-1.1.txt",
+      "sha256": "99bfb7c1e845b79d1031fcf37e678178eb4a8c7cc74a3f218ddf7223083a6fcd"
+    },
+    {
+      "path": "licenses/Font-Awesome-Free-NOTICE.txt",
+      "sha256": "e779748dfe75e84f974df3c7bc07f842011a100159158b0f1f49b2f2a5a515cb"
+    },
+    {
+      "path": "licenses/KaTeX-code-MIT.txt",
+      "sha256": "766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3"
+    },
+    {
+      "path": "licenses/KaTeX-fonts-OFL-1.1.txt",
+      "sha256": "c18355733963d3ae093cdb4816997feaf06ab9e465de6dee18e600b1b43b0d74"
+    },
+    {
+      "path": "licenses/MathLive-MIT.txt",
+      "sha256": "3caebd18611959ca725ab976a004d408017eb1d7093d6c9b9b09c5a4790eaff8"
+    },
+    {
+      "path": "licenses/Matter-js-MIT.txt",
+      "sha256": "ed182087be5b26734aa6d4789743de3a97417950e8c1e3ff2e3d19c6462720d3"
+    },
+    {
+      "path": "licenses/esbuild-MIT.txt",
+      "sha256": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+    },
+    {
+      "path": "logo/official/pulsar-auto.svg",
+      "sha256": "b1dcd9586eeee9e04cce0cdfe12b2f6e36ce971663f9f80c1c1b7b976552e920"
+    },
+    {
+      "path": "logo/official/pulsar-cyan.svg",
+      "sha256": "f7e3da2647924dda2d20a763c0f63ad57b6f1d160c215be0731b77ee74466e52"
+    },
+    {
+      "path": "logo/official/pulsar-wine.svg",
+      "sha256": "d66121a0b4ad1cf805c1551e3a106fc2e882df6a62856d2b2099af31a9edb28c"
+    },
+    {
+      "path": "logo/official/ui-cyan-dark.png",
+      "sha256": "dc5551b3d9957e1d7e6e9a649a14133e458fdd3bc474ca9563ca841294d7e899"
+    },
+    {
+      "path": "logo/official/ui-wine-light.png",
+      "sha256": "04188499e5f8378e90943476836d0766ec6743def3e34097acc5ad3e4ae25535"
+    },
+    {
+      "path": "src/app.js",
+      "sha256": "449cf9468a7dad650d57b4c33ea703eed4bb0efe201070baef2f2389f268f1d6"
+    },
+    {
+      "path": "src/arc-connection.js",
+      "sha256": "839b8336ea701520411d1751ed3c020846c618a22d2da3465d65652b48363cf5"
+    },
+    {
+      "path": "src/cad-editor.js",
+      "sha256": "e0d72d0d454ab21bc96e248ab3fc83da0ac045f6adfd86a1bf29df9c015cb6e6"
+    },
+    {
+      "path": "src/cad.js",
+      "sha256": "9465679eb436d2a47713395daba6dc94682fe5badbd058b28a9b0834a90dc206"
+    },
+    {
+      "path": "src/compact-document.js",
+      "sha256": "5da9190599f25cb7fd3fb876ace2ebf19c762c94d022f61ec9f416be5d05628a"
+    },
+    {
+      "path": "src/conics.js",
+      "sha256": "3f22817cc91d2a94e7d1f6f0cf692ce514ec3ce0c74317adb827fd318b432af7"
+    },
+    {
+      "path": "src/construction-cache.js",
+      "sha256": "129c1f2f9f707396ae7484af91ffd4a644a9c896b848c0916026d7814f7f96e6"
+    },
+    {
+      "path": "src/construction-preview.js",
+      "sha256": "f25b79cd0eb4d9451911be6efa0a06a190fc63fcdbc8b7100f363c646198c6e1"
+    },
+    {
+      "path": "src/construction-store.js",
+      "sha256": "3ca01d02e143186c633b854a9dde374811de83b9b124ce88534456002a7f2c7c"
+    },
+    {
+      "path": "src/document-editor.js",
+      "sha256": "53654296bac1a6835d9e37c35f1d5c8e294d11ec9836651cae368a72afd054c3"
+    },
+    {
+      "path": "src/document.js",
+      "sha256": "fd623f3a76d52d3ecc98be6496d69906124294c872eaa0d6f9b2c0a99daf5013"
+    },
+    {
+      "path": "src/equation-intersections.js",
+      "sha256": "ee16119f0e1e4dcce80caecd0eb6decb1f037d54a618d842d3bdc62aa5d90c57"
+    },
+    {
+      "path": "src/friction-brush.js",
+      "sha256": "08650875870b62addddcfdfc21e80e8fd28c1ed48503d0ec9d087dfff03c280e"
+    },
+    {
+      "path": "src/geometry.js",
+      "sha256": "6616a56feca92a74c69367f939cebc009af5f8e737598d08b384637da735c76e"
+    },
+    {
+      "path": "src/grid-snap.js",
+      "sha256": "f218ab1e8ce6c79c186de23ce74cbc88c692c7cfede351faa7bcd63f10ef94d1"
+    },
+    {
+      "path": "src/i18n.js",
+      "sha256": "1c38f68e0bd5cf60ccf10dbd14f3f22b7293efda4aefcd63431db2a3baed2b46"
+    },
+    {
+      "path": "src/intersection-tracker.js",
+      "sha256": "3403b2d7602d9ff53f516168f1275aa4c7676b6eb6b18d00a85b0fe8cc7161c1"
+    },
+    {
+      "path": "src/javascript-syntax.js",
+      "sha256": "7104b189e2b403fd24774161b4761ac753b415fa1023fb4568e5171eb3100b22"
+    },
+    {
+      "path": "src/json-data.js",
+      "sha256": "c7a5fe4ad22947967fc3cf6760805a79370bbbf54bfad5504702bc479c35ce70"
+    },
+    {
+      "path": "src/json-highlight-worker.js",
+      "sha256": "363f999cf0c33bdc3489f97c49694526ffff1e81b9a8448436399bccffdf7ddd"
+    },
+    {
+      "path": "src/json-highlight.js",
+      "sha256": "3b2ef3d08852872a04abe868526c8efbb992cd7314d25ad747e834c0723bff87"
+    },
+    {
+      "path": "src/json-syntax.js",
+      "sha256": "f7ff6ad5dd44962c6af57a486f27bc614c624e6bcaf7d6acb70783b855aeb291"
+    },
+    {
+      "path": "src/liquid-editor.js",
+      "sha256": "9e36b181f7caa0bd138fff53542841d00f7d7949f9cb9c0638f13c7a20725c7f"
+    },
+    {
+      "path": "src/liquid-physics.js",
+      "sha256": "d060974bb9ff7ade30b037b3c1319d1b565a7e9c23f84d4d6a40e75d9af3bf13"
+    },
+    {
+      "path": "src/liquid.js",
+      "sha256": "a9a61088c014559a8a8b5c073cb0f365e22602668db28db130cdf6177a1b0d6e"
+    },
+    {
+      "path": "src/locales/en.js",
+      "sha256": "e1fe17611482b793a4322b6783d39f0839acbe3c5de9959d33e9085a98306960"
+    },
+    {
+      "path": "src/locales/zh-CN.js",
+      "sha256": "058d284e4f60adf9ee573df81c1da65e66cff88ad0d19d7d0cd245eac4083e7c"
+    },
+    {
+      "path": "src/locales/zh-TW.js",
+      "sha256": "908077b5843401cbe67d1d985be98945c0e09ff98811ac89b662be8dc3ec7604"
+    },
+    {
+      "path": "src/math-input.js",
+      "sha256": "2539b219fe725da9df5e60a7adc1c9dad574133121958259994cc5c565cc88c5"
+    },
+    {
+      "path": "src/math-source.js",
+      "sha256": "996db0b1a1a1f70093cb47933438f354a506224935af395329421877bc898761"
+    },
+    {
+      "path": "src/measurements.js",
+      "sha256": "fcb25197ff82c8c7a1fe9a8428b62854e878ca0bf246eccc80e4150536f03489"
+    },
+    {
+      "path": "src/mobile-ui.js",
+      "sha256": "beda6a4e5020ec080c5588b8974eda47a7d093434776698da3c007f912d08dba"
+    },
+    {
+      "path": "src/object-menu.js",
+      "sha256": "9a093a9efd71258a7f2989c7c917867f9c8c856e5dd6d80776276b75c75d842b"
+    },
+    {
+      "path": "src/object-status.js",
+      "sha256": "93a82bddfeadc931a9dffec8dae4fb7f47a8af256083dafdb9cf7d1a5795916d"
+    },
+    {
+      "path": "src/object-style.js",
+      "sha256": "b758f9501c3e52002379bb20c953702c65b2c05785f4d3b596a5d02a804adfe8"
+    },
+    {
+      "path": "src/physics-boundaries.js",
+      "sha256": "bbc2e822d6025a1fd332123f52d5c8e04a65a66b40808206459a80b799f67cbb"
+    },
+    {
+      "path": "src/physics-contact-friction.js",
+      "sha256": "9e8e8c821dc83136ffd34f40dd989c0a6365ebe82ac2fe56f1a9a7d1813ef1ed"
+    },
+    {
+      "path": "src/physics-drag.js",
+      "sha256": "a3436d904c7c95e4bdcc879fe5ae5ac31882b286db2b0bb6320778726ba78a71"
+    },
+    {
+      "path": "src/physics-editor.js",
+      "sha256": "498217143d0b3e6ec51138e3e96100046f31a6563022d41e93a6aa32c4348068"
+    },
+    {
+      "path": "src/physics-material-editor.js",
+      "sha256": "90747797b2d4afa3f9554bfa16d64e89071ee203636f9f5bf0a6dff3ba96bd37"
+    },
+    {
+      "path": "src/physics-material.js",
+      "sha256": "b000e55fc8f45290d3426ebee26cd6989221574655f1bffd1d42d7e093894a65"
+    },
+    {
+      "path": "src/physics-shape.js",
+      "sha256": "3782c273de6fb4ca10455064626308ed465683e7b896c1d3ca57ac079d9252c4"
+    },
+    {
+      "path": "src/physics-timeline.js",
+      "sha256": "e7c571ffed396118862d826eb1ebcd696338e3282d068b3c9799f2cebde06555"
+    },
+    {
+      "path": "src/physics.js",
+      "sha256": "0fb339bd8e3a3e8013dc7991c8e5959d5ad0313328d98552623bc8e14c801ffc"
+    },
+    {
+      "path": "src/plot/formula.js",
+      "sha256": "9fd8c9996b7d708f959f460bd31fbd596332539e02bfdbb3cc1b1ff7754a54d8"
+    },
+    {
+      "path": "src/plot/interval.js",
+      "sha256": "5a972e34ca5e451ac009f9380b66d4077bf79b38b8fc036cdc60cde6df30a532"
+    },
+    {
+      "path": "src/plot/lshade.js",
+      "sha256": "06db9b5a3649dffa8a867f5aff2ff58bf2e07872333336a065c0c4387150bdfc"
+    },
+    {
+      "path": "src/plot/manager.js",
+      "sha256": "88371a06c8e508be7d27d5790cb4324f86ed36c5da9f30afb0c7ae4df889e471"
+    },
+    {
+      "path": "src/plot/options.js",
+      "sha256": "6e2edc5cca50b3d5e7010d35e6e8cee12a6e8e61893c164cdd7c31fd73d5e0c0"
+    },
+    {
+      "path": "src/plot/parametric-formula.js",
+      "sha256": "8b95be035db73de08de49ef73b183cb083acdb8cb4afc9afc34043d88482573e"
+    },
+    {
+      "path": "src/plot/parametric-options.js",
+      "sha256": "f534399b4e820f20edc9449b9f9a63437f2a906f36ba0241254e5414b055fadb"
+    },
+    {
+      "path": "src/plot/parametric-sampler.js",
+      "sha256": "1ac3ba1a97700f71d1c5578edd1d786573a46326a1b53d11f9659021cd60d359"
+    },
+    {
+      "path": "src/plot/sampler.js",
+      "sha256": "152bdede4e5e707fa0dc155912804291a41d0965d85416819575d51b8beec253"
+    },
+    {
+      "path": "src/plot/stuplot-interval.js",
+      "sha256": "ce60442e26b2210aa31d9d89dbcb976217c967d6a759ae4e704c1b95b28d98a3"
+    },
+    {
+      "path": "src/plot/types.js",
+      "sha256": "b90fb02707180f344dba25c22b8708a195e7db4a2d956b9a0dfc8f8887139e83"
+    },
+    {
+      "path": "src/project-file.js",
+      "sha256": "59a29f61231c4c10c27366932f3d8373e40ec249830ab0f0b0cc865d0568cbf4"
+    },
+    {
+      "path": "src/project-menu.js",
+      "sha256": "f3439f951595819ba2737a13b70e3d49b01771a7d1f6424069d43210f4238ea6"
+    },
+    {
+      "path": "src/projection.js",
+      "sha256": "8449f47886072739c9718696ef86f2e9d1436ae007cc68dc8fce1698c05bbdcf"
+    },
+    {
+      "path": "src/ratio-dialog.js",
+      "sha256": "60d8c8f4c6b96217339f3ea74ca0fcfa403a9150b5efababc902eabb8fcd6bc2"
+    },
+    {
+      "path": "src/reflection-editor.js",
+      "sha256": "4d1b157971fba7a11ed1469d5210f2822afd7f8b5ce8f63a7360ae402f755327"
+    },
+    {
+      "path": "src/reflection-engine.js",
+      "sha256": "2567b82b3abdaa3d3fefcd87256cb1e2274acc03ea77cee34e779d88874a6ab7"
+    },
+    {
+      "path": "src/reflection-manager.js",
+      "sha256": "9974d66d7c88bc986d579b971bc52cae1898a119b24f0fd6537bf9b5eb4bbb9b"
+    },
+    {
+      "path": "src/reflection-worker.js",
+      "sha256": "c9d982364c37912fa5bd7291fdb6f5cc576d13d621f8fb17d4348528c2fce0b5"
+    },
+    {
+      "path": "src/reflection.js",
+      "sha256": "70ae3ec827d549e2b771d95eb3d508ec437ea63bda33e8dfa5e7e3b9da3c16f0"
+    },
+    {
+      "path": "src/region-editor.js",
+      "sha256": "002d32ef81dc891985b6eeea85fc27f60afd69959c3eb32d310efa464b3b9938"
+    },
+    {
+      "path": "src/region-grid.js",
+      "sha256": "03acf2b2bb1bee0f45c3905217c24a8f050fdad029d5ff79a4b3d0acb4e120cc"
+    },
+    {
+      "path": "src/region-options.js",
+      "sha256": "43fe1354bef5737acb358d074c91a8e6486a7411f709fa432c66f19e79914a1c"
+    },
+    {
+      "path": "src/regions.js",
+      "sha256": "d580ef7d38a5cf9f147d19eb1f7267c40114d11e689e3e70dcd4c1302b25b450"
+    },
+    {
+      "path": "src/renderer.js",
+      "sha256": "40ea11f70d2d609c121095d398dd04262478ad6878a222e297d565186b800ef5"
+    },
+    {
+      "path": "src/rope-editor.js",
+      "sha256": "8335a43f760c70129eaf82182fb09b70c8cae5b766cfcb39d22a7f50a8614743"
+    },
+    {
+      "path": "src/rope-physics.js",
+      "sha256": "f3b62a1c452d0cee911f5d1ca9a8684f8c5f407d4ba4f61e175b4995fbf0dbc6"
+    },
+    {
+      "path": "src/rope.js",
+      "sha256": "dbdfba65a6c3d319b4f2f76bb041bcc88a5855d5aaa227ebb2f5fdea541dc1d2"
+    },
+    {
+      "path": "src/scene.js",
+      "sha256": "7a08af6c3f16464d1afb2acc2a61306733febe56d6df1fa31932d80f7c2cde73"
+    },
+    {
+      "path": "src/selection.js",
+      "sha256": "71b5bbe0821c5825f1e16e791d697c43309a503b3122342e816b1fe023009105"
+    },
+    {
+      "path": "src/snap-settings.js",
+      "sha256": "874158821db5427fc6ebe0e6f46830edf1f9725dfa9c3a206971413265f47931"
+    },
+    {
+      "path": "src/soft-body.js",
+      "sha256": "ff71f7f2d8f827cf9d1b57d71ed609a1e57db0775f7cacf5e81cf372c3ec6032"
+    },
+    {
+      "path": "src/soft-editor.js",
+      "sha256": "c46e69c068ff6bb721f7826ee56bd6a7a1e4a382f2145f32735d52b6f63c64fc"
+    },
+    {
+      "path": "src/soft-physics.js",
+      "sha256": "d2906d6da771aff7361b440db738f97a1c631081737cce7c49708d3a32496d4a"
+    },
+    {
+      "path": "src/spring.js",
+      "sha256": "f7d7d8609da4f3cc504c699c9c068b309534af05fdace3280554e6553396f7a8"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "366b12f6fb24cfb34404b8a737f743b2c24d7d3a23ace96918ba8c90e3bd8d5d"
+    },
+    {
+      "path": "src/surface-brush-target.js",
+      "sha256": "08949dd044c0857697bf135011fcb806bcd889a98473735490ff8edf854f39c8"
+    },
+    {
+      "path": "src/surface-friction.js",
+      "sha256": "42082d7c039206dc297cdb9c96465f4df6ae23eb7e73f636eccca40144a53c86"
+    },
+    {
+      "path": "src/surface-restitution.js",
+      "sha256": "9e1c4839f757431f582f25fa57b1ca4d69cda2e2c5a974c477640b22001c6aed"
+    },
+    {
+      "path": "src/themes.js",
+      "sha256": "5fe48d479b77da42fafdd17c0421d80a775160d3da24e188bbf20880ffa7bf50"
+    },
+    {
+      "path": "src/timeline-editor.js",
+      "sha256": "24323c87614c43cfabe8f47d7fa19023100f4c3ea082f9b699e5067c6ae70fe5"
+    },
+    {
+      "path": "src/timeline-state.js",
+      "sha256": "db907b2f368cd47e994b4c8ab685504801c0c4ee3091740879c815465ecc2887"
+    },
+    {
+      "path": "src/touch-interaction.js",
+      "sha256": "b1e090d7ca737406234ec908620c0ede481644767529a82eca3c65bf68ce9666"
+    },
+    {
+      "path": "src/traces.js",
+      "sha256": "a86ade693944c5718e77df416a5c3e19794c11be1b9b05fe0f07aff2a4dd0a3d"
+    }
+  ]
+}

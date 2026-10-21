@@ -1,0 +1,95 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++23 极致性能谓词系统生成器</title>
+    <!-- Tailwind CSS (界面美化) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Prism.js (C++ 语法高亮) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <style>
+        pre[class*="language-"] {
+            margin: 0 !important;
+            border-radius: 0.5rem !important;
+            background: #1e1e1e !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+
+<!-- 顶部导航栏 -->
+<header class="border-b border-gray-800 bg-gray-950 py-4 px-6 flex justify-between items-center shadow-lg">
+    <div class="flex items-center space-x-3">
+            <span class="text-xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
+                C++23 PREDICATE GENERATOR
+            </span>
+        <span class="px-2 py-0.5 text-xs rounded-full bg-blue-900/50 text-blue-300 font-mono border border-blue-800">
+                v1.1.0
+            </span>
+    </div>
+    <div class="text-sm text-gray-400 font-mono">
+        Pure C++23 • 0-Branch Evaluation • Auto-Extract
+    </div>
+</header>
+
+<!-- 主体区域 -->
+<main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- 左侧输入区 -->
+    <section class="flex flex-col space-y-4 h-full">
+        <div class="flex justify-between items-center">
+            <h2 class="text-lg font-bold text-gray-200 flex items-center">
+                <span class="mr-2 text-blue-400">⚙️</span> 配置元数据 (JSON)
+            </h2>
+            <button id="btn-reset" class="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded border border-gray-700 transition">
+                恢复默认模板
+            </button>
+        </div>
+        <div class="flex-1 relative min-h-[400px] lg:min-h-0">
+                <textarea id="json-input"
+                          class="w-full h-full p-4 bg-gray-950 text-emerald-400 font-mono text-sm rounded-lg border border-gray-800 focus:outline-none focus:border-blue-500 shadow-inner resize-none"
+                          spellcheck="false"
+                ></textarea>
+            <div id="json-error" class="absolute bottom-2 left-2 right-2 p-2 bg-red-900/80 border border-red-700 text-red-200 text-xs rounded hidden">
+                ⚠️ JSON 解析错误，请检查格式
+            </div>
+        </div>
+        <button id="btn-generate" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-lg shadow-lg hover:shadow-blue-500/20 transition-all duration-200">
+            生成 C++23 极致性能代码
+        </button>
+    </section>
+
+    <!-- 右侧输出区 -->
+    <section class="flex flex-col space-y-4 h-full">
+        <div class="flex justify-between items-center">
+            <h2 class="text-lg font-bold text-gray-200 flex items-center">
+                <span class="mr-2 text-indigo-400">⚡</span> 编译期位图索引代码 (.hpp)
+            </h2>
+            <button id="btn-copy" class="text-xs px-3 py-1.5 bg-blue-900/40 hover:bg-blue-800/50 text-blue-300 rounded border border-blue-800 transition flex items-center space-x-1">
+                <span>📋</span> <span id="copy-text">复制代码</span>
+            </button>
+        </div>
+        <div class="flex-1 bg-gray-950 rounded-lg border border-gray-800 overflow-auto max-h-[600px] lg:max-h-none">
+            <pre class="w-full h-full"><code id="cpp-output" class="language-cpp"></code></pre>
+        </div>
+    </section>
+
+</main>
+
+<!-- 页脚 -->
+<footer class="bg-gray-950 text-xs text-gray-500 py-4 text-center border-t border-gray-800">
+    基于 C++23 [[assume]] 硬件推定与 2D 二级压缩位图索引设计 • 运行期 0 哈希 0 分支 • 自动去重提取
+</footer>
+
+<!-- Prism JS 库及其组件 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+
+<!-- 核心逻辑控制 -->
+<script src="generator.js"></script>
+</body>
+</html>
