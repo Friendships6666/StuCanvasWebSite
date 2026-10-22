@@ -1,5 +1,6 @@
 import { isFlexible, ropeState } from './rope.js';
 import { isSoftBody, softState } from './soft-body.js';
+import { captureSoftBoundary, resolveSoftBoundary } from './soft-collision.js';
 import { syncSoftBodies, applySoftForces, readSoftBodies, bindSoftSurface } from './soft-physics.js';
 import { isLiquid, liquidState, liquidFromBody } from './liquid.js';
 import { syncLiquids, applyLiquidForces, readLiquids } from './liquid-physics.js';
@@ -235,7 +236,7 @@ export class PhysicsWorld {
       const speed=(Math.hypot(body.velocity.x,body.velocity.y)+Math.abs(body.angularVelocity)*Math.hypot(body.bounds.max.x-body.bounds.min.x,body.bounds.max.y-body.bounds.min.y)/2)*60*body.timeScale;
       // Droplets and soft nodes have finite radii. Advancing by half a radius
       // bounds travel without using a thin rigid stroke's .5 px scale.
-      const distance=isLiquid(object)?Math.max(.5,object.radius*SCALE*.5):isSoftBody(object)?Math.max(.5,body.circleRadius*.5):.5;
+      const distance=isLiquid(object)?Math.max(.5,object.radius*SCALE*.5):isSoftBody(object)?Math.max(.5,body.softRadius*.5):.5;
       return speed*seconds/distance;
     }));
     const substeps = Math.min(128, Math.max(1, Math.ceil(travel)));
@@ -247,7 +248,9 @@ export class PhysicsWorld {
       applyDrag(this, Matter, SCALE);
       applySoftForces(this, SCALE);
       applyLiquidForces(this, Matter, SCALE, seconds/substeps);
+      const boundary=captureSoftBoundary(this);
       Engine.update(this.engine, seconds * 1000 / substeps);
+      resolveSoftBoundary(this,boundary,Matter);
     }
     const changed = new Set();
     for (const entry of rigid) {

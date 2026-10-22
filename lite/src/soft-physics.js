@@ -1,3 +1,4 @@
+import { createSoftColliders } from './soft-collision.js';
 import { isSoftBody } from './soft-body.js';
 import { frictionAt } from './surface-friction.js';
 import { restitutionAt } from './surface-restitution.js';
@@ -26,7 +27,8 @@ export function syncSoftBodies(world,objects,Matter,scale) {
     ids.add(object.id);let entry=world.softBodies.get(object.id);
     if(!entry||entry.mesh!==object.mesh||entry.radius!==object.collisionRadius){
       if(entry)Composite.remove(world.engine.world,entry.composite);
-      const particles=object.nodes.map((state,i)=>Bodies.circle(state.position.x*scale,-state.position.y*scale,Math.max(.02,object.mesh.radii[i]*object.collisionRadius*scale),{slop:.005},12));
+      const particles=object.nodes.map((state,i)=>Bodies.circle(state.position.x*scale,-state.position.y*scale,.02,{slop:.005},12));
+      createSoftColliders(particles,object.mesh,object.collisionRadius,Matter,scale);
       const constraints=object.mesh.links.map(link=>Constraint.create({bodyA:particles[link.a],bodyB:particles[link.b],length:link.length*scale,stiffness:stiffness(object,link.kind),damping:object.damping}));
       const neighbors=object.nodes.map(()=>[]);
       for(const face of object.mesh.triangles)for(const i of face)for(const j of face)if(i!==j&&!neighbors[i].includes(j))neighbors[i].push(j);

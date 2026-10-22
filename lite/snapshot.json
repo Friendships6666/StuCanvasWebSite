@@ -265,7 +265,7 @@
     },
     {
       "path": "src/physics-shape.js",
-      "sha256": "0565537df166b6f99d04e626b9ea49220bc314e810b784939f02de1d4fdf8fb8"
+      "sha256": "cd0979512ff65fb7da7edad20227dab23d14a88a698d3b9c8fd6f560e8fc4ef5"
     },
     {
       "path": "src/physics-timeline.js",
@@ -273,7 +273,7 @@
     },
     {
       "path": "src/physics.js",
-      "sha256": "f8798c2cc83e1195acc89e588807900bb85f62106f5fb660dbcf171e383719aa"
+      "sha256": "fb3ce69ff653ebe6bf5f5ed9471510d1f44b589d140e885b86c1265aab30c578"
     },
     {
       "path": "src/plot/formula.js",
@@ -381,7 +381,7 @@
     },
     {
       "path": "src/renderer.js",
-      "sha256": "96d91fe49e1430723f9c112c83d4ea3c0a343754ce3a62e5fad0c0ec52dd4156"
+      "sha256": "4d8762b5e8aab961ae3843247de03a2b0c15c998b00e68b57bd1a45f8bb49f60"
     },
     {
       "path": "src/rope-editor.js",
@@ -397,7 +397,7 @@
     },
     {
       "path": "src/scene.js",
-      "sha256": "2db5d02a34796b0384466a84f921e9eede85f8ef05548604df8153a83d2878bf"
+      "sha256": "aeaeb0d6df2c13dd62b5b8db23c52aefb969f2d9e227f84b1085e694eabf76f6"
     },
     {
       "path": "src/selection.js",
@@ -412,12 +412,16 @@
       "sha256": "046fefd6c30a0e0d4a22dd90faba443e357b96b353756ceaec717c0a9cd23765"
     },
     {
+      "path": "src/soft-collision.js",
+      "sha256": "bb7ca6dfc3025234c5959aca868ff92474654f2cf30bcbca7ed6692f4d2e20de"
+    },
+    {
       "path": "src/soft-editor.js",
       "sha256": "4941a01bd32777183613d51e1015b5c2e40270fcd90768913d228832a9dc3994"
     },
     {
       "path": "src/soft-physics.js",
-      "sha256": "3f4eeb9fd14b6755d9ba37c54646226108d1911ee4d7e7467792fb8b2a756416"
+      "sha256": "7585bd53380632ffcbd5890d7415dd64792ad1a4a25b0f9cf6e371454eb93bca"
     },
     {
       "path": "src/spring.js",

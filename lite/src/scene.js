@@ -7,8 +7,8 @@ import { surfaceSegments, paintedSurfaceSegments, surfaceColor } from './surface
 import { clipLinear, gridStep, gridTicks, projectCircle, toScreen } from './projection.js';
 import { snapSteps } from './grid-snap.js';
 import { isPoint } from './geometry.js';
-import { isPhysicsBody, bodyRectangles } from './physics.js';
-import { bodyGeometry } from './physics-shape.js';
+import { isPhysicsBody } from './physics.js';
+import { bodyRenderTriangles } from './physics-shape.js';
 import { physicsMaterial } from './physics-material.js';
 import { cadPrimitives, trimCadSources } from './cad.js';
 import { objectColor, objectOpacity } from './object-style.js';
@@ -250,23 +250,12 @@ export function buildScene(objects, view, width, height, options = {}) {
     if (isPhysicsBody(object)) {
       const material = physicsMaterial(object);
       const start = used / 20;
-      const geometry = bodyGeometry(object);
-      if (geometry.triangles) {
-        const c = Math.cos(object.angle), s = Math.sin(object.angle);
-        for (const triangle of geometry.triangles) {
-          const points = triangle.map(p => toScreen({ x: object.position.x + p.x * c - p.y * s, y: object.position.y + p.x * s + p.y * c }, view, width, height));
-          const left = Math.max(0, Math.min(...points.map(p => p.x)) - 2), top = Math.max(0, Math.min(...points.map(p => p.y)) - 2);
-          const right = Math.min(width, Math.max(...points.map(p => p.x)) + 2), bottom = Math.min(height, Math.max(...points.map(p => p.y)) + 2);
-          if (right > left && bottom > top) add([left, top, right - left, bottom - top], [points[0].x, points[0].y, points[1].x, points[1].y], [6, 0, points[2].x, points[2].y], [...color, alpha]);
-        }
-      } else for (const box of bodyRectangles(object)) {
-        const center = toScreen(box, view, width, height);
-        const halfX = box.width * view.scale / 2, halfY = box.height * view.scale / 2;
-        const extentX = Math.abs(Math.cos(box.angle)) * halfX + Math.abs(Math.sin(box.angle)) * halfY + 2;
-        const extentY = Math.abs(Math.sin(box.angle)) * halfX + Math.abs(Math.cos(box.angle)) * halfY + 2;
-        const left = Math.max(0, center.x - extentX), top = Math.max(0, center.y - extentY);
-        const right = Math.min(width, center.x + extentX), bottom = Math.min(height, center.y + extentY);
-        if (right > left && bottom > top) add([left, top, right - left, bottom - top], [center.x, center.y, halfX, halfY], [5, 0, -box.angle, 0], [...color, highlighted ? Math.min(1, alpha * 1.15) : alpha]);
+      const c = Math.cos(object.angle), s = Math.sin(object.angle);
+      for (const triangle of bodyRenderTriangles(object)) {
+        const points = triangle.map(p => toScreen({ x: object.position.x + p.x * c - p.y * s, y: object.position.y + p.x * s + p.y * c }, view, width, height));
+        const left = Math.max(0, Math.min(...points.map(p => p.x)) - 2), top = Math.max(0, Math.min(...points.map(p => p.y)) - 2);
+        const right = Math.min(width, Math.max(...points.map(p => p.x)) + 2), bottom = Math.min(height, Math.max(...points.map(p => p.y)) + 2);
+        if (right > left && bottom > top) add([left, top, right - left, bottom - top], [points[0].x, points[0].y, points[1].x, points[1].y], [6, 0, points[2].x, points[2].y], [...color, alpha]);
       }
       if (used / 20 > start) groups.push({ start, count: used / 20 - start, material: {
         ...material, origin: toScreen(object.position, view, width, height), angle: -object.angle,

@@ -213,6 +213,20 @@ export function bodyPolygons(object) {
     {x:left,y:bottom},{x:right,y:bottom},{x:right,y:top},{x:left,y:top},
   ]);
 }
+
+const renderTriangles=new WeakMap();
+export function bodyRenderTriangles(object) {
+  const geometry=bodyGeometry(object);
+  if(geometry.triangles)return geometry.triangles;
+  if(!renderTriangles.has(object.shape)){
+    const contours=shapeContours(object.shape);
+    const triangles=contours&&triangulate(contours);
+    renderTriangles.set(object.shape,triangles||object.shape.rectangles.flatMap(([l,b,r,t])=>[
+      [{x:l,y:b},{x:r,y:b},{x:r,y:t}], [{x:l,y:b},{x:r,y:t},{x:l,y:t}],
+    ]));
+  }
+  return renderTriangles.get(object.shape);
+}
 export function bodyWorldPolygons(object) {
   const c=Math.cos(object.angle),s=Math.sin(object.angle);
   return bodyPolygons(object).map(polygon=>polygon.map(p=>({x:object.position.x+p.x*c-p.y*s,y:object.position.y+p.x*s+p.y*c})));
