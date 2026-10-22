@@ -1,9 +1,10 @@
 import { rememberParticleCreation } from './construction-store.js';
+import { cloneParticleStates } from './particle-state.js';
 export const isLiquid = object => object?.type === 'liquid';
 export const DEFAULT_LIQUID_DROPS = 256;
 export const MAX_LIQUID_DROPS = 1024;
 export const validLiquidDrops = count => Number.isInteger(count) && count >= 1 && count <= MAX_LIQUID_DROPS;
-export const liquidState = object => ({ particles: structuredClone(object.particles) });
+export const liquidState = object => ({ particles: cloneParticleStates(object.particles) });
 export const liquidMass = object => object.density * object.volume;
 
 const halton = (index, base) => {

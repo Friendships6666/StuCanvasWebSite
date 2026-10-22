@@ -1,6 +1,6 @@
 import { isLiquid, liquidMass } from './liquid.js';
 
-const stateKey = object => JSON.stringify([object.particles,object.density,object.volume,object.radius,object.running,object.hidden,object.restitution,object.airFriction,object.playbackRate]);
+const stateKey = object => JSON.stringify([object.density,object.volume,object.radius,object.running,object.hidden,object.restitution,object.airFriction,object.playbackRate]);
 
 export function syncLiquids(world,objects,Matter,scale) {
   const {Bodies,Body,Composite,Pairs}=Matter, ids=new Set();
@@ -11,14 +11,17 @@ export function syncLiquids(world,objects,Matter,scale) {
       if(entry) Composite.remove(world.engine.world,entry.composite);
       const particles=object.particles.map(()=>Bodies.circle(0,0,object.radius*scale,{slop:.005,friction:0,frictionStatic:0},10));
       const composite=Composite.create();Composite.add(composite,particles);Composite.add(world.engine.world,composite);
-      entry={object,particles,composite,geometry,key:null};world.liquids.set(object.id,entry);Pairs.clear(world.engine.pairs);
+      entry={object,particles,composite,geometry,key:null,state:[]};world.liquids.set(object.id,entry);Pairs.clear(world.engine.pairs);
     }
-    entry.object=object;const key=stateKey(object);
+    entry.object=object;const key=stateKey(object),configChanged=entry.key!==key;
+    const filterKey=JSON.stringify([object.id,object.ignored,object.freeFall,object.collideBodies,object.collideGeometry,object.hidden]);
+    const filterChanged=entry.filterKey!==filterKey;
     for(let i=0;i<entry.particles.length;i++) {
       const particle=entry.particles[i],state=object.particles[i];
-      Object.assign(particle.collisionFilter,{objectId:object.id,kind:'liquid',ignored:object.ignored,freeFall:object.freeFall,
+      if(filterChanged)Object.assign(particle.collisionFilter,{objectId:object.id,kind:'liquid',ignored:object.ignored,freeFall:object.freeFall,
         collideBodies:object.collideBodies,collideGeometry:object.collideGeometry,mask:object.hidden?0:0xFFFFFFFF});
-      if(entry.key!==key) {
+      const at=i*4;
+      if(configChanged||entry.state[at]!==state.position.x||entry.state[at+1]!==state.position.y||entry.state[at+2]!==state.velocity.x||entry.state[at+3]!==state.velocity.y) {
         Body.setStatic(particle,false);Body.setMass(particle,liquidMass(object)/object.particleCount);
         particle.inertia=Infinity;particle.inverseInertia=0;
         particle.friction=particle.frictionStatic=0;particle.restitution=object.restitution;particle.frictionAir=object.airFriction;
@@ -26,54 +29,81 @@ export function syncLiquids(world,objects,Matter,scale) {
         Body.setVelocity(particle,{x:state.velocity.x*scale/60,y:-state.velocity.y*scale/60});
         particle.timeScale=object.playbackRate;
         if(!object.running||object.hidden) Body.setStatic(particle,true);
+        entry.state[at]=state.position.x;entry.state[at+1]=state.position.y;entry.state[at+2]=state.velocity.x;entry.state[at+3]=state.velocity.y;
       }
     }
-    entry.key=key;
+    entry.key=key;entry.filterKey=filterKey;
   }
   for(const [id,entry] of world.liquids) if(!ids.has(id)) {Composite.remove(world.engine.world,entry.composite);world.liquids.delete(id);Pairs.clear(world.engine.pairs);}
 }
 
-function particleGrid(world,scale) {
-  const entries=[...world.liquids.values()].filter(entry=>!entry.object.hidden);
-  if(!entries.length)return null;
-  // Separate fluids with very different resolutions must not force the entire
-  // scene into one oversized neighbor cell. Each pool gets its own grid.
-  return entries.map(entry=>{
-    const spacing=Math.sqrt(entry.object.volume/entry.object.particleCount),cell=spacing*1.8,grid=new Map();
-    const nodes=entry.particles.map((body,index)=>({body,index,x:body.position.x/scale,y:-body.position.y/scale}));
-    for(const node of nodes){const key=`${Math.floor(node.x/cell)},${Math.floor(node.y/cell)}`;if(!grid.has(key))grid.set(key,[]);grid.get(key).push(node);}
-    return {entry,spacing,cell,grid,nodes};
-  });
+// Neighbor scratch data is disposable and deliberately kept out of solver
+// checkpoints. Numeric cells, nodes and buckets are reused between substeps.
+const neighborCaches = new WeakMap();
+function particleGrid(world,Matter,scale) {
+  const pools=[];
+  for(const entry of world.liquids.values()){
+    if(entry.object.hidden)continue;
+    let pool=neighborCaches.get(entry);
+    if(!pool){
+      pool={entry,nodes:entry.particles.map((body,index)=>({body,index,x:0,y:0,vx:0,vy:0})),grid:new Map(),rows:[],buckets:[]};
+      neighborCaches.set(entry,pool);
+    }
+    pool.spacing=Math.sqrt(entry.object.volume/entry.object.particleCount);pool.cell=pool.spacing*1.8;
+    pool.grid.clear();let rows=0,buckets=0;
+    pool.minX=pool.minY=Infinity;pool.maxX=pool.maxY=-Infinity;
+    for(const node of pool.nodes){
+      const velocity=Matter.Body.getVelocity(node.body);
+      node.x=node.body.position.x/scale;node.y=-node.body.position.y/scale;node.vx=velocity.x;node.vy=velocity.y;
+      pool.minX=Math.min(pool.minX,node.x);pool.maxX=Math.max(pool.maxX,node.x);pool.minY=Math.min(pool.minY,node.y);pool.maxY=Math.max(pool.maxY,node.y);
+      const x=Math.floor(node.x/pool.cell),y=Math.floor(node.y/pool.cell);
+      let row=pool.grid.get(x);
+      if(!row){row=pool.rows[rows]||(pool.rows[rows]=new Map());rows++;row.clear();pool.grid.set(x,row);}
+      let bucket=row.get(y);
+      if(!bucket){bucket=pool.buckets[buckets]||(pool.buckets[buckets]=[]);buckets++;bucket.length=0;row.set(y,bucket);}
+      bucket.push(node);
+    }
+    pools.push(pool);
+  }
+  return pools;
 }
 
 export function applyLiquidForces(world,Matter,scale,seconds) {
-  const pools=particleGrid(world,scale);if(!pools)return;
-  const {Body}=Matter;
+  const pools=particleGrid(world,Matter,scale);if(!pools)return;
   for(let a=0;a<pools.length;a++)for(let b=a;b<pools.length;b++) {
     const first=pools[a],second=pools[b],one=first.entry.object,two=second.entry.object;
     if(!one.running&&!two.running)continue;
     if(a!==b&&(!one.collideBodies||!two.collideBodies||one.ignored.includes(two.id)||two.ignored.includes(one.id)))continue;
     const spacing=(first.spacing+second.spacing)/2,reach=spacing*1.8;
+    if(first.maxX+reach<second.minX||second.maxX+reach<first.minX||first.maxY+reach<second.minY||second.maxY+reach<first.minY)continue;
     const m1=one.density*one.volume/one.particleCount,m2=two.density*two.volume/two.particleCount;
     const coefficient=2*m1*m2/(m1+m2)*scale/1e6,pressure=(one.pressure+two.pressure)/2;
     const cohesion=Math.min(one.cohesion,two.cohesion),viscosity=(one.viscosity+two.viscosity)/2;
     for(const node of first.nodes) {
       const cx=Math.floor(node.x/second.cell),cy=Math.floor(node.y/second.cell),range=Math.ceil(reach/second.cell);
-      for(let x=cx-range;x<=cx+range;x++)for(let y=cy-range;y<=cy+range;y++)for(const other of second.grid.get(`${x},${y}`)||[]) {
-        if(a===b&&other.index<=node.index)continue;
-        let dx=other.x-node.x,dy=other.y-node.y,distance=Math.hypot(dx,dy);
-        if(distance>=reach)continue;
-        if(distance<1e-10){dx=1;dy=0;distance=1e-10;}else{dx/=distance;dy/=distance;}
-        const q=distance/spacing;
-        const acceleration=q<1 ? pressure*spacing*(1-q) : -cohesion*pressure*spacing*(1-(q-1)/.8)*.08;
-        const va=Body.getVelocity(node.body),vb=Body.getVelocity(other.body),damping=viscosity*5*(1-distance/reach);
-        const fx=(-dx*acceleration+(vb.x-va.x)*60/scale*damping)*coefficient;
-        const fy=(dy*acceleration+(vb.y-va.y)*60/scale*damping)*coefficient;
-        node.body.force.x+=fx;node.body.force.y+=fy;other.body.force.x-=fx;other.body.force.y-=fy;
+      for(let x=cx-range;x<=cx+range;x++){
+        const row=second.grid.get(x);if(!row)continue;
+        for(let y=cy-range;y<=cy+range;y++){
+          const bucket=row.get(y);if(!bucket)continue;
+          for(const other of bucket) {
+            if(a===b&&other.index<=node.index)continue;
+            let dx=other.x-node.x,dy=other.y-node.y;
+            if(dx*dx+dy*dy>reach*reach*(1+1e-14))continue;
+            let distance=Math.hypot(dx,dy);
+            if(distance>=reach)continue;
+            if(distance<1e-10){dx=1;dy=0;distance=1e-10;}else{dx/=distance;dy/=distance;}
+            const q=distance/spacing;
+            const acceleration=q<1 ? pressure*spacing*(1-q) : -cohesion*pressure*spacing*(1-(q-1)/.8)*.08;
+            const damping=viscosity*5*(1-distance/reach);
+            const fx=(-dx*acceleration+(other.vx-node.vx)*60/scale*damping)*coefficient;
+            const fy=(dy*acceleration+(other.vy-node.vy)*60/scale*damping)*coefficient;
+            node.body.force.x+=fx;node.body.force.y+=fy;other.body.force.x-=fx;other.body.force.y-=fy;
+          }
+        }
       }
     }
   }
-  applyBuoyancy(world,pools,Matter,scale,seconds);
+  if(world.bodies.size)applyBuoyancy(world,pools,Matter,scale,seconds);
 }
 
 function applyBuoyancy(world,pools,Matter,scale,seconds) {
@@ -120,7 +150,10 @@ const rigidVolume=(world,id)=>world.bodies.get(id)?.buoyancyVolume;
 export function readLiquids(world,seconds,Matter,scale,changed) {
   for(const entry of world.liquids.values()) {
     const object=entry.object;if(!object.running||object.hidden)continue;
-    object.particles=entry.particles.map(body=>{const v=Matter.Body.getVelocity(body);return{position:{x:body.position.x/scale,y:-body.position.y/scale},velocity:{x:v.x*60/scale,y:-v.y*60/scale}};});
+    object.particles=entry.particles.map((body,i)=>{
+      const v=Matter.Body.getVelocity(body),state={position:{x:body.position.x/scale,y:-body.position.y/scale},velocity:{x:v.x*60/scale,y:-v.y*60/scale}},at=i*4;
+      entry.state[at]=state.position.x;entry.state[at+1]=state.position.y;entry.state[at+2]=state.velocity.x;entry.state[at+3]=state.velocity.y;return state;
+    });
     object.time+=seconds*object.playbackRate;
     if(object.duration>0&&object.time>=object.duration){object.time=object.duration;object.running=false;}
     entry.key=object.running?stateKey(object):null;changed.add(object.id);

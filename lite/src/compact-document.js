@@ -22,7 +22,22 @@ const values = new ConstructionCache(), simulationValues = new ConstructionCache
 const sampleField = object => object.type === 'softBody' ? 'nodes' : object.type === 'liquid' ? 'particles' : isFlexible(object) ? 'links' : null;
 const fail = path => { throw new LocalizedError('error.documentValue', { path }); };
 const stripRef = state => { const { derivation, ...rest } = state; return rest; };
-const same = (a, b) => a === b || documentKey(a) === documentKey(b);
+// Simulation snapshots contain thousands of numeric leaves. Compare their
+// values directly, avoiding sorted keys and temporary JSON strings per leaf.
+// Unusual values and cycles still go through the document's canonical checker.
+const same = (a, b, active = new WeakSet()) => {
+  if (a === b) return true;
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return documentKey(a) === documentKey(b);
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a) && a.length !== b.length) return false;
+  if (active.has(a) || active.has(b)) return documentKey(a) === documentKey(b);
+  const keys = Object.keys(a);
+  if (keys.length !== Object.keys(b).length) return false;
+  active.add(a); active.add(b);
+  const equal = keys.every(key => Object.hasOwn(b, key) && same(a[key], b[key], active));
+  active.delete(a); active.delete(b);
+  return equal;
+};
 function finish(iterator) { let next; do { next = iterator.next(); } while (!next.done); return next.value; }
 
 function shapeFromLoops(loops) {
@@ -202,7 +217,7 @@ export function recordConstructionStep(world, objects, scene, seconds) {
     const outputs = new Map();
     for (const object of physical) {
       const ref = addConstruction('result', [step], { id: object.id });
-      rememberConstruction(object, ref); outputs.set(object.id, clone(object));
+      rememberConstruction(object, ref); outputs.set(object.id, evaluatedConstructions.get(ref));
     }
     simulationValues.set(step, outputs); world.constructionPrevious = step;
   };

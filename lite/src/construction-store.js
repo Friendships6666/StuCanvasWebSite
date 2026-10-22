@@ -1,6 +1,7 @@
 import { jsonData } from './json-data.js';
 import { shapeContours } from './physics-shape.js';
 import { ConstructionCache } from './construction-cache.js';
+import { cloneParticleStates } from './particle-state.js';
 
 // The store contains immutable INPUTS/operations only. Evaluated arrays stay in
 // memory; the JSON graph is collected by following explicit string references.
@@ -11,6 +12,16 @@ export const constructionNode = id => nodes.get(id);
 // Exclude it BEFORE cloning; replacing it afterwards still copies every sample.
 export function cloneConstructionValue(value) {
   if (!['physicsBody', 'softBody', 'rope', 'spring', 'liquid'].includes(value?.type)) return structuredClone(value);
+  if (value.type === 'liquid' && Array.isArray(value.particles) && (!value.initialState || Array.isArray(value.initialState.particles))) {
+    const { particles, initialState, ...definition } = value;
+    const snapshot = structuredClone(definition);
+    snapshot.particles = cloneParticleStates(particles);
+    if (initialState) {
+      const { particles: initialParticles, ...rest } = initialState;
+      snapshot.initialState = { ...structuredClone(rest), particles: cloneParticleStates(initialParticles) };
+    }
+    return snapshot;
+  }
   const { shape, mesh, ...state } = value;
   const snapshot = structuredClone(state);
   if (shape) snapshot.shape = shape;

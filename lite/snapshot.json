@@ -101,7 +101,7 @@
     },
     {
       "path": "src/compact-document.js",
-      "sha256": "ce943226381bf55da0449223444f5fbdc19efb6c657c8ce898f1f057e7d61c9d"
+      "sha256": "2c01723a8436efadf4988dc633fb44118458bc9372fd8dc3f4fba2812ec8e974"
     },
     {
       "path": "src/conics.js",
@@ -117,7 +117,7 @@
     },
     {
       "path": "src/construction-store.js",
-      "sha256": "534f6e70833268e361c767ccb525720d1abef140d42319d9315c2e8941b24172"
+      "sha256": "e1e7e73db7683000dace5f9d0e0b5291b33bb3d1556e313cb3ebf9a8d258bec4"
     },
     {
       "path": "src/document-editor.js",
@@ -177,11 +177,11 @@
     },
     {
       "path": "src/liquid-physics.js",
-      "sha256": "d060974bb9ff7ade30b037b3c1319d1b565a7e9c23f84d4d6a40e75d9af3bf13"
+      "sha256": "3b16d2f9d55579382b8719956207de357d2e5219e3b326986fe3ee756a952d6e"
     },
     {
       "path": "src/liquid.js",
-      "sha256": "a9a61088c014559a8a8b5c073cb0f365e22602668db28db130cdf6177a1b0d6e"
+      "sha256": "d20f79ab68cbe8463d25f5ae5dcc26de65ca6735ca307eacffd1e378631e4b14"
     },
     {
       "path": "src/locales/en.js",
@@ -222,6 +222,10 @@
     {
       "path": "src/object-style.js",
       "sha256": "b758f9501c3e52002379bb20c953702c65b2c05785f4d3b596a5d02a804adfe8"
+    },
+    {
+      "path": "src/particle-state.js",
+      "sha256": "3184ec1ee91eb864d88b4c08aea3051e7df4f5f54e347c26e8d50fbefa5ef05b"
     },
     {
       "path": "src/physics-boundaries.js",
