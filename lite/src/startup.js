@@ -4,6 +4,7 @@
   const root=document.documentElement;
   const loader=document.getElementById('startup');
   const axes=[...loader.querySelectorAll('[data-startup-axis]')];
+  const rotors=[...axes,...loader.querySelectorAll('[data-startup-rotor]')];
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const events=new AbortController();
   let completion=null;
@@ -14,17 +15,12 @@
   import(catalog.href).then(({default:messages})=>{
     for(const key of ['loading','failed','retry'])loader.querySelector(`[data-i18n="startup.${key}"]`).textContent=messages[`startup.${key}`];
   }).catch(()=>{});
-  try{
-    const theme=JSON.parse(localStorage.getItem('stucanvas.theme')||'null');
-    const dark=theme?.selection==='cyan-dark'||(!theme?.selection||theme.selection==='system')&&matchMedia('(prefers-color-scheme: dark)').matches;
-    if(theme?.selection==='wine-light'||dark){root.style.setProperty('--startup-background',dark?'#0b0b0b':'#fffaf9');root.style.setProperty('--startup-ink',dark?'#62f5eb':'#a6243b');root.style.setProperty('--startup-muted',dark?'#bec5c7':'#687585');}
-  }catch{}
   const fail=error=>{
     if(root.dataset.bootState==='ready')return;
     root.dataset.bootState='failed';
-    for(const animation of loader.getAnimations())animation.cancel();
+    for(const animation of loader.getAnimations({subtree:true}))animation.cancel();
     loader.style.opacity='1';
-    for(const axis of axes){for(const animation of axis.getAnimations())animation.cancel();axis.style.animation='none';axis.style.transform='none';}
+    for(const axis of rotors){for(const animation of axis.getAnimations())animation.cancel();axis.style.animation='none';axis.style.transform='none';}
     const detail=document.getElementById('gpu-error');
     loader.querySelector('.startup-detail').textContent=detail&&!detail.hidden?detail.textContent:'';
     root.setAttribute('aria-busy','false');
@@ -52,16 +48,19 @@
     if(root.dataset.bootState==='failed')return;
     root.dataset.bootState='settling';
     if(!reduced.matches){
-      const animations=axes.map(axis=>{
+      const animations=rotors.map(axis=>{
         const matrix=new DOMMatrixReadOnly(getComputedStyle(axis).transform);
         const angle=(Math.atan2(matrix.b,matrix.a)*180/Math.PI+360)%360;
         axis.style.animation='none';axis.style.transform=`rotate(${angle}deg)`;
-        return axis.animate([{transform:`rotate(${angle}deg)`},{transform:'rotate(360deg)'}],{duration:620,easing:'cubic-bezier(.2,.65,.2,1)',fill:'forwards'});
+        // Slow instrument rings take the nearest reference stop; the logo
+        // axes complete their forward sweep into the original mark.
+        const stop=axis.hasAttribute('data-startup-rotor')?Math.round(angle/360)*360:360;
+        return axis.animate([{transform:`rotate(${angle}deg)`},{transform:`rotate(${stop}deg)`}],{duration:620,easing:'cubic-bezier(.2,.65,.2,1)',fill:'forwards'});
       });
       await Promise.all(animations.map(animation=>animation.finished.catch(()=>{})));
       for(const animation of animations)animation.cancel();
     }
-    for(const axis of axes){axis.style.animation='none';axis.style.transform='none';}
+    for(const axis of rotors){axis.style.animation='none';axis.style.transform='none';}
     if(root.dataset.bootState==='failed')return;
     root.dataset.bootState='aligned';
     if(!reduced.matches)await new Promise(resolve=>setTimeout(resolve,140));

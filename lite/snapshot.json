@@ -25,7 +25,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "912ee8b43d3f2b6b2f9593a96fca1d2a61c438968cc0dccd65b03387c936ec17"
+      "sha256": "03d475e8b5db75e52ec22b2dee516e5ea58ddabb7e17208593ed0a4617fb1f17"
     },
     {
       "path": "licenses/CC-BY-4.0.txt",
@@ -433,7 +433,7 @@
     },
     {
       "path": "src/startup.js",
-      "sha256": "02922c7b970cbe4b9ae70f3837321636be9202bc24fdeabc85261cc50603ac41"
+      "sha256": "d731da22b62ac456a27042fa3ab0d4252a5bc26aa9f1219cdfa77a26bfcbd4e1"
     },
     {
       "path": "src/style.css",
