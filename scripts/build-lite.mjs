@@ -55,11 +55,13 @@ for (const entry of runtime) {
   await cp(path.join(root, 'node_modules', entry), filename, { recursive: true });
 }
 await cp(path.join(root, 'site'), output, { recursive: true });
+await writeFile(path.join(output, moduleRoot, 'site-links.js'), (await readFile(path.join(root, 'site/site-links.js'), 'utf8')).replaceAll('/src/', `${moduleRoot}/`));
+await cp(path.join(root, 'site/site-links.css'), path.join(output, moduleRoot, 'site-links.css'));
 const html = publicPaths(await readFile(path.join(source, 'index.html'), 'utf8'))
   .replaceAll('/src/', `${moduleRoot}/`)
   .replace('</head>', `  <meta name="stucanvas-build" content="${buildHash}" />\n</head>`)
-  .replace('</head>', '  <link rel="stylesheet" href="/site-links.css" />\n</head>')
-  .replace('</body>', '  <script type="module" src="/site-links.js"></script>\n</body>');
+  .replace('</head>', `  <link rel="stylesheet" href="${moduleRoot}/site-links.css" />\n</head>`)
+  .replace('</body>', `  <script type="module" src="${moduleRoot}/site-links.js"></script>\n</body>`);
 await writeFile(path.join(output, 'index.html'), html);
 await writeFile(path.join(output, 'version.json'), JSON.stringify({ commit, snapshot: snapshotHash, build: buildHash, modules: moduleRoot, version: snapshot.version }, null, 2) + '\n');
 console.log('Built Lite at /, tutorial home at /tutorials; existing documentation and toolbox routes retained.');
