@@ -1,4 +1,4 @@
-import { localizeDOM, t } from './i18n.js';
+import { localizeDOM } from './i18n.js';
 import { SCRIPT_LIMIT } from './reflection.js';
 import { createCodeHighlight } from './json-highlight.js';
 
@@ -18,9 +18,7 @@ export function createReflectionEditor(panel, actions) {
   const sourceHost = document.createElement('div'); sourceHost.className = 'script-code'; sourceHost.append(source);
   const highlight = createCodeHighlight(source, { language: 'javascript' });
   const output = document.createElement('pre'); output.className = 'script-value'; output.dataset.i18nAriaLabel = 'script.result';
-  const note = document.createElement('p'); note.className = 'physics-note'; note.dataset.i18n = 'script.help';
   const error = document.createElement('p'); error.className = 'formula-error'; error.setAttribute('role', 'status');
-  const status = document.createElement('p'); status.className = 'physics-note script-status';
   const retry = document.createElement('button'); retry.type = 'button'; retry.dataset.i18n = 'script.retry';
   retry.addEventListener('click', () => actions.retry());
   let timer = null, composing = false, dirty = false, displayedValue;
@@ -52,7 +50,7 @@ export function createReflectionEditor(panel, actions) {
     });
   }
   for (const event of ['click', 'pointerdown', 'contextmenu']) area.addEventListener(event, event => event.stopPropagation());
-  area.append(heading, sourceHost, label, output, note, status, error, retry); panel.append(area);
+  area.append(heading, sourceHost, label, output, error, retry); panel.append(area);
   const sync = (object, result) => {
     if (!dirty) enabled.checked = object.enabled;
     if (!dirty && document.activeElement !== source && source.value !== object.source.replace(/\r\n?/g, '\n')) { source.value = object.source; highlight.update(); }
@@ -63,7 +61,6 @@ export function createReflectionEditor(panel, actions) {
     }
     source.setAttribute('aria-invalid', String(!!result?.error));
     error.textContent = result?.error || ''; error.hidden = !result?.error;
-    status.textContent = result && !result.error ? t('script.dependencies', { count: new Set(result.reads || []).size }) : '';
     retry.hidden = !result?.error;
     localizeDOM(area);
   };

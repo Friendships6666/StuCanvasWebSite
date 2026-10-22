@@ -40,7 +40,7 @@ export function createSoftControls(panel,actions,addNumber) {
     input.addEventListener('change',()=>{const value=input.checked;actions.change(object=>{object[key]=value;});actions.end();});row.append(input,caption);panel.append(row);flags.push({key,input});
   }
   const summary=document.createElement('output');summary.className='physics-note';summary.dataset.role='soft-summary';
-  const note=document.createElement('p');note.className='physics-note';note.dataset.i18n='soft.note';panel.append(summary,note);
+  panel.append(summary);
   return object=>{
     if(document.activeElement!==smoothRange)smoothRange.value=object.smoothing??0;
     restore.disabled=!(object.smoothing>0);

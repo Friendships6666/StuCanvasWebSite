@@ -25,7 +25,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "730da975c55758d69fed1166854cd602190de93c8848c01ae599df28d4651335"
+      "sha256": "c44c33f579971899996ffc4749929f704d5248fc80698dbbecf54c3b02d510a9"
     },
     {
       "path": "licenses/CC-BY-4.0.txt",
@@ -189,15 +189,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "00c408ff2bd6acac040a6927750a991b18acea1baa870e0bffbcf66c6f775e13"
+      "sha256": "f2c00b2972f94273eb297b2a4c97decf9c72dd2f02188827767743f9bcc83330"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "47bc91b5a460347e591e1e3f236cb45cab0abdd7fdee7413fe98a10c03937ca3"
+      "sha256": "aa5aff94abd9b55db1629098df39be0d4a2d349efa06904c32560ab6949169f7"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "1c31e3f12e57d933cfbb65b05583a3e4ab34df38c5995bcb65fb08618531b65c"
+      "sha256": "87c568c37861e5a5edcbabd04ff1d4ddf723c2161b4767492329fecb6dba0abd"
     },
     {
       "path": "src/math-input.js",
@@ -245,11 +245,11 @@
     },
     {
       "path": "src/physics-editor.js",
-      "sha256": "498217143d0b3e6ec51138e3e96100046f31a6563022d41e93a6aa32c4348068"
+      "sha256": "abb5ff1ca13ece2013ea2fa7e3992de92a963ebebde629d9ce725c3ddeb28f1e"
     },
     {
       "path": "src/physics-material-editor.js",
-      "sha256": "90747797b2d4afa3f9554bfa16d64e89071ee203636f9f5bf0a6dff3ba96bd37"
+      "sha256": "cd5689cc8a96baf54ac4f28b257d4b2fe01f08023c4cb091dc50df78201a3545"
     },
     {
       "path": "src/physics-material.js",
@@ -329,7 +329,7 @@
     },
     {
       "path": "src/reflection-editor.js",
-      "sha256": "0533c461e583f3eeecb3e3ad905e632eb1da9fcfe2600471b8150f718eba7d1c"
+      "sha256": "4a947a22603b4663ca3b1d4573d651ef974f8d29fd28c802e9dffdd2dc640f2f"
     },
     {
       "path": "src/reflection-engine.js",
@@ -401,7 +401,7 @@
     },
     {
       "path": "src/soft-editor.js",
-      "sha256": "57974f6371b104ff4b08c97d4080b4de9353b5563f46eff485f7b29c719a4702"
+      "sha256": "4941a01bd32777183613d51e1015b5c2e40270fcd90768913d228832a9dc3994"
     },
     {
       "path": "src/soft-physics.js",

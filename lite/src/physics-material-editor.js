@@ -16,10 +16,9 @@ export function createPhysicsMaterialEditor(container, actions) {
   label.className = 'physics-material-size'; caption.dataset.i18n = 'physics.tileSize';
   size.type = 'number'; size.min = .05; size.max = 100; size.step = 'any'; size.dataset.parameter = 'material.tileSize'; size.dataset.i18nAriaLabel = 'physics.tileSize';
   label.append(caption, size);
-  const note = document.createElement('p'); note.className = 'physics-note'; note.dataset.i18n = 'physics.textureNote';
   const error = document.createElement('p'); error.className = 'formula-error physics-texture-error'; error.setAttribute('role', 'alert');
   const errorId = `texture-error-${actions.get().id}`; error.id = errorId; file.setAttribute('aria-describedby', errorId); size.setAttribute('aria-describedby', errorId);
-  buttons.append(open, reset); panel.append(summary, preview, name, buttons, file, label, note, error); container.append(panel);
+  buttons.append(open, reset); panel.append(summary, preview, name, buttons, file, label, error); container.append(panel);
   let request = 0, previewSource = '';
   open.addEventListener('click', () => { file.value = ''; file.click(); });
   file.addEventListener('change', async () => {

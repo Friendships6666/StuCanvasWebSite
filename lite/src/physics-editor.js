@@ -75,11 +75,8 @@ export function createPhysicsEditor(container, actions) {
   }
   addNumber('restitution', 'physics.restitution', 0, 1, .05);
   const air = document.createElement('div'); air.className = 'physics-air-resistance';
-  const airInput = addNumber('airFriction', 'physics.airFriction', 0, 1, .001, air);
-  const airNote = document.createElement('p'); airNote.className = 'physics-note'; airNote.dataset.i18n = 'physics.airFrictionNote';
-  airNote.id = `physics-air-note-${actions.get().id}`;
-  airInput.setAttribute('aria-describedby', airNote.id);
-  air.append(airNote); panel.append(air);
+  addNumber('airFriction', 'physics.airFriction', 0, 1, .001, air);
+  panel.append(air);
   let syncShape = () => {};
   if (!rope && !liquid && !soft) {
     const smoothing = document.createElement('div'); smoothing.className = 'physics-smoothing';
