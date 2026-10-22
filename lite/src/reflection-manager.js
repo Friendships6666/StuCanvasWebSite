@@ -2,8 +2,8 @@ import { documentKey } from './document.js';
 import { needsReflection, reflectionSource } from './reflection.js';
 
 export class ReflectionManager {
-  constructor({ read, resolved, apply, changed, workerFactory = () => new Worker(new URL('./reflection-worker.js', import.meta.url), { type: 'module' }) }) {
-    Object.assign(this, { read, resolved, apply, changed, workerFactory });
+  constructor({ read, version, resolved, resolvedVersion, apply, changed, workerFactory = () => new Worker(new URL('./reflection-worker.js', import.meta.url), { type: 'module' }) }) {
+    Object.assign(this, { read, version, resolved, resolvedVersion, apply, changed, workerFactory });
     this.statuses = new Map(); this.blocked = new Map(); this.worker = null;
     this.key = ''; this.job = 0; this.pending = false; this.timer = null; this.active = [];
   }
@@ -23,12 +23,15 @@ export class ReflectionManager {
 
   sync() {
     if (this.pending) return; // Completion pulls the newest document; no job queue.
+    const version = this.version?.();
+    if (this.version && this.key && version === this.seenVersion) return;
     const document = this.read();
+    this.seenVersion = version;
     const bindings = document.objects.filter(needsReflection);
     for (const [id, source] of this.blocked) if (!bindings.some(object => object.id === id && reflectionSource(object) === source)) this.blocked.delete(id);
     for (const id of this.statuses.keys()) if (!bindings.some(object => object.id === id)) this.statuses.delete(id);
     if (!bindings.length) { this.key = ''; return; }
-    const key = documentKey(document);
+    const key = documentKey([document, this.resolvedVersion?.()]);
     if (key === this.key) return;
     this.key = key;
     if (!this.worker) {

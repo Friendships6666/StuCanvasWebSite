@@ -194,8 +194,12 @@ function restoreSnapshot(text) {
 }
 const screenToWorld = point => toWorld(point, view, width, height);
 const plots = new PlotManager(draw);
+let reflectionRevision = 0;
+let reflectionGeometryRevision = 0;
 const reflection = new ReflectionManager({
   read: readDocument, resolved: () => resolved,
+  resolvedVersion: () => reflectionGeometryRevision,
+  version: () => `${reflectionRevision}:${reflectionGeometryRevision}:${documentKey([timeline.state, readEnvironment()])}`,
   apply(updates) {
     const changed = new Set();
     for (const update of updates) {
@@ -525,6 +529,7 @@ function commit(before, changed = null) {
 }
 
 function refresh(changed = null) {
+  reflectionRevision++;
   for (const id of intersectionTracker.retain(objects)) resolved.delete(id);
   const ids = new Set(objects.map(object => object.id));
   selection = new Set([...selection].filter(id => ids.has(id)));
@@ -987,6 +992,7 @@ function equationIntersections(first, second) {
 
 function updatePointDependents(changed) {
   if (!changed.size) return;
+  reflectionGeometryRevision++;
   const dependents = objects.filter(object => object.parents?.some(parent => changed.has(parent))).map(object => object.id);
   if (dependents.length) resolved = resolveObjects(objects, resolved, new Set(dependents), intersectionTracker);
 }
@@ -1470,7 +1476,7 @@ function updateAreaMeasurements() {
     Object.assign(current, metrics);
     changed = true;
   }
-  if (changed) renderObjects();
+  if (changed) { reflectionGeometryRevision++; renderObjects(); }
 }
 
 function conicSubject(object) {
@@ -2230,6 +2236,7 @@ function draw() {
     const physicsChanged = physicsReplayBefore ? new Set() : tickTimeline(now);
     syncTimeline();
     if (physicsChanged.size) {
+      reflectionRevision++;
       resolved = resolveObjects(objects, resolved, physicsChanged, intersectionTracker);
       renderObjects();
     }

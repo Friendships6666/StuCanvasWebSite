@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "525577091dbd6f5aff17bac8d59eed8d8cdefff5f38e9d57a7b7efe9e6787213"
+      "sha256": "979767802b7ff3e946f275cea99e7232cf194ac8ca9de6f1e183c79fab94a88b"
     },
     {
       "path": "src/arc-connection.js",
@@ -321,15 +321,15 @@
     },
     {
       "path": "src/reflection-editor.js",
-      "sha256": "4d1b157971fba7a11ed1469d5210f2822afd7f8b5ce8f63a7360ae402f755327"
+      "sha256": "0533c461e583f3eeecb3e3ad905e632eb1da9fcfe2600471b8150f718eba7d1c"
     },
     {
       "path": "src/reflection-engine.js",
-      "sha256": "2567b82b3abdaa3d3fefcd87256cb1e2274acc03ea77cee34e779d88874a6ab7"
+      "sha256": "4ac4896dc6c09af6d5c1418cec5189e82a69c5cb316cba20607bfc1c4aee234e"
     },
     {
       "path": "src/reflection-manager.js",
-      "sha256": "9974d66d7c88bc986d579b971bc52cae1898a119b24f0fd6537bf9b5eb4bbb9b"
+      "sha256": "a3acc24bc35ee72b227313224845ca863535b3dee344cf143251518b332664b3"
     },
     {
       "path": "src/reflection-worker.js",

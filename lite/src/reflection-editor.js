@@ -23,7 +23,8 @@ export function createReflectionEditor(panel, actions) {
   const status = document.createElement('p'); status.className = 'physics-note script-status';
   const retry = document.createElement('button'); retry.type = 'button'; retry.dataset.i18n = 'script.retry';
   retry.addEventListener('click', () => actions.retry());
-  let timer = null, composing = false, dirty = false;
+  let timer = null, composing = false, dirty = false, displayedValue;
+  let outputReady = false;
   const flush = () => {
     clearTimeout(timer); timer = null;
     const object = actions.get();
@@ -56,7 +57,10 @@ export function createReflectionEditor(panel, actions) {
     if (!dirty) enabled.checked = object.enabled;
     if (!dirty && document.activeElement !== source && source.value !== object.source.replace(/\r\n?/g, '\n')) { source.value = object.source; highlight.update(); }
     if (!dirty && document.activeElement !== name) name.value = object.name;
-    output.textContent = JSON.stringify(object.value, null, 2);
+    if (!outputReady || !Object.is(displayedValue, object.value)) {
+      displayedValue = object.value; outputReady = true;
+      output.textContent = JSON.stringify(object.value, null, 2);
+    }
     source.setAttribute('aria-invalid', String(!!result?.error));
     error.textContent = result?.error || ''; error.hidden = !result?.error;
     status.textContent = result && !result.error ? t('script.dependencies', { count: new Set(result.reads || []).size }) : '';

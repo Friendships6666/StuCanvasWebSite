@@ -1,4 +1,4 @@
-import { documentKey, parseDocument } from './document.js';
+import { documentKey, objectDefinition, parseDocument } from './document.js';
 import { resolveObjects } from './geometry.js';
 import { bindingPatch, formulaParameters, isJavaScript, jsonValue, needsReflection, pathParts, reflectionSource, variableRoot, variableValue } from './reflection.js';
 import { compileEquation } from './plot/formula.js';
@@ -10,21 +10,29 @@ const keyOf = value => value === undefined ? 'undefined' : documentKey(value);
 // Runs inside a disposable worker. Read tracking records leaves, existence and
 // enumeration separately: changing an unrelated field does not rerun a script.
 export class ReflectionEngine {
-  constructor() { this.cache = new Map(); }
+  constructor() { this.cache = new Map(); this.compiled = new Map(); }
 
   evaluate(document, previous = [], blocked = [], progress = () => {}) {
     const model = structuredClone(document);
     const byId = new Map(model.objects.map(object => [object.id, object]));
+    const byName = new Map();
+    for (const object of model.objects) if (!byName.has(object.name)) byName.set(object.name, object.id);
     const indices = new Map(model.objects.map((object, index) => [object.id, index]));
     const variableIds = new Map(model.objects.filter(isJavaScript).map(object => [object.name.toLowerCase(), object.id]));
+    const parameterIds = new Map(model.objects.filter(object => isJavaScript(object) || object.type === 'slider').map(object => [object.name.toLowerCase(), object.id]));
     const statuses = [], updates = [], states = new Map(), errors = new Map();
     const disabled = new Set(blocked);
     let geometry = new Map(previous), geometryDirty = previous.length ? new Set() : null, reader = null;
-    const cloneCache = new Map();
+    const spaces = new Map(), readyGeometry = new Set();
+    const plots = model.objects.filter(object => ['equation', 'parametric'].includes(object.type) && !object.draft);
+    let parameterNames = plots.length ? keyOf(Object.keys(formulaParameters(model.objects))) : '';
+    let revision = 0;
     for (const id of this.cache.keys()) if (!byId.has(id)) this.cache.delete(id);
+    for (const id of this.compiled.keys()) if (!byId.has(id)) this.compiled.delete(id);
 
     const ensureGeometry = (id, seen = new Set()) => {
       if (seen.has(id)) throw new Error(`Dependency cycle: ${id}`);
+      if (readyGeometry.has(id)) return;
       seen.add(id);
       const object = byId.get(id);
       if (!object) return;
@@ -43,6 +51,7 @@ export class ReflectionEngine {
           }
         } catch (error) { if (/cycle|stopped/.test(error.message)) throw error; }
       }
+      readyGeometry.add(id);
     };
     const currentGeometry = id => {
       ensureGeometry(id);
@@ -53,6 +62,7 @@ export class ReflectionEngine {
     };
     const locate = (space, path) => {
       let value;
+      if (space === 'lookup') return byId.has(path[0]) ? path[0] : byName.get(path[0]);
       if (space === 'json') value = model;
       else if (space === 'vars') {
         if (!path.length) return Object.fromEntries([...variableIds].map(([name, id]) => [name, byId.get(id).value]));
@@ -67,23 +77,55 @@ export class ReflectionEngine {
       for (const key of parts) value = value?.[key];
       return value;
     };
-    const signature = (space, path, kind, property) => {
-      const value = locate(space, path);
+    // Intern access paths once per evaluation. Hot reads then reuse the value,
+    // proxy, dependency token and signature until a successful patch changes it.
+    const nodeAt = (space, path) => {
+      if (!spaces.has(space)) spaces.set(space, { space, path: [], children: new Map(), tokens: new Map(), revision: -1 });
+      let node = spaces.get(space);
+      for (const key of path) {
+        if (!node.children.has(key)) node.children.set(key, { space, path: [...node.path, key], children: new Map(), tokens: new Map(), revision: -1 });
+        node = node.children.get(key);
+      }
+      return node;
+    };
+    const valueAt = node => {
+      if (node.revision !== revision) {
+        const value = locate(node.space, node.path);
+        node.value = value; node.revision = revision;
+      }
+      return node.value;
+    };
+    const signature = (node, kind, property) => {
+      const value = valueAt(node);
       if (kind === 'keys') return keyOf(value && typeof value === 'object' ? Object.keys(value) : null);
       if (kind === 'has') return String(!!value && Object.hasOwn(value, property));
       if (kind === 'object') return value === null ? 'null' : Array.isArray(value) ? 'array' : typeof value;
       return keyOf(value);
     };
-    const remember = (space, path, kind, property) => {
-      const stamp = signature(space, path, kind, property);
-      if (reader) reader.set(JSON.stringify([space, path, kind, property]), { space, path, kind, property, stamp });
+    const tokenAt = (node, kind, property) => {
+      if (!node.tokens.has(kind)) node.tokens.set(kind, new Map());
+      const tokens = node.tokens.get(kind);
+      if (!tokens.has(property)) tokens.set(property, { space: node.space, path: node.path, kind, property, revision: -1 });
+      const token = tokens.get(property);
+      if (token.revision !== revision) {
+        token.stamp = signature(node, kind, property); token.revision = revision;
+      }
+      return token;
     };
-    const proxy = (space, path) => {
-      const value = locate(space, path);
-      if (!value || typeof value !== 'object') { remember(space, path, 'value'); return value; }
-      remember(space, path, 'object');
-      const cacheKey = JSON.stringify([space, path]);
-      if (cloneCache.has(cacheKey)) return cloneCache.get(cacheKey);
+    const remember = (node, kind, property) => {
+      if (!reader) return;
+      const token = tokenAt(node, kind, property);
+      if (!reader.has(token)) {
+        const { space, path, stamp } = token;
+        reader.set(token, { space, path, kind, property, stamp });
+      }
+    };
+    const proxy = node => {
+      const value = valueAt(node);
+      if (!value || typeof value !== 'object') { remember(node, 'value'); return value; }
+      remember(node, 'object');
+      if (node.proxy) return node.proxy;
+      const { space, path } = node;
       // Empty, extensible targets let a read-only proxy faithfully expose even
       // frozen-looking input without violating Proxy descriptor invariants.
       const result = new Proxy(Array.isArray(value) ? [] : {}, {
@@ -92,17 +134,19 @@ export class ReflectionEngine {
             if (key === Symbol.iterator && Array.isArray(value)) return Array.prototype[Symbol.iterator];
             return undefined;
           }
-          const latest = locate(space, path);
+          const latest = valueAt(node);
           if (Array.isArray(latest) && typeof Array.prototype[key] === 'function') return Array.prototype[key];
           if (['__proto__', 'constructor', 'prototype'].includes(key)) return undefined;
-          return proxy(space, [...path, key]);
+          let child = node.children.get(key);
+          if (!child) child = nodeAt(space, [...path, key]);
+          return proxy(child);
         },
-        has(target, key) { if (typeof key === 'symbol') return false; remember(space, path, 'has', key); return Object.hasOwn(locate(space, path) || {}, key); },
-        ownKeys() { remember(space, path, 'keys'); return Object.keys(locate(space, path) || {}).concat(Array.isArray(value) ? ['length'] : []); },
+        has(target, key) { if (typeof key === 'symbol') return false; remember(node, 'has', key); return Object.hasOwn(valueAt(node) || {}, key); },
+        ownKeys() { remember(node, 'keys'); return Object.keys(valueAt(node) || {}).concat(Array.isArray(value) ? ['length'] : []); },
         getOwnPropertyDescriptor(target, key) {
           if (Array.isArray(value) && key === 'length') return Reflect.getOwnPropertyDescriptor(target, key);
-          if (!Object.hasOwn(locate(space, path) || {}, key)) return undefined;
-          return { configurable: true, enumerable: true, writable: false, value: proxy(space, [...path, key]) };
+          if (!Object.hasOwn(valueAt(node) || {}, key)) return undefined;
+          return { configurable: true, enumerable: true, writable: false, value: proxy(nodeAt(space, [...path, key])) };
         },
         set() { throw new Error('Document data is read-only; return the fields to update'); },
         deleteProperty() { throw new Error('Document data is read-only'); },
@@ -110,18 +154,56 @@ export class ReflectionEngine {
         setPrototypeOf() { throw new Error('Document data is read-only'); },
         preventExtensions() { throw new Error('Document data is read-only'); },
       });
-      cloneCache.set(cacheKey, result);
+      node.proxy = result;
       return result;
     };
-    const json = proxy('json', []);
-    const vars = proxy('vars', []);
+    const json = proxy(nodeAt('json', []));
+    const vars = proxy(nodeAt('vars', []));
     const get = name => {
       if (typeof name !== 'string') throw new Error('get() expects an object ID or name');
-      const object = json.objects.find(item => item.id === name) || json.objects.find(item => item.name === name);
-      if (!object) throw new Error(`Object not found: ${name}`);
-      const id = object.id;
-      if (!currentGeometry(id)) throw new Error(`Object is undefined: ${name}`);
-      return proxy('resolved', [id]);
+      const lookup = nodeAt('lookup', [name]);
+      remember(lookup, 'value');
+      const id = valueAt(lookup);
+      if (!id) throw new Error(`Object not found: ${name}`);
+      const node = nodeAt('resolved', [id]);
+      if (!valueAt(node)) throw new Error(`Object is undefined: ${name}`);
+      return proxy(node);
+    };
+    const validatePatch = (object, candidate) => {
+      if (isJavaScript(object)) {
+        // jsonValue already checked the only writable JS field. A changed set
+        // of numeric variable paths can also invalidate existing formulas.
+        if (!plots.length) return;
+        const parameters = formulaParameters(model.objects), names = keyOf(Object.keys(parameters));
+        if (names === parameterNames) return;
+        for (const plot of plots) {
+          if (plot.type === 'parametric') compileParametric(plot, parameters);
+          else compileEquation(plot.source, parameters);
+        }
+        parameterNames = names;
+        return;
+      }
+      // Bindings cannot change identity, parents, source or references. Validate
+      // the changed native object and its dependency closure, without copying
+      // unrelated JSON data, construction history or every other native object.
+      const selected = new Map();
+      let parameters;
+      const include = id => {
+        if (selected.has(id)) return;
+        let definition = id === object.id ? candidate : byId.get(id);
+        if (!definition) return;
+        if (definition.derivation && geometry.get(id)) definition = objectDefinition({ ...geometry.get(id), ...definition });
+        selected.set(id, definition);
+        for (const parent of definition.parents || []) include(parent);
+        for (const reference of Object.values(definition.bindings || {})) include(variableIds.get(variableRoot(reference)));
+        if (['equation', 'parametric'].includes(definition.type) && !definition.draft) {
+          parameters ||= formulaParameters(model.objects);
+          const compiled = definition.type === 'parametric' ? compileParametric(definition, parameters) : compileEquation(definition.source, parameters);
+          for (const name of compiled.parameterNames) include(parameterIds.get(variableRoot(name)));
+        }
+      };
+      include(object.id);
+      parseDocument(JSON.stringify({ format: model.format, version: model.version, objects: [...selected.values()] }));
     };
     const ensure = id => {
       const object = byId.get(id);
@@ -137,7 +219,7 @@ export class ReflectionEngine {
         const source = reflectionSource(object);
         const selfKey = documentKey([object.id, object.name, object.type, object.parents]);
         let cached = this.cache.get(id), patch, reads;
-        const reusable = cached?.source === source && cached.selfKey === selfKey && cached.reads.every(read => signature(read.space, read.path, read.kind, read.property) === read.stamp);
+        const reusable = cached?.source === source && cached.selfKey === selfKey && cached.reads.every(read => tokenAt(nodeAt(read.space, read.path), read.kind, read.property).stamp === read.stamp);
         if (reusable) {
           patch = isJavaScript(object) ? cached.patch : bindingPatch(object, reference => variableValue(model.objects, reference));
           reads = cached.reads;
@@ -145,28 +227,35 @@ export class ReflectionEngine {
         else {
           reader = new Map();
           if (isJavaScript(object)) {
-            let execute;
+            let compiled = this.compiled.get(id);
             // An expression or a function body with return are both accepted.
-            try { execute = new Function('json', 'get', 'vars', 'self', `"use strict"; return (${source}\n);`); }
-            catch { execute = new Function('json', 'get', 'vars', 'self', `"use strict";\n${source}\n`); }
+            if (compiled?.source !== source) {
+              let execute;
+              try { execute = new Function('json', 'get', 'vars', 'self', `"use strict"; return (${source}\n);`); }
+              catch { execute = new Function('json', 'get', 'vars', 'self', `"use strict";\n${source}\n`); }
+              compiled = { source, execute }; this.compiled.set(id, compiled);
+            }
             const self = Object.freeze({ id: object.id, name: object.name });
+            const execute = compiled.execute;
             patch = { value: jsonValue(execute(json, get, vars, self)) };
           } else patch = bindingPatch(object, reference => {
             const parts = pathParts(reference);
             if (!variableIds.has(parts[0].toLowerCase())) throw new Error(`Variable not found: ${parts[0]}`);
             parts[0] = parts[0].toLowerCase();
-            return jsonValue(proxy('vars', parts));
+            return jsonValue(proxy(nodeAt('vars', parts)));
           });
           reads = [...reader.values()];
         }
         reader = null;
-        const candidate = { ...object, ...structuredClone(patch) };
-        const index = indices.get(id);
-        model.objects[index] = candidate;
-        try { parseDocument(JSON.stringify(model)); }
-        catch (error) { model.objects[index] = object; throw error; }
-        byId.set(id, candidate);
-        if (geometryDirty && Object.keys(patch).some(key => keyOf(object[key]) !== keyOf(patch[key]))) geometryDirty.add(id);
+        if (Object.keys(patch).some(key => keyOf(object[key]) !== keyOf(patch[key]))) {
+          const candidate = { ...object, ...structuredClone(patch) };
+          const index = indices.get(id);
+          model.objects[index] = candidate;
+          try { validatePatch(object, candidate); }
+          catch (error) { model.objects[index] = object; throw error; }
+          byId.set(id, candidate); revision++;
+          if (geometryDirty) geometryDirty.add(id);
+        }
         this.cache.set(id, { source, selfKey, patch, reads });
         updates.push({ id, source, patch });
         statuses.push({ id, reads: reads.map(({ space, path }) => `${space}.${path.join('.')}`), cached: reusable, error: '' });
