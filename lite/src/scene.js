@@ -1,3 +1,4 @@
+import { rendersInWindow } from './render-targets.js';
 import { isFlexible } from './rope.js';
 import { isLiquid } from './liquid.js';
 import { isSoftBody, softCenter } from './soft-body.js';
@@ -185,7 +186,7 @@ export function buildScene(objects, view, width, height, options = {}) {
     if (origin.x >= 0 && origin.x <= width && origin.y >= 0 && origin.y <= height) text('0', origin.x - 7, origin.y + 16, palette.text, 'end', 11);
   }
   }
-  const visible = trimCadSources([...(options.traces || []), ...objects]).flatMap(cadPrimitives).filter(object => !object.hidden);
+  const visible = trimCadSources([...(options.traces || []), ...objects].filter(object=>object.preview||rendersInWindow(object,options.windowId))).flatMap(cadPrimitives).filter(object => !object.hidden);
   const ordered = [...visible.filter(object => object.type === 'region'), ...visible.filter(object => !isPoint(object) && !isMeasurement(object) && object.type !== 'region'), ...visible.filter(isPoint), ...visible.filter(isMeasurement)];
   ordered.sort((first, second) => Number(!!second.historical) - Number(!!first.historical));
   for (const object of ordered) {

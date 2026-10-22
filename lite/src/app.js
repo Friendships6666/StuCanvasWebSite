@@ -39,6 +39,7 @@ import { circularPreview } from './construction-preview.js';
 import { cadPrimitives, cadTools, computeCadCorner, cornerSides, isCad, lineCorner, resolveCadCorner, trimCadSources } from './cad.js';
 import { arcConnectionParameters, isArcSource } from './arc-connection.js';
 import { snapToGrid, touchAim, pinchView } from './grid-snap.js';
+import { mainWindowId, renderTargets, rendersInWindow } from './render-targets.js';
 import { createCoordinateWindows } from './coordinate-windows.js';
 import { createSnapSettings } from './snap-settings.js';
 import { createTouchSettings } from './touch-settings.js';
@@ -58,6 +59,7 @@ const element = id => document.getElementById(id);
 localizeDOM();
 const setHint = (key = '', values = {}) => setMessage(element('hint'), key ? { key, values } : '');
 let canvas = element('canvas');
+canvas.dataset.windowId=mainWindowId;
 let textLayer = element('text-layer');
 const draftTemplate = element('equation-form').cloneNode(true);
 const tools = [
@@ -246,7 +248,7 @@ function tickTimeline(now) {
 let regions = new RegionManager(draw);
 // Each viewport owns only camera/render/sampling caches. The model, selection,
 // construction tools, history and simulation are shared by every canvas.
-const mainViewport = { canvas, textLayer, view, width, height, renderer, plots, regions, touchInteraction };
+const mainViewport = { id:mainWindowId, canvas, textLayer, view, width, height, renderer, plots, regions, touchInteraction };
 let activeViewport = mainViewport;
 const viewports = new Set([mainViewport]);
 let coordinateWindows = null;
@@ -315,12 +317,13 @@ function finishObjectStyleEdit() {
 
 function triggerRipple(position) {
   if (!position || !Number.isFinite(position.x) || !Number.isFinite(position.y)) return;
-  ripples.push({ x: position.x, y: position.y, started: performance.now(), duration: 520 });
+  ripples.push({ windowId:activeViewport.id, x: position.x, y: position.y, started: performance.now(), duration: 520 });
   draw();
 }
 const objectMenu = createObjectMenu({
   openTimeline: point => syncTimeline.open(point),
-  openCoordinates: (type,point) => coordinateWindows.add(type,point),
+  openCoordinates: point => coordinateWindows.add(point),
+  windows:()=>coordinateWindows.ids(),
   get: id => objects.find(object => object.id === id),
   all: () => objects,
   defaults: () => plots.options,
@@ -611,7 +614,7 @@ function readEnvironment() {
     view: { ...(activeViewport===mainViewport?view:mainViewport.view) },
     display: { ...Object.fromEntries(['grid', 'axes', 'snap'].map(id => [id, element(id).checked])), snapping: snapSettings.read(), touchOffset: element('touch-offset').checked, touchOffsetPixels: touchSettings.read() },
     settings: { locale: getLocale(), theme: getThemeSelection(), themeConfiguration: readThemeConfiguration(), plotDefaults: { ...plots.options } },
-    ui: { ...documentExtras.ui, timeline: syncTimeline.read(), coordinateWindows: coordinateWindows?.read() || [] },
+    ui: { ...documentExtras.ui, mainWindowId, timeline: syncTimeline.read(), coordinateWindows: coordinateWindows?.read() || [] },
   };
 }
 
@@ -909,7 +912,7 @@ function pickPoint(position, mode = 'snap') {
 
 function nearestObjects(position, radius = Infinity) {
   const candidates = [];
-  for (const object of trimCadSources([...resolved.values()])) {
+  for (const object of trimCadSources([...resolved.values()].filter(object=>rendersInWindow(object,activeViewport.id)))) {
     if (forcedHit && object.id !== forcedHit.object?.id) continue;
     if (object.hidden || object.invalid || (!shapeTypes.has(object.type) && !isPlot(object))) continue;
     const projection = isPlot(object) ? nearestPlotPoint(position, object) : projectPointOnObject(position, object);
@@ -938,7 +941,7 @@ function movePoint(point, position) {
 }
 
 function hitCandidates(position, filter = () => true, radius = hitRadius) {
-  return trimCadSources([...resolved.values()]).filter(object => !object.hidden && !object.invalid && (isMeasurement(object) || isPoint(object) || shapeTypes.has(object.type) || isPlot(object) || object.type === 'region' || isPhysicsObject(object)) && filter(object))
+  return trimCadSources([...resolved.values()].filter(object=>rendersInWindow(object,activeViewport.id))).filter(object => !object.hidden && !object.invalid && (isMeasurement(object) || isPoint(object) || shapeTypes.has(object.type) || isPlot(object) || object.type === 'region' || isPhysicsObject(object)) && filter(object))
     .map(object => ({ object, distance: isPlot(object)
       ? plots.get(object.id)?.distance(toScreen(position, view, width, height), view, width, height) ?? Infinity
       : isMeasurement(object) ? measurementDistance(measurementLayout(object, view, width, height), toScreen(position, view, width, height))
@@ -1620,13 +1623,13 @@ async function createRegion(position) {
     await new Promise(resolve => setTimeout(resolve, 40));
     if (request !== regionRequest) return;
   }
-  const boundaries = [...resolved.values()].filter(isBoundary).map(object => isPlot(object) ? { ...object, plot: plots.get(object.id) } : object);
+  const boundaries = [...resolved.values()].filter(object=>isBoundary(object)&&rendersInWindow(object,activeViewport.id)).map(object => isPlot(object) ? { ...object, plot: plots.get(object.id) } : object);
   if (!boundaries.length) { setHint('hint.createRegion'); return; }
   const equationTasks = boundaries.filter(isPlot).map(object => [object.id, plots.entries.get(object.id)?.task]);
   const content = JSON.stringify([intersectionContext(...boundaries), sliderParameters()]);
   const result = await regions.request(boundaries, position, { ...view }, width, height, mode);
   if (request !== regionRequest) return;
-  if (equationTasks.some(([id, task]) => plots.entries.get(id)?.task !== task) || content !== JSON.stringify([intersectionContext(...[...resolved.values()].filter(isBoundary)), sliderParameters()])) { setHint('hint.changedBoundary'); return; }
+  if (equationTasks.some(([id, task]) => plots.entries.get(id)?.task !== task) || content !== JSON.stringify([intersectionContext(...[...resolved.values()].filter(object=>isBoundary(object)&&rendersInWindow(object,activeViewport.id))), sliderParameters()])) { setHint('hint.changedBoundary'); return; }
   if (!result) { setHint('hint.noRegion'); return; }
   const before = snapshot();
   let index = 1;
@@ -1641,6 +1644,7 @@ async function createRegion(position) {
 }
 
 function constructRope(position, precise=false, candidate=null) {
+  if(activeViewport!==mainViewport){setHint('targets.physics');return;}
   const target=candidate||hitTest(position,object=>isPhysicsBody(object)||isSoftBody(object)||isPoint(object));
   const anchor=ropeAnchor(target,position,precise);
   if(!pending?.rope){pausePhysics();pending={rope:true,anchor};setHint(activeTool==='spring'?'spring.second':'rope.second');draw();return;}
@@ -2213,7 +2217,7 @@ function renderObjects() {
 }
 
 function selectableObjects() {
-  return [...resolved.values()].filter(object => !isJavaScript(object)).map(object => isPlot(object) ? { ...object, plot: plots.get(object.id) } : object.type === 'region' ? { ...object, region: regions.get(object.id) } : object);
+  return [...resolved.values()].filter(object => !isJavaScript(object)&&rendersInWindow(object,activeViewport.id)).map(object => isPlot(object) ? { ...object, plot: plots.get(object.id) } : object.type === 'region' ? { ...object, region: regions.get(object.id) } : object);
 }
 
 function updateMarquee() {
@@ -2237,8 +2241,10 @@ function scene(clean = false, interactive = true) {
   const geometry = selectableObjects();
   if (!clean && interactive && cadTools.has(activeTool)) geometry.push(...cadPreview(pointer));
   else if (!clean && interactive && pending?.rope && pointer) {
+    if(activeViewport===mainViewport){
     const second=ropeAnchor(hitTest(pointer,object=>isPhysicsBody(object)||isSoftBody(object)||isPoint(object)),pointer);
     const preview=(activeTool==='spring'?createSpring:createRope)([pending.anchor,second],resolved);if(preview)geometry.push({...preview,preview:true});
+    }
   }
   else if (!clean && interactive && pending && activeTool === 'ratioPoint') geometry.push(...ratioPointPreview(pointer));
   else if (!clean && interactive && pending && pointer && measurementTools.has(activeTool)) geometry.push(...measurementPreview(pointer));
@@ -2254,15 +2260,15 @@ function scene(clean = false, interactive = true) {
   }
   hitRadius = radius;
   return buildScene(geometry, view, width, height, {
-    grid: element('grid').checked, axes: element('axes').checked,
+    windowId:activeViewport.id, grid: element('grid').checked, axes: element('axes').checked,
     snapGrid: element('snap').checked ? snapSettings.read() : null,
     selected, selection, hovered, pending: pending?.ids?.at(-1) || pending?.id || pending?.pointId || pending?.subjectId || pending?.referenceId, clean,
     marquee: interactive && gesture?.mode === 'marquee' ? screenBox(gesture.screen, gesture.current) : null,
     surfaceOverlay: !clean && interactive && surfaceBrushes[activeTool] ? activeTool === 'frictionBrush' ? 'friction' : 'restitution' : null,
     surfaceBrush: !clean && interactive && surfaceBrushes[activeTool] && pointer ? { ...surfaceBrushes[activeTool].state, property: activeTool === 'frictionBrush' ? 'friction' : 'restitution', position: pointer, target: surfaceBrushTarget(pointer) } : null,
-    ripples: clean ? [] : ripples,
-    traces: traces.samples,
-    physicsDrag: !clean ? physics.dragGuide() : null,
+    ripples: clean ? [] : ripples.filter(ripple=>ripple.windowId===activeViewport.id),
+    traces: traces.samples.map(sample=>{const source=resolved.get(sample.sourceId);return source?{...sample,renderTargets:renderTargets(source)}:sample;}).filter(sample=>rendersInWindow(sample,activeViewport.id)),
+    physicsDrag: !clean && activeViewport===mainViewport ? physics.dragGuide() : null,
   });
 }
 
@@ -3012,8 +3018,8 @@ touchInteraction=makeTouchInteraction(mainViewport);storeViewport();
 coordinateWindows=createCoordinateWindows(element('canvas-wrap'),{
   view:()=>({...view}),
   read(context){if(context===activeViewport)storeViewport();return {...context.view};},
-  create(surface,layer,camera,error){
-    const context={canvas:surface,textLayer:layer,view:camera,width:0,height:0,renderer:null,
+  create(surface,layer,camera,error,id){
+    const context={id,canvas:surface,textLayer:layer,view:camera,width:0,height:0,renderer:null,
       plots:new PlotManager(draw),regions:new RegionManager(draw),touchInteraction:null,lifecycle:new AbortController()};
     context.plots.configure(mainViewport.plots.options);viewports.add(context);
     context.touchInteraction=makeTouchInteraction(context);
@@ -3043,18 +3049,22 @@ coordinateWindows=createCoordinateWindows(element('canvas-wrap'),{
   canTransform:()=>!gesture&&!touchInteraction?.active,
   apply(context,camera){context.view=camera;if(context===activeViewport)view=camera;draw();},
   type(context,type){
-    if(!activateViewport(context))return;
+    if(!activateViewport(context))return false;
     view={...view,coordinateSystem:type};storeViewport();snapSettings.coordinateSystem(type);draw();
   },
   home(context){if(gesture)return;inViewport(context,()=>{view={x:0,y:0,scale:65,coordinateSystem:view.coordinateSystem||'cartesian'};});draw();},
-  changed(){documentEditor?.sync();draw();},
+  closed(id){
+    const changed=new Set();for(const object of objects){if(renderTargets(object).includes(id)){object.renderTargets=renderTargets(object).filter(target=>target!==id);changed.add(object.id);}}
+    if(changed.size)refresh(changed);objectMenu.sync();
+  },
+  changed(){objectMenu.sync();documentEditor?.sync();draw();},
 });
 element('coordinate-type').addEventListener('change',event=>{
   if(!activateViewport(mainViewport)){event.target.value=mainViewport.view.coordinateSystem||'cartesian';return;}
   view={...view,coordinateSystem:event.target.value};storeViewport();snapSettings.coordinateSystem(view.coordinateSystem);
   documentEditor?.sync();draw();
 });
-for(const type of ['cartesian','polar'])element(`coordinate-new-${type}`).addEventListener('click',()=>coordinateWindows.add(type));
+element('coordinate-new').addEventListener('click',()=>coordinateWindows.add());
 
 element('touch-properties').addEventListener('click', () => {
   mobileUI.show(true); documentEditor.showObjects();

@@ -1,3 +1,4 @@
+import { mainOnly, mainWindowId, renderTargets } from './render-targets.js';
 import { createRegionEditor } from './region-editor.js';
 import { t, onLocaleChange } from './i18n.js';
 import { normalizeOptions, parameterAppliesToAlgorithm, parameters } from './plot/options.js';
@@ -205,6 +206,23 @@ export function createObjectMenu(actions) {
     }
     position();
   };
+  function showTargets() {
+    panel='targets';actions.endStyle?.();
+    const object=actions.get(objectId);if(!object){close();return;}
+    popup.replaceChildren();popup.classList.remove('object-menu-quick');popup.classList.add('object-menu-settings');
+    button(t('menu.back'),showMenu,'object-menu-back');
+    const title=document.createElement('div');title.className='object-menu-title';title.textContent=t('targets.label');popup.append(title);
+    const selected=new Set(renderTargets(object));
+    for(const id of actions.windows()){
+      const check=document.createElement('input');check.type='checkbox';check.checked=selected.has(id);check.disabled=mainOnly(object);check.dataset.renderTarget=id;
+      check.addEventListener('change',()=>{
+        actions.change(objectId,target=>{const next=new Set(renderTargets(target));if(check.checked)next.add(id);else next.delete(id);target.renderTargets=[...next];});
+      });
+      setting(id===mainWindowId?t('targets.main'):id,check);
+    }
+    if(mainOnly(object)){const note=document.createElement('p');note.className='render-target-note';note.textContent=t('targets.physics');popup.append(note);}
+    position();
+  }
   function showMenu() {
     panel = 'menu';
     actions.endStyle?.();
@@ -216,6 +234,7 @@ export function createObjectMenu(actions) {
       button(t('menu.edit'), () => { const id = objectId; close(); actions.edit(id); });
       button(t('menu.duplicate'), () => { const id = objectId; close(); actions.duplicate(id); });
     }
+    const targets=button(t('targets.label'),showTargets);targets.dataset.action='render-targets';
     if (isJavaScript(object)) {
       button(t('menu.delete'), () => { const id = objectId; close(); actions.remove(id); }, 'object-menu-delete');
       position(); return;
@@ -272,14 +291,15 @@ export function createObjectMenu(actions) {
   onLocaleChange(() => {
     popup.setAttribute('aria-label', t('menu.object'));
     if (popup.hidden) return;
-    if (panel === 'settings') showSettings();
+    if (panel === 'targets') showTargets();
+    else if (panel === 'settings') showSettings();
     else if (panel === 'quick') showQuickMenu();
     else if (panel === 'canvas') menu.openCanvas(anchor, contextPosition);
     else showMenu();
   });
   const menu = {
     close,
-    sync() { if (objectId && !actions.get(objectId)) close(); },
+    sync() { if (objectId && !actions.get(objectId)) close(); else if(objectId&&!popup.hidden&&panel==='targets')showTargets(); },
     openCanvas(control, point) {
       close();
       panel = 'canvas';
@@ -291,10 +311,8 @@ export function createObjectMenu(actions) {
       popup.hidden = false;
       const timeline = button(t('timeline.open'), () => { const at = contextPosition; close(); actions.openTimeline(at); });
       timeline.dataset.action = 'open-timeline';
-      for(const type of ['cartesian','polar']){
-        const coordinate=button(t(type==='polar'?'coordinates.newPolar':'coordinates.newCartesian'),()=>{const at=contextPosition;close();actions.openCoordinates(type,at);});
-        coordinate.dataset.action=`open-${type}-coordinates`;
-      }
+      const coordinate=button(t('coordinates.create'),()=>{const at=contextPosition;close();actions.openCoordinates(at);});
+      coordinate.dataset.action='open-coordinate-window';
       const clear = button(t('menu.clearTraces'), () => { close(); actions.clearTraces(); });
       clear.dataset.action = 'clear-traces';
       position();

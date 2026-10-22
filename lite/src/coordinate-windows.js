@@ -1,5 +1,5 @@
-import { localizeDOM, onLocaleChange } from './i18n.js';
-import { coordinateTypes } from './coordinate-system.js';
+import { localizeDOM, onLocaleChange, t } from './i18n.js';
+import { mainWindowId } from './render-targets.js';
 
 const svg = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8"/></svg>';
 export function createCoordinateWindows(container, actions) {
@@ -18,33 +18,38 @@ export function createCoordinateWindows(container, actions) {
     if(!windows.has(entry.state.id))return;
     if(!actions.remove(entry.context))return;
     windows.delete(entry.state.id);entry.lifecycle.abort();entry.observer.disconnect();entry.panel.remove();
-    if(notify)actions.changed();
+    if(notify){actions.closed?.(entry.state.id);actions.changed();}
   }
   function add(state) {
     const panel=document.createElement('section');panel.className='coordinate-window';panel.dataset.coordinateWindow=state.id;
     panel.dataset.i18nAriaLabel='coordinates.window';
     const header=document.createElement('div');header.className='coordinate-window-header';
     const grip=document.createElement('span');grip.className='coordinate-window-grip';grip.textContent='⠿';grip.setAttribute('aria-hidden','true');
-    const select=document.createElement('select');select.dataset.i18nAriaLabel='coordinates.type';select.dataset.coordinateType='';
-    for(const type of coordinateTypes){const option=document.createElement('option');option.value=type;option.dataset.i18n=`coordinates.${type}`;select.append(option);}
+    const title=document.createElement('span');title.className='coordinate-window-title';title.textContent=state.id;title.title=state.id;
+    const toggle=document.createElement('button');toggle.type='button';toggle.dataset.coordinateType=state.view.coordinateSystem||'cartesian';
+    const updateType=()=>{
+      const type=toggle.dataset.coordinateType;
+      toggle.setAttribute('aria-label',`${t('coordinates.type')}: ${t(`coordinates.${type}`)}`);toggle.title=toggle.getAttribute('aria-label');
+      toggle.innerHTML=type==='polar'?'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3.5"/><path d="M2 10h16M10 2v16m-6-14 12 12M4 16 16 4"/></svg>':'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 14h14m-11 3V3m-3 3 3-3 3 3m5 5 3 3-3 3"/></svg>';
+    };
     const home=document.createElement('button');home.type='button';home.dataset.i18nAriaLabel='ui.home';
     home.innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 5v4h4M4 9a6 6 0 1 1 0 4M8 10h4m-2-2v4"/></svg>';
     const dismiss=document.createElement('button');dismiss.type='button';dismiss.dataset.i18nAriaLabel='coordinates.close';dismiss.dataset.action='coordinate-close';dismiss.innerHTML=svg;
-    header.append(grip,select,home,dismiss);
+    header.append(grip,title,toggle,home,dismiss);
     const body=document.createElement('div');body.className='coordinate-window-body';
-    const canvas=document.createElement('canvas');canvas.id=`coordinate-${state.id}`;canvas.tabIndex=0;canvas.dataset.i18nAriaLabel='ui.drawingArea';
+    const canvas=document.createElement('canvas');canvas.id=`coordinate-${state.id}`;canvas.tabIndex=0;canvas.dataset.windowId=state.id;canvas.dataset.i18nAriaLabel='ui.drawingArea';
     const layer=document.createElementNS('http://www.w3.org/2000/svg','svg');layer.classList.add('text-layer');layer.setAttribute('aria-hidden','true');
     const error=document.createElement('p');error.className='coordinate-window-error';error.hidden=true;error.setAttribute('role','status');
     const resize=document.createElement('button');resize.type='button';resize.className='coordinate-window-resize';resize.dataset.i18nAriaLabel='coordinates.resize';
     resize.innerHTML='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><path d="m5 12 7-7m-2 7 2-2"/></svg>';
     body.append(canvas,layer,error);panel.append(header,body,resize);container.append(panel);
     const lifecycle=new AbortController(),signal=lifecycle.signal;
-    const context=actions.create(canvas,layer,copy(state.view),error);
-    const entry={state:copy(state),panel,context,lifecycle,select,observer:new ResizeObserver(()=>actions.resize(context))};
+    const context=actions.create(canvas,layer,copy(state.view),error,state.id);
+    const entry={state:copy(state),panel,context,lifecycle,toggle,updateType,observer:new ResizeObserver(()=>actions.resize(context))};
     windows.set(state.id,entry);entry.observer.observe(body);
-    select.value=state.view.coordinateSystem||'cartesian';
+    updateType();
     panel.addEventListener('pointerdown',()=>{panel.style.zIndex=String(++depth);},{signal});
-    select.addEventListener('change',()=>{actions.type(context,select.value);actions.changed();},{signal});
+    toggle.addEventListener('click',()=>{const type=toggle.dataset.coordinateType==='polar'?'cartesian':'polar';if(actions.type(context,type)===false)return;toggle.dataset.coordinateType=type;updateType();actions.changed();},{signal});
     home.addEventListener('click',()=>{actions.home(context);actions.changed();},{signal});
     dismiss.addEventListener('click',()=>close(entry),{signal});
     let drag=null;
@@ -72,13 +77,15 @@ export function createCoordinateWindows(container, actions) {
     fit(entry);localizeDOM(panel);return entry;
   }
   new ResizeObserver(()=>{for(const entry of windows.values())fit(entry);}).observe(container);
-  onLocaleChange(()=>{for(const entry of windows.values())localizeDOM(entry.panel);});
+  onLocaleChange(()=>{for(const entry of windows.values()){localizeDOM(entry.panel);entry.updateType();}});
   return {
-    add(type, point) {
+    add(point) {
       const parent=container.getBoundingClientRect(),count=windows.size;
-      add({id:crypto.randomUUID(),view:{...actions.view(),coordinateSystem:type},x:point?point.x-parent.left:24+count%5*24,y:point?point.y-parent.top:24+count%5*24,width:420,height:330});
+      let index=1;while(windows.has(`window-${index}`))index++;
+      add({id:`window-${index}`,view:{...actions.view()},x:point?point.x-parent.left:24+count%5*24,y:point?point.y-parent.top:24+count%5*24,width:420,height:330});
       actions.changed();
     },
+    ids(){return [mainWindowId,...windows.keys()];},
     read(){return [...windows.values()].map(entry=>({...copy(entry.state),view:actions.read(entry.context)}));},
     apply(states=[]) {
       const ids=new Set(states.map(state=>state.id));
@@ -86,7 +93,7 @@ export function createCoordinateWindows(container, actions) {
       for(const state of states){
         const entry=windows.get(state.id);
         if(!entry){add(state);continue;}
-        entry.state=copy(state);actions.apply(entry.context,copy(state.view));entry.select.value=state.view.coordinateSystem||'cartesian';fit(entry);
+        entry.state=copy(state);actions.apply(entry.context,copy(state.view));entry.toggle.dataset.coordinateType=state.view.coordinateSystem||'cartesian';entry.updateType();fit(entry);
       }
     },
   };

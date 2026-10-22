@@ -489,7 +489,6 @@ body, math-field {
 .coordinate-window-header { display: flex; align-items: center; gap: 6px; min-height: 42px; padding: 5px 8px; border-bottom: 1px solid var(--line); color: var(--foreground); background: var(--surface); cursor: grab; touch-action: none; user-select: none; }
 .coordinate-window-header:active { cursor: grabbing; }
 .coordinate-window-grip { color: var(--ink-muted); font-size: 19px; }
-.coordinate-window-header select { min-width: 0; flex: 1; width: 0; padding: 5px 3px; font: 12px Arial, sans-serif; border: 0; border-radius: 5px; background: var(--surface); color: var(--foreground); cursor: pointer; }
 .coordinate-window-header button { display: grid; place-items: center; flex-shrink: 0; width: 30px; height: 30px; padding: 5px; color: var(--ink-muted); border: 0; border-radius: 7px; background: transparent; cursor: pointer; }
 .coordinate-window-header button:hover { background: var(--surface-hover); color: var(--foreground); }
 .coordinate-window-header svg { width: 20px; height: 20px; pointer-events: none; }
@@ -502,6 +501,8 @@ body, math-field {
 @media (pointer: coarse) {
   .coordinate-window-header { min-height: 48px; }
   .coordinate-window-header button { width: 40px; height: 40px; }
-  .coordinate-window-header select { font-size: 16px; }
   .coordinate-window-resize { width: 32px; height: 32px; }
 }
+
+.coordinate-window-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 12px/1.4 ui-monospace, monospace; color: var(--text-secondary); }
+.render-target-note { max-width: 260px; margin: 6px 0; color: var(--text-secondary); font-size: 12px; }

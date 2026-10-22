@@ -1,3 +1,4 @@
+import { rendersInWindow } from './render-targets.js';
 import { createDocument, documentKey, objectDefinition, parseDocument, setConstructionCodec } from './document.js';
 import { jsonData } from './json-data.js';
 import { addConstruction, constructionNode, evaluatedConstructions, rememberConstruction, rememberBodyCreation, constructionDefinition, collectConstructions, cloneConstructionValue as clone } from './construction-store.js';
@@ -326,7 +327,7 @@ export function expandDocument(document) {
       const p = node.parameters;
       if (!Array.isArray(p.definitions) || p.definitions.some(isPhysicsObject) || !Number.isFinite(p.view?.x) || !Number.isFinite(p.view?.y) || !Number.isFinite(p.view?.scale) || p.view.scale <= 0 || !Number.isFinite(p.width) || !Number.isFinite(p.height)) fail('construction.scene');
       parseDocument(JSON.stringify({ format: 'stucanvas-lite', version: 1, objects: p.definitions }));
-      sceneValues.set(id, { ...p, geometry: geometricObjects(p.definitions, p.plots, true) });
+      sceneValues.set(id, { ...p, geometry: geometricObjects(p.definitions, p.plots, true).filter(object=>rendersInWindow(object)) });
     }
     return sceneValues.get(id);
   }

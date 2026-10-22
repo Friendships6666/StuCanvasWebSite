@@ -1,4 +1,5 @@
 import { clipLinear, gridStep, projectCircle, toScreen } from './projection.js';
+import { mainWindowId, validWindowId } from './render-targets.js';
 import { defaultSnapSettings, polarSteps } from './grid-snap.js';
 
 export const coordinateTypes = ['cartesian', 'polar'];
@@ -8,7 +9,7 @@ export const validCoordinateView = value => value && typeof value === 'object'
   && (value.coordinateSystem === undefined || validCoordinateType(value.coordinateSystem));
 export function validCoordinateWindows(value) {
   return Array.isArray(value) && new Set(value.map(item => item?.id)).size === value.length
-    && value.every(item => item && typeof item.id === 'string' && item.id.length > 0 && item.id.length < 128
+    && value.every(item => item && validWindowId(item.id) && item.id !== mainWindowId
       && validCoordinateView(item.view) && ['x', 'y', 'width', 'height'].every(key => Number.isFinite(item[key]))
       && item.width >= 200 && item.width <= 10000 && item.height >= 180 && item.height <= 10000);
 }

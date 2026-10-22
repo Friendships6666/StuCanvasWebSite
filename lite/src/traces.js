@@ -1,3 +1,4 @@
+import { renderTargets } from './render-targets.js';
 import { isFlexible, ropeNodes } from './rope.js';
 import { isLiquid } from './liquid.js';
 import { isSoftBody } from './soft-body.js';
@@ -49,7 +50,7 @@ export class TraceManager {
     const shape = freezeShape(entry.current);
     this.samples.push(shape);
     if (isPoint(shape) && next && isPoint(next) && (shape.x !== next.x || shape.y !== next.y)) {
-      this.samples.push({ type: 'segment', historical: true, first: { x: shape.x, y: shape.y }, second: { x: next.x, y: next.y }, color: shape.color, colorType: shape.colorType, opacity: shape.opacity, strokeWidth: Math.min(shape.strokeWidth || 2.4, 2) });
+      this.samples.push({ type: 'segment', historical: true, sourceId:shape.sourceId, renderTargets:shape.renderTargets, first: { x: shape.x, y: shape.y }, second: { x: next.x, y: next.y }, color: shape.color, colorType: shape.colorType, opacity: shape.opacity, strokeWidth: Math.min(shape.strokeWidth || 2.4, 2) });
     }
     entry.current = null;
   }
@@ -90,7 +91,7 @@ export class TraceManager {
         payload = Number.isFinite(object.value) ? {} : null;
         Object.assign(state, { type: 'point', x: object.value, y: 0 });
       } else payload = {};
-      const current = payload ? { ...state, ...payload, historical: true, color: object.color ?? null, colorType: object.type, opacity: objectOpacity(object) * 0.3, strokeWidth: object.strokeWidth } : null;
+      const current = payload ? { ...state, ...payload, historical: true, sourceId:object.id, renderTargets:[...renderTargets(source)], color: object.color ?? null, colorType: object.type, opacity: objectOpacity(object) * 0.3, strokeWidth: object.strokeWidth } : null;
       if (entry.key !== key) {
         this.archive(entry, current);
         entry.key = key;

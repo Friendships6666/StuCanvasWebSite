@@ -22,6 +22,7 @@ import { defaultPhysicsMaterial, validTextureImage } from './physics-material.js
 import { SCRIPT_LIMIT, bindingPatch, formulaParameters, isJavaScript, jsonValue, validVariablePath, variableRoot } from './reflection.js';
 import { jsonData } from './json-data.js';
 import { validSnapSettings, validTouchOffsetPixels } from './grid-snap.js';
+import { mainWindowId, renderTargets, validRenderTargets } from './render-targets.js';
 import { validCoordinateView, validCoordinateWindows } from './coordinate-system.js';
 
 export const documentFormat = 'stucanvas-lite';
@@ -110,6 +111,7 @@ export function objectDefinition(source, { plotDefaults = defaults, resolved } =
   object.opacity = objectOpacity(object);
   object.strokeWidth ??= 2.4;
   object.hidden ??= false;
+  object.renderTargets = [...renderTargets(object)];
   object.trace ??= false;
   if (isJavaScript(object)) {
     object.source ??= 'return 1;'; object.enabled ??= true;
@@ -337,6 +339,7 @@ export function parseDocument(text) {
     if (document.display.touchOffset !== undefined && typeof document.display.touchOffset !== 'boolean') fail('error.documentValue', { path: '$.display.touchOffset' });
     if (document.display.touchOffsetPixels !== undefined && !validTouchOffsetPixels(document.display.touchOffsetPixels)) fail('error.documentValue', { path: '$.display.touchOffsetPixels' });
   }
+  if(document.ui?.mainWindowId!==undefined&&document.ui.mainWindowId!==mainWindowId)fail('error.documentValue',{path:'$.ui.mainWindowId'});
   if(document.ui?.coordinateWindows!==undefined&&!validCoordinateWindows(document.ui.coordinateWindows))fail('error.documentValue',{path:'$.ui.coordinateWindows'});
   if (document.ui?.timeline !== undefined) {
     const state = document.ui.timeline;
@@ -365,6 +368,7 @@ export function parseDocument(text) {
       || value.duration > 0 && value.time > value.duration || typeof value.running !== 'boolean') fail('error.documentValue', { path: '$.timeline' });
   }
 
+  const availableWindows=document.ui?.coordinateWindows===undefined&&document.ui?.mainWindowId===undefined?null:new Set([mainWindowId,...(document.ui.coordinateWindows||[]).map(window=>window.id)]);
   const byId = new Map();
   const sliderNames = new Map();
   for (const [index, object] of document.objects.entries()) {
@@ -375,6 +379,7 @@ export function parseDocument(text) {
     if (byId.has(object.id)) fail('error.documentDuplicate', { id: object.id });
     if (object.type === 'rightAngle') object.type = 'chamfer';
     if (typeof object.type !== 'string' || !Object.hasOwn(parentRules, object.type)) fail('error.documentType', { id: object.id, type: JSON.stringify(object.type) });
+    if (!validRenderTargets(object,availableWindows)) fail('error.documentValue', { path: `${path}.renderTargets` });
     if (object.name !== undefined && (typeof object.name !== 'string' || !object.name.trim())) fail('error.documentValue', { path: `${path}.name` });
     if (object.parents !== undefined && (!Array.isArray(object.parents) || object.parents.some(parent => typeof parent !== 'string'))) fail('error.documentValue', { path: `${path}.parents` });
     if (object.script !== undefined) fail('error.documentValue', { path: `${path}.script` });
