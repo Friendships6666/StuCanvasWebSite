@@ -151,6 +151,8 @@ const intersectionTracker = new IntersectionTracker();
 const equationIntersectionCache = new Map();
 let activeTool = 'select';
 let selected = null;
+let listedSelection = null;
+let objectRevealQueued = false;
 let selection = new Set();
 let hovered = null;
 let pending = null;
@@ -2164,6 +2166,8 @@ function createObjectRow(object, existing) {
 
 function renderObjects() {
   const list = element('objects');
+  const selectionChanged = selected !== listedSelection;
+  listedSelection = selected;
   const rows = new Map([...list.children].filter(row => row.dataset.id).map(row => [row.dataset.id, row]));
   for (const [index, object] of objects.entries()) {
     const geometry = resolved.get(object.id);
@@ -2228,6 +2232,28 @@ function renderObjects() {
     if (list.children[index] !== row) list.insertBefore(row, list.children[index] || null);
   }
   for (const row of rows.values()) { reflectionEditors.get(row)?.destroy?.(); row.remove(); }
+  if (selectionChanged && !list.contains(document.activeElement)) revealSelectedObject();
+}
+
+function revealSelectedObject() {
+  if (!selected || objectRevealQueued) return;
+  objectRevealQueued = true;
+  // Coalesce selection updates and wait until every row is in its final order.
+  // Scrolling only this container leaves the canvas and keyboard focus intact.
+  queueMicrotask(() => {
+    objectRevealQueued = false;
+    if (!selected) return;
+    documentEditor?.showObjects();
+    const panel = element('object-panel');
+    const row = element('objects').querySelector(`[data-id="${CSS.escape(selected)}"]`);
+    if (!row || !panel.clientHeight) return;
+    const bounds = panel.getBoundingClientRect();
+    const item = row.getBoundingClientRect();
+    const top = bounds.top + panel.clientTop;
+    const bottom = top + panel.clientHeight;
+    const offset = item.top < top ? item.top - top : item.bottom > bottom ? Math.min(item.top - top, item.bottom - bottom) : 0;
+    if (offset) panel.scrollTo({ top: panel.scrollTop + offset, behavior: 'instant' });
+  });
 }
 
 function selectableObjects() {
@@ -2400,7 +2426,7 @@ function beginPhysicsDrag(position, pointerId) {
   if (!physics.beginDrag(hit.id, position)) { physicsSession = session; restoreSnapshot(before); refresh(); return; }
   selected = hit.id; selection.clear();
   gesture = { mode: 'physicsForce', id: hit.id, before, session, pointerId };
-  canvas.style.cursor = 'grabbing'; setHint('drag.active'); refresh();
+  canvas.style.cursor = 'grabbing'; setHint('drag.active'); refresh(); revealSelectedObject();
 }
 
 function releasePhysicsDrag(cancelled) {
@@ -2458,6 +2484,7 @@ function startPointer(event) {
     else if (isMeasurement(hit)) { pausePhysics(); gesture = { mode: 'measurement', id: hit.id, before: snapshot(), screen, offset: { ...(hit.labelOffset || { x: 0, y: 0 }) }, pointerId: event.pointerId }; }
     else if (!hit) gesture = { mode: 'pan', screen, view: { ...view }, pointerId: event.pointerId };
     refresh();
+    revealSelectedObject();
   } else if (['rope','spring'].includes(activeTool)) constructRope(pointer, event.altKey);
   else construct(pointer);
 }
@@ -2591,6 +2618,7 @@ listenViewport('contextmenu', event => {
   refresh();
   if (selected) objectMenu.openQuick(selected, canvas, { x: event.clientX, y: event.clientY });
   else objectMenu.openCanvas(canvas, { x: event.clientX, y: event.clientY });
+  revealSelectedObject();
 });
 
 function undo() {
@@ -3004,6 +3032,7 @@ function makeTouchInteraction(context) {
     selection.clear(); selected = target?.id || null; hovered = null;
     if (isPoint(target)) triggerRipple(target);
     refresh();
+    revealSelectedObject();
   },
   start(event, target) { withTouchHit(target, () => startPointer(event)); },
   move: movePointer,
@@ -3014,6 +3043,7 @@ function makeTouchInteraction(context) {
     refresh();
     const position = { x: event.clientX, y: event.clientY };
     if (selected) objectMenu.openQuick(selected, canvas, position); else objectMenu.openCanvas(canvas, position);
+    revealSelectedObject();
   },
   beginPinch(points) {
     objectMenu.close();

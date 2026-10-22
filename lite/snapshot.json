@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "50a9e8c47ee8480d522034646152b8c8a9e4683d955bb4f67a038f66484a060b"
+      "sha256": "059a27774f926f6de9eb31fc5ec17f2065eb80aeb46a639aefba9b94a6241ef0"
     },
     {
       "path": "src/arc-connection.js",
@@ -225,7 +225,7 @@
     },
     {
       "path": "src/object-menu.js",
-      "sha256": "bec73fd28ee94282b64877287b848a55fecba35910a8745372b2497704856789"
+      "sha256": "7acb9967b3ee7162ca60da35e1c96468fb0ed3a9ffa3d1ab8e194ffcc7fe7c81"
     },
     {
       "path": "src/object-status.js",

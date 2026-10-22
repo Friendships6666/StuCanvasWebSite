@@ -287,7 +287,9 @@ export function createObjectMenu(actions) {
     if (event.key === 'Escape' && !popup.hidden) { close(); anchor?.focus(); event.preventDefault(); event.stopImmediatePropagation(); }
   });
   window.addEventListener('resize', () => { if (!popup.hidden) position(); });
-  document.querySelector('.algebra-content').addEventListener('scroll', close);
+  document.querySelector('.algebra-content').addEventListener('scroll', event => {
+    if (anchor && event.currentTarget.contains(anchor)) close();
+  });
   onLocaleChange(() => {
     popup.setAttribute('aria-label', t('menu.object'));
     if (popup.hidden) return;
