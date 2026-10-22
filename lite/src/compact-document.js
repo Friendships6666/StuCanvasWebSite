@@ -1,6 +1,6 @@
 import { createDocument, documentKey, objectDefinition, parseDocument, setConstructionCodec } from './document.js';
 import { jsonData } from './json-data.js';
-import { addConstruction, constructionNode, evaluatedConstructions, rememberConstruction, rememberBodyCreation, constructionDefinition, collectConstructions } from './construction-store.js';
+import { addConstruction, constructionNode, evaluatedConstructions, rememberConstruction, rememberBodyCreation, constructionDefinition, collectConstructions, cloneConstructionValue as clone } from './construction-store.js';
 import { PhysicsWorld, bodyState, instantiateRegion, isPhysicsObject } from './physics.js';
 import { softFromBody } from './soft-body.js';
 import { liquidFromBody } from './liquid.js';
@@ -21,13 +21,8 @@ import { ConstructionCache } from './construction-cache.js';
 const values = new ConstructionCache(), simulationValues = new ConstructionCache(), sceneValues = new ConstructionCache({ maxEntries: 8 });
 const sampleField = object => object.type === 'softBody' ? 'nodes' : object.type === 'liquid' ? 'particles' : isFlexible(object) ? 'links' : null;
 const fail = path => { throw new LocalizedError('error.documentValue', { path }); };
-const clone = value => {
-  const next = structuredClone(value);
-  if (isPhysicsObject(value)) for (const key of ['shape', 'mesh']) if (value[key]) next[key] = value[key];
-  return next;
-};
 const stripRef = state => { const { derivation, ...rest } = state; return rest; };
-const same = (a, b) => documentKey(a) === documentKey(b);
+const same = (a, b) => a === b || documentKey(a) === documentKey(b);
 function finish(iterator) { let next; do { next = iterator.next(); } while (!next.done); return next.value; }
 
 function shapeFromLoops(loops) {
@@ -79,12 +74,18 @@ export function rememberRegionConstruction(object, source, definitions, region, 
 function offsets(before, after) {
   if (!Array.isArray(before) || !Array.isArray(after) || before.length !== after.length || !before.length) return null;
   const delta = {};
+  const displacement = (read) => {
+    const candidates = [...new Set(before.map((item, i) => read(after[i]) - read(item)))];
+    // Subtracting two floats can round the user's uniform displacement. Prefer
+    // a candidate that reproduces every value exactly when it is added back.
+    return candidates.find(value => before.every((item, i) => read(item) + value === read(after[i]))) ?? candidates[0];
+  };
   for (const field of ['position', 'velocity']) {
-    delta[field] = { x: after[0][field].x - before[0][field].x, y: after[0][field].y - before[0][field].y };
+    delta[field] = Object.fromEntries(['x', 'y'].map(axis => [axis, displacement(item => item[field][axis])]));
     if (before.some((item, i) => ['x', 'y'].some(axis => Math.abs(after[i][field][axis] - item[field][axis] - delta[field][axis]) > 1e-9))) return null;
   }
   for (const field of ['angle', 'angularVelocity']) if (Object.hasOwn(before[0], field)) {
-    delta[field] = after[0][field] - before[0][field];
+    delta[field] = displacement(item => item[field]);
     if (before.some((item, i) => Math.abs(after[i][field] - item[field] - delta[field]) > 1e-9)) return null;
   }
   return delta;
@@ -118,7 +119,10 @@ export function captureConstruction(object, objects = []) {
     } else throw new LocalizedError('project.missingRecipe', { id: object.id });
   }
   const a = { ...before }, b = { ...object }; delete a.derivation; delete b.derivation;
-  if (same(a, b)) return id;
+  // Shared geometry must not be serialized on every solver synchronization.
+  // Other fields still compare by value so in-place property edits are recorded.
+  const fields = Object.keys(a);
+  if (fields.length === Object.keys(b).length && fields.every(key => Object.hasOwn(b, key) && same(a[key], b[key]))) return id;
   const field = sampleField(object), parameters = { definition: constructionDefinition(object) }, parents = [id];
   if (field && !same(before[field], object[field])) {
     parameters.motion = offsets(before[field], object[field]);

@@ -1,5 +1,6 @@
 import { anchorWorld, isFlexible } from './rope.js';
 import { isSoftBody, softCoordinates } from './soft-body.js';
+import { isPoint } from './geometry.js';
 
 export function syncRopes(world,objects,Matter,scale) {
   const {Bodies,Body,Constraint,Composite,Pairs}=Matter;
@@ -34,9 +35,13 @@ export function syncRopes(world,objects,Matter,scale) {
     const disabled=object.hidden||anchorPoints.some(p=>!p)||object.anchors.some(a=>targets.get(a.objectId)?.hidden);
     const key=JSON.stringify([object.links,object.mass,object.running,disabled,object.restitution,object.airFriction,object.playbackRate]);
     const length=object.length/object.segments*scale;
+    // A point is both a fixed anchor and a visible collision disk. Solving
+    // against that disk would push the attached chain away from its own pin.
+    // Apply this to existing projects too, without changing user exclusions.
+    const ignored=[...new Set([...object.ignored,...object.anchors.filter(anchor=>isPoint(targets.get(anchor.objectId))).map(anchor=>anchor.objectId)])];
     for(let i=0;i<entry.links.length;i++){
       const body=entry.links[i],state=object.links[i];
-      Object.assign(body.collisionFilter,{objectId:object.id,kind:'rope',ignored:object.ignored,freeFall:object.freeFall,
+      Object.assign(body.collisionFilter,{objectId:object.id,kind:'rope',ignored,freeFall:object.freeFall,
         collideBodies:object.collideBodies,collideGeometry:object.collideGeometry,mask:disabled?0:0xFFFFFFFF});
       if(entry.key!==key){
         Body.setStatic(body,false);Body.setMass(body,object.mass/object.segments);

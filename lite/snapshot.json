@@ -101,7 +101,7 @@
     },
     {
       "path": "src/compact-document.js",
-      "sha256": "5da9190599f25cb7fd3fb876ace2ebf19c762c94d022f61ec9f416be5d05628a"
+      "sha256": "d358ee808f774ac8b2833638d8a319ba072cdbaacc6d0d2d4bfe31b08ac2462b"
     },
     {
       "path": "src/conics.js",
@@ -117,7 +117,7 @@
     },
     {
       "path": "src/construction-store.js",
-      "sha256": "3ca01d02e143186c633b854a9dde374811de83b9b124ce88534456002a7f2c7c"
+      "sha256": "534f6e70833268e361c767ccb525720d1abef140d42319d9315c2e8941b24172"
     },
     {
       "path": "src/document-editor.js",
@@ -365,7 +365,7 @@
     },
     {
       "path": "src/rope-physics.js",
-      "sha256": "f3b62a1c452d0cee911f5d1ca9a8684f8c5f407d4ba4f61e175b4995fbf0dbc6"
+      "sha256": "905e4cc907fcb1497fa6595f9b3091670dc11fdf1cf8294c9eea4338f1cea127"
     },
     {
       "path": "src/rope.js",

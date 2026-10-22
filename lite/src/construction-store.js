@@ -7,6 +7,16 @@ import { ConstructionCache } from './construction-cache.js';
 const nodes = new Map(), keys = new Map();
 export const evaluatedConstructions = new ConstructionCache();
 export const constructionNode = id => nodes.get(id);
+// Geometry is immutable and already shared by the renderer and solver caches.
+// Exclude it BEFORE cloning; replacing it afterwards still copies every sample.
+export function cloneConstructionValue(value) {
+  if (!['physicsBody', 'softBody', 'rope', 'spring', 'liquid'].includes(value?.type)) return structuredClone(value);
+  const { shape, mesh, ...state } = value;
+  const snapshot = structuredClone(state);
+  if (shape) snapshot.shape = shape;
+  if (mesh) snapshot.mesh = mesh;
+  return snapshot;
+}
 export function addConstruction(kind, parents = [], parameters = {}) {
   const node = jsonData({ kind, parents, parameters }), key = JSON.stringify(node);
   if (keys.has(key)) return keys.get(key);
@@ -26,8 +36,7 @@ export function addConstruction(kind, parents = [], parameters = {}) {
 export function rememberConstruction(object, id) {
   object.derivation = id;
   if (object.time === 0 && object.initialState && Object.entries(object.initialState).filter(([key]) => key !== 'derivation').every(([key, value]) => JSON.stringify(value) === JSON.stringify(object[key]))) object.initialState.derivation = id;
-  const snapshot = structuredClone(object);
-  for (const key of ['shape', 'mesh']) if (object[key]) snapshot[key] = object[key];
+  const snapshot = cloneConstructionValue(object);
   evaluatedConstructions.set(id, snapshot);
   return id;
 }
