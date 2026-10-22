@@ -25,7 +25,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "c44c33f579971899996ffc4749929f704d5248fc80698dbbecf54c3b02d510a9"
+      "sha256": "a6aacb42bc882f8a69d2d3f330dbe15cdcdbfd8754f994cc4a85ab0c3d06e313"
     },
     {
       "path": "licenses/CC-BY-4.0.txt",
@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "432ab98892f48fe60bf727a2dcc8732809570b4361ae08986b1bac3ce4572ba9"
+      "sha256": "124f0949a70766949debbb85f1d124d049b19a6d38f9bf92bc8c44220b00a855"
     },
     {
       "path": "src/arc-connection.js",
@@ -120,12 +120,20 @@
       "sha256": "e1e7e73db7683000dace5f9d0e0b5291b33bb3d1556e313cb3ebf9a8d258bec4"
     },
     {
+      "path": "src/coordinate-system.js",
+      "sha256": "a58b33ee0af6332cc24fdcc85c65a66e64a7ce7b806b358b6c0bc4faaeeaf2f0"
+    },
+    {
+      "path": "src/coordinate-windows.js",
+      "sha256": "609f1c070391f90c6faca34416a5bf3944930c6bc267e16615c74ce2981842db"
+    },
+    {
       "path": "src/document-editor.js",
       "sha256": "53654296bac1a6835d9e37c35f1d5c8e294d11ec9836651cae368a72afd054c3"
     },
     {
       "path": "src/document.js",
-      "sha256": "593441569ea2ffb31dd6bccc246b83df98c2621a9a2bedbd3690df9241255d7e"
+      "sha256": "5c41538aac8c96bf36d0b0bb1c07f139dac8188ff7b38264ccb20cf0601f7fad"
     },
     {
       "path": "src/equation-intersections.js",
@@ -141,7 +149,7 @@
     },
     {
       "path": "src/grid-snap.js",
-      "sha256": "7907052a9e36e51d656fec7d79cd86a0b3ebe3f854441b961703eb06d90d74c5"
+      "sha256": "44ed7b5eee551f9d34dc454ccd84603b41073e979924207b7e62db6640a2453a"
     },
     {
       "path": "src/i18n.js",
@@ -189,15 +197,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "ab2ca4d5f2632b71163a36cf373869c0337476213952b72373ad95f1a03230a8"
+      "sha256": "b9ed436cabe2f292d7324e509034635664a88bf37dde7a86f9976046cdfb03a8"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "bc639a6dfe51cd0281665638fe60cee45b53bc39ebe7a8cc218b2698e7c9bf24"
+      "sha256": "f1961ce6ee619218275641faab4e438b90590550525440b509be77b8bda539d0"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "2d9d2b4ecf709e17291228fea703de564b6c61dc3784b97b78a73995bc13b1f3"
+      "sha256": "972176fb548f722cccc0751cf0104ab15df7d763134dcf7474337d301b13a8cf"
     },
     {
       "path": "src/math-input.js",
@@ -217,7 +225,7 @@
     },
     {
       "path": "src/object-menu.js",
-      "sha256": "9a093a9efd71258a7f2989c7c917867f9c8c856e5dd6d80776276b75c75d842b"
+      "sha256": "e1763e9c9d6ac9c760b18a857803dcc296716664b233ba408d135a4e0b1b567b"
     },
     {
       "path": "src/object-status.js",
@@ -253,7 +261,7 @@
     },
     {
       "path": "src/physics-material.js",
-      "sha256": "b000e55fc8f45290d3426ebee26cd6989221574655f1bffd1d42d7e093894a65"
+      "sha256": "7c2425ae39845eb95940d4a9110c2d414e60f6e85a423eeb4605f7a5c1c8f531"
     },
     {
       "path": "src/physics-shape.js",
@@ -321,7 +329,7 @@
     },
     {
       "path": "src/projection.js",
-      "sha256": "8449f47886072739c9718696ef86f2e9d1436ae007cc68dc8fce1698c05bbdcf"
+      "sha256": "329fbb188976caba3d3eb0607ac805db50fb144964da4722835ca68166f08d76"
     },
     {
       "path": "src/ratio-dialog.js",
@@ -369,7 +377,7 @@
     },
     {
       "path": "src/renderer.js",
-      "sha256": "6c6776ccbe18cf12ea346de83b40bf3e564c44428930420f6c1a6e6382d5ebab"
+      "sha256": "96d91fe49e1430723f9c112c83d4ea3c0a343754ce3a62e5fad0c0ec52dd4156"
     },
     {
       "path": "src/rope-editor.js",
@@ -385,7 +393,7 @@
     },
     {
       "path": "src/scene.js",
-      "sha256": "041be94c114797b25c18b962f9819aa1caaebd2a99c82ea0012cc52fcbaa6818"
+      "sha256": "c0f704e237c4f6f7bd27c3370e6b3b0b17c719da9b9bd26b7c198a1925b6298e"
     },
     {
       "path": "src/selection.js",
@@ -393,7 +401,7 @@
     },
     {
       "path": "src/snap-settings.js",
-      "sha256": "874158821db5427fc6ebe0e6f46830edf1f9725dfa9c3a206971413265f47931"
+      "sha256": "ecfbb2b0558105cf280dd14cf08613d47bcab035754d4c05deb7c79223afaee1"
     },
     {
       "path": "src/soft-body.js",
@@ -413,7 +421,7 @@
     },
     {
       "path": "src/style.css",
-      "sha256": "eadd2c3f54719a8187235c8bdca0af14b54cac1501eef048a1ae35da7ab5409a"
+      "sha256": "219295e15468763b5f70508c9c747bdd12b15b53e8c55193788b359e1a67c2a5"
     },
     {
       "path": "src/surface-brush-target.js",
@@ -441,7 +449,7 @@
     },
     {
       "path": "src/touch-interaction.js",
-      "sha256": "b1e090d7ca737406234ec908620c0ede481644767529a82eca3c65bf68ce9666"
+      "sha256": "bf150b46e2c67c533cdd6c0094c5d9ecf12c65e0b0a26c298696addbd32cf9ef"
     },
     {
       "path": "src/touch-settings.js",

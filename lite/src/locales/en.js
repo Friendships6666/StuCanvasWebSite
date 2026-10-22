@@ -1,4 +1,18 @@
 export default {
+  "coordinates.main": "Main coordinates",
+  "coordinates.type": "Coordinate system",
+  "coordinates.cartesian": "Cartesian",
+  "coordinates.polar": "Polar",
+  "coordinates.newCartesian": "New Cartesian window",
+  "coordinates.newPolar": "New polar window",
+  "coordinates.window": "Coordinate window",
+  "coordinates.close": "Close coordinate window",
+  "coordinates.resize": "Resize coordinate window",
+  "snap.radialStep": "Radius step",
+  "snap.angularStep": "Angle step (°)",
+  "snap.radius": "Radius only",
+  "snap.angle": "Angle only",
+
   "project.missingRecipe": "Object {id} has no recoverable construction source. Recreate it from its original region; this legacy state cannot be rebuilt losslessly from a construction graph.",
   "timeline.open": "Open timeline",
   "timeline.close": "Close timeline",

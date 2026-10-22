@@ -1,4 +1,18 @@
 export default {
+  "coordinates.main": "主坐标系",
+  "coordinates.type": "坐标系类型",
+  "coordinates.cartesian": "直角坐标系",
+  "coordinates.polar": "极坐标系",
+  "coordinates.newCartesian": "新建直角坐标窗口",
+  "coordinates.newPolar": "新建极坐标窗口",
+  "coordinates.window": "坐标系窗口",
+  "coordinates.close": "关闭坐标系窗口",
+  "coordinates.resize": "调整坐标系窗口大小",
+  "snap.radialStep": "半径步长",
+  "snap.angularStep": "角度步长（°）",
+  "snap.radius": "仅半径",
+  "snap.angle": "仅角度",
+
   "project.missingRecipe": "对象 {id} 缺少可重建的构造来源，请从原始色块重新实例化；无法用构造链无损恢复此旧状态。",
   "timeline.open": "打开时间线",
   "timeline.close": "关闭时间线",

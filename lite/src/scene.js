@@ -13,6 +13,7 @@ import { cadPrimitives, trimCadSources } from './cad.js';
 import { objectColor, objectOpacity } from './object-style.js';
 import { regionScreenProjection } from './regions.js';
 import { regionMesh } from './region-mesh.js';
+import { polarGrid } from './coordinate-system.js';
 import { isPlot } from './plot/types.js';
 import { conicSegments, isConic } from './conics.js';
 import { isMeasurement, measurementLayout } from './measurements.js';
@@ -127,6 +128,22 @@ export function buildScene(objects, view, width, height, options = {}) {
   const step = gridStep(view.scale);
   const horizontal = gridTicks(view.x, view.scale, width, step);
   const vertical = gridTicks(view.y, view.scale, height, step, true);
+  if(view.coordinateSystem==='polar'){
+    polarGrid(view,width,height,options,{
+      line:(a,b,axis)=>line(a,b,axis ? .65 : .35,rgba(axis?palette.axes:palette.gridMinor)),
+      circle:(circle,major)=>{
+        let bounds=viewportBounds;
+        if(circle.kind===2){
+          const [x,y]=circle.geometry,r=circle.radius+2;
+          const left=Math.max(0,x-r),top=Math.max(0,y-r),right=Math.min(width,x+r),bottom=Math.min(height,y+r);
+          if(right<=left||bottom<=top)return;
+          bounds=[left,top,right-left,bottom-top];
+        }
+        add(bounds,circle.geometry,[circle.kind,major ? .6 : .35,circle.radius,0],rgba(major?palette.gridMajor:palette.gridMinor));
+      },
+      text:(value,x,y,anchor='start')=>text(value,x,y,palette.text,anchor,11),
+    });
+  } else {
   if (options.grid) {
     if (options.snapGrid) {
       const settings = options.snapGrid, steps = snapSteps(settings, view.scale);
@@ -166,6 +183,7 @@ export function buildScene(objects, view, width, height, options = {}) {
       for (const tick of vertical) if (tick.value !== 0) text(format(tick.value), Math.max(25, origin.x - 8), tick.screen + 4, palette.text, 'end', 11);
     }
     if (origin.x >= 0 && origin.x <= width && origin.y >= 0 && origin.y <= height) text('0', origin.x - 7, origin.y + 16, palette.text, 'end', 11);
+  }
   }
   const visible = trimCadSources([...(options.traces || []), ...objects]).flatMap(cadPrimitives).filter(object => !object.hidden);
   const ordered = [...visible.filter(object => object.type === 'region'), ...visible.filter(object => !isPoint(object) && !isMeasurement(object) && object.type !== 'region'), ...visible.filter(isPoint), ...visible.filter(isMeasurement)];

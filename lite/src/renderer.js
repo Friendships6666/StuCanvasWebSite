@@ -122,11 +122,14 @@ const compositeShader = `
 `;
 
 export class GeometryRenderer {
-  static async create(canvas, onError, onChange) {
+  static async create(canvas, onError, onChange, device = null) {
     if (!navigator.gpu) throw new LocalizedError('error.webgpuUnavailable');
-    const adapter = await navigator.gpu.requestAdapter();
-    if (!adapter) throw new LocalizedError('error.webgpuAdapter');
-    const renderer = new GeometryRenderer(canvas, await adapter.requestDevice(), onError, onChange);
+    if(!device){
+      const adapter = await navigator.gpu.requestAdapter();
+      if (!adapter) throw new LocalizedError('error.webgpuAdapter');
+      device = await adapter.requestDevice();
+    }
+    const renderer = new GeometryRenderer(canvas, device, onError, onChange);
     await renderer.initialize();
     return renderer;
   }
@@ -142,10 +145,12 @@ export class GeometryRenderer {
     this.textures = new PhysicsTextureCache(device, onChange);
     this.lost = false;
     device.lost.then(info => {
+      if(this.disposed)return;
       this.lost = true;
       onError(new LocalizedError('error.deviceLost', { reason: info.message || info.reason }));
     });
-    device.addEventListener('uncapturederror', event => onError(new LocalizedError('error.webgpu', { message: event.error.message })));
+    this.onGPUError = event => onError(new LocalizedError('error.webgpu', { message: event.error.message }));
+    device.addEventListener('uncapturederror', this.onGPUError);
   }
 
   async initialize() {
@@ -342,6 +347,17 @@ export class GeometryRenderer {
     }
     this.device.queue.submit([encoder.finish()]);
     return readback ? this.readPixels(readback, rowBytes, this.canvas.width, this.canvas.height) : null;
+  }
+
+  destroy() {
+    this.disposed=true;this.lost=true;
+    this.device.removeEventListener('uncapturederror',this.onGPUError);
+    this.context.unconfigure();
+    for(const name of ['uniform','multisampleTexture','unionMultisampleTexture','unionTexture'])this[name]?.destroy();
+    for(const batch of this.batches)batch.storage.destroy();
+    for(const binding of this.materialBindings)binding?.uniform.destroy();
+    this.liquidRenderer?.texture?.destroy();this.liquidRenderer?.multisample?.destroy();this.liquidRenderer?.retain(0);
+    this.textures.destroy();
   }
 
   async readPixels(buffer, rowBytes, width, height) {

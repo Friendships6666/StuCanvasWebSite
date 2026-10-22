@@ -480,3 +480,28 @@ body, math-field {
 .script-value { max-height: 160px; overflow: auto; margin: 6px 0; padding: 7px; border: 1px solid var(--line); border-radius: 4px; color: var(--foreground); background: var(--surface); white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
 .js-region-editor { margin-top: 0; }
 .binding-status { margin: 5px 0 0; overflow-wrap: anywhere; }
+
+.coordinate-setting { justify-content: space-between; }
+.coordinate-actions { display: grid; gap: 4px; margin: 4px 0 8px; }
+.snap-settings label[hidden] { display: none; }
+.coordinate-window { position: absolute; z-index: 5; display: flex; flex-direction: column; min-width: 200px; min-height: 180px; border: 1px solid var(--control-border); border-radius: 14px; background: var(--surface); box-shadow: 0 8px 28px var(--shadow); overflow: hidden; }
+.coordinate-window.coordinate-active { border-color: var(--brand-600); }
+.coordinate-window-header { display: flex; align-items: center; gap: 6px; min-height: 42px; padding: 5px 8px; border-bottom: 1px solid var(--line); color: var(--foreground); background: var(--surface); cursor: grab; touch-action: none; user-select: none; }
+.coordinate-window-header:active { cursor: grabbing; }
+.coordinate-window-grip { color: var(--ink-muted); font-size: 19px; }
+.coordinate-window-header select { min-width: 0; flex: 1; width: 0; padding: 5px 3px; font: 12px Arial, sans-serif; border: 0; border-radius: 5px; background: var(--surface); color: var(--foreground); cursor: pointer; }
+.coordinate-window-header button { display: grid; place-items: center; flex-shrink: 0; width: 30px; height: 30px; padding: 5px; color: var(--ink-muted); border: 0; border-radius: 7px; background: transparent; cursor: pointer; }
+.coordinate-window-header button:hover { background: var(--surface-hover); color: var(--foreground); }
+.coordinate-window-header svg { width: 20px; height: 20px; pointer-events: none; }
+.coordinate-window button:focus-visible, .coordinate-window select:focus-visible, .coordinate-window canvas:focus-visible { outline: 2px solid var(--brand-600); outline-offset: -2px; }
+.coordinate-window-body { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.coordinate-window canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+.coordinate-window-error { position: absolute; inset: 12px; color: var(--error); font-size: 12px; }
+.coordinate-window-resize { position: absolute; right: 0; bottom: 0; display: grid; place-items: center; width: 24px; height: 24px; padding: 3px; border: 0; border-top-left-radius: 7px; background: var(--surface); color: var(--ink-muted); cursor: nwse-resize; touch-action: none; }
+.coordinate-window-resize svg { width: 16px; height: 16px; pointer-events: none; }
+@media (pointer: coarse) {
+  .coordinate-window-header { min-height: 48px; }
+  .coordinate-window-header button { width: 40px; height: 40px; }
+  .coordinate-window-header select { font-size: 16px; }
+  .coordinate-window-resize { width: 32px; height: 32px; }
+}

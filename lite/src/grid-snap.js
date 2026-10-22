@@ -3,6 +3,7 @@ import { gridStep, zoomView } from './projection.js';
 export const defaultSnapSettings = Object.freeze({
   spacing: 'fixed', stepX: 1, stepY: 1, subdivisions: 1,
   originX: 0, originY: 0, axis: 'both', attraction: 'always', tolerance: 12,
+  radialStep: 1, angularStep: 15,
 });
 
 export function validSnapSettings(value) {
@@ -13,7 +14,9 @@ export function validSnapSettings(value) {
     && ['stepX', 'stepY'].every(key => Number.isFinite(value[key]) && value[key] >= 1e-12 && value[key] <= 1e12)
     && [1, 2, 4, 5, 10, 20].includes(value.subdivisions)
     && ['originX', 'originY'].every(key => Number.isFinite(value[key]) && Math.abs(value[key]) <= 1e12)
-    && Number.isFinite(value.tolerance) && value.tolerance >= 1 && value.tolerance <= 40;
+    && Number.isFinite(value.tolerance) && value.tolerance >= 1 && value.tolerance <= 40
+    && (value.radialStep === undefined || Number.isFinite(value.radialStep) && value.radialStep >= 1e-12 && value.radialStep <= 1e12)
+    && (value.angularStep === undefined || Number.isFinite(value.angularStep) && value.angularStep >= 1e-6 && value.angularStep <= 180);
 }
 
 export function snapSteps(settings, scale) {
@@ -21,7 +24,36 @@ export function snapSteps(settings, scale) {
   return { x: (base ?? settings.stepX) / settings.subdivisions, y: (base ?? settings.stepY) / settings.subdivisions };
 }
 
-export function snapToGrid(position, settings, scale) {
+export function polarSteps(settings, scale) {
+  return { radius: (settings.spacing === 'auto' ? gridStep(scale) : settings.radialStep ?? 1)/settings.subdivisions,
+    angle: (settings.angularStep ?? 15)/settings.subdivisions*Math.PI/180 };
+}
+
+export function snapToPolarGrid(position, settings, scale) {
+  const dx=position.x-settings.originX,dy=position.y-settings.originY;
+  let radius=Math.hypot(dx,dy),angle=(Math.atan2(dy,dx)+Math.PI*2)%(Math.PI*2);
+  if (!Number.isFinite(radius) || !radius) return {...position};
+  const steps=polarSteps(settings,scale),nearby=settings.attraction==='nearby';
+  if(settings.axis!=='y'){
+    const count=radius/steps.radius;
+    if(Number.isFinite(count)&&count<=Number.MAX_SAFE_INTEGER){
+      const candidate=Number((Math.round(count)*steps.radius).toPrecision(15));
+      if(!nearby||Math.abs(candidate-radius)*scale<=settings.tolerance)radius=candidate;
+    }
+  }
+  if(settings.axis!=='x'){
+    // Include the zero ray when an arbitrary degree step does not divide 360.
+    const candidate=Math.min(Math.floor(Math.PI*2/steps.angle),Math.round(angle/steps.angle))*steps.angle;
+    const delta=a=>Math.abs(Math.atan2(Math.sin(a-angle),Math.cos(a-angle)));
+    const nearest=delta(0)<delta(candidate)?0:candidate;
+    if(!nearby||2*radius*Math.sin(delta(nearest)/2)*scale<=settings.tolerance)angle=nearest;
+  }
+  const x=settings.originX+radius*Math.cos(angle),y=settings.originY+radius*Math.sin(angle);
+  return Number.isFinite(x)&&Number.isFinite(y)?{...position,x,y}:{...position};
+}
+
+export function snapToGrid(position, settings, scale, coordinateSystem='cartesian') {
+  if(coordinateSystem==='polar')return snapToPolarGrid(position,settings,scale);
   const steps = snapSteps(settings, scale);
   const result = { ...position };
   for (const axis of ['x', 'y']) {

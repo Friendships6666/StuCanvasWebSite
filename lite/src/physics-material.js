@@ -81,4 +81,8 @@ export class PhysicsTextureCache {
       entry.texture?.destroy(); this.entries.delete(source);
     }
   }
+  destroy() {
+    for(const entry of this.entries.values())entry.texture?.destroy();
+    this.entries.clear();this.white?.texture.destroy();
+  }
 }

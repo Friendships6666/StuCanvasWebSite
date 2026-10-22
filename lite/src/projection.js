@@ -39,7 +39,7 @@ export function zoomView(view, factor, anchor, width, height) {
     const bounds = scaleBounds(next, width, height);
     scale = Math.max(bounds.minimum, Math.min(bounds.maximum, requested));
   }
-  return { ...next, scale };
+  return { ...view, ...next, scale };
 }
 
 export function gridStep(scale) {

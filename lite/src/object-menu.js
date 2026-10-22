@@ -291,6 +291,10 @@ export function createObjectMenu(actions) {
       popup.hidden = false;
       const timeline = button(t('timeline.open'), () => { const at = contextPosition; close(); actions.openTimeline(at); });
       timeline.dataset.action = 'open-timeline';
+      for(const type of ['cartesian','polar']){
+        const coordinate=button(t(type==='polar'?'coordinates.newPolar':'coordinates.newCartesian'),()=>{const at=contextPosition;close();actions.openCoordinates(type,at);});
+        coordinate.dataset.action=`open-${type}-coordinates`;
+      }
       const clear = button(t('menu.clearTraces'), () => { close(); actions.clearTraces(); });
       clear.dataset.action = 'clear-traces';
       position();

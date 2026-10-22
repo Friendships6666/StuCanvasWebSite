@@ -39,6 +39,7 @@ import { circularPreview } from './construction-preview.js';
 import { cadPrimitives, cadTools, computeCadCorner, cornerSides, isCad, lineCorner, resolveCadCorner, trimCadSources } from './cad.js';
 import { arcConnectionParameters, isArcSource } from './arc-connection.js';
 import { snapToGrid, touchAim, pinchView } from './grid-snap.js';
+import { createCoordinateWindows } from './coordinate-windows.js';
 import { createSnapSettings } from './snap-settings.js';
 import { createTouchSettings } from './touch-settings.js';
 import { createMobileUI } from './mobile-ui.js';
@@ -56,8 +57,8 @@ import { formulaParameters, hasBindings, hasScript, isJavaScript, needsReflectio
 const element = id => document.getElementById(id);
 localizeDOM();
 const setHint = (key = '', values = {}) => setMessage(element('hint'), key ? { key, values } : '');
-const canvas = element('canvas');
-const textLayer = element('text-layer');
+let canvas = element('canvas');
+let textLayer = element('text-layer');
 const draftTemplate = element('equation-form').cloneNode(true);
 const tools = [
   { id: 'select', get name() { return t('tool.select'); }, key: 'V', icon: '<path d="m7 3 13 11-7 1-3 7Z"/>' },
@@ -193,7 +194,7 @@ function restoreSnapshot(text) {
   if (saved.environment) applyEnvironment(saved.environment);
 }
 const screenToWorld = point => toWorld(point, view, width, height);
-const plots = new PlotManager(draw);
+let plots = new PlotManager(draw);
 let reflectionRevision = 0;
 let reflectionGeometryRevision = 0;
 const reflection = new ReflectionManager({
@@ -242,7 +243,58 @@ function tickTimeline(now) {
   timeline.state.time = timeline.frame * PHYSICS_STEP;
   return new Set();
 }
-const regions = new RegionManager(draw);
+let regions = new RegionManager(draw);
+// Each viewport owns only camera/render/sampling caches. The model, selection,
+// construction tools, history and simulation are shared by every canvas.
+const mainViewport = { canvas, textLayer, view, width, height, renderer, plots, regions, touchInteraction };
+let activeViewport = mainViewport;
+const viewports = new Set([mainViewport]);
+let coordinateWindows = null;
+const viewportListeners = [];
+function storeViewport() {
+  Object.assign(activeViewport, { canvas, textLayer, view, width, height, renderer, plots, regions, touchInteraction });
+}
+function useViewport(context) {
+  if(context===activeViewport)return;
+  storeViewport();activeViewport=context;
+  ({canvas,textLayer,view,width,height,renderer,plots,regions,touchInteraction}=context);
+}
+function inViewport(context, action) {
+  const previous=activeViewport;useViewport(context);
+  try {return action();} finally {storeViewport();useViewport(previous);}
+}
+function activateViewport(context) {
+  if(!viewports.has(context)||context.closed)return false;
+  if(context!==mainViewport&&!context.renderer)return false;
+  if(context===activeViewport)return true;
+  if(gesture||touchInteraction?.active)return false;
+  touchInteraction?.close();regionRequest++;regions.cancelQueries();
+  useViewport(context);pointer=null;hovered=null;touchPreview=false;
+  snapSettings.coordinateSystem(view.coordinateSystem);
+  for(const item of viewports)item.canvas.closest('.coordinate-window')?.classList.toggle('coordinate-active',item===context);
+  draw();return true;
+}
+function attachViewportListener(context,type,handler,options={}) {
+  context.canvas.addEventListener(type,event=>{
+    if(!activateViewport(context))return;
+    handler(event);
+  },{...options,signal:context.lifecycle?.signal});
+}
+function listenViewport(type,handler,options={}) {
+  viewportListeners.push([type,handler,options]);attachViewportListener(mainViewport,type,handler,options);
+}
+listenViewport('focus',()=>{});
+function resizeViewport(context) {
+  if(context.closed)return;
+  inViewport(context,()=>{
+    const bounds=canvas.getBoundingClientRect(),ratio=window.devicePixelRatio||1;
+    const changed=width!==bounds.width||height!==bounds.height||renderer?.ratio!==ratio;
+    width=bounds.width;height=bounds.height;
+    textLayer.setAttribute('viewBox',`0 0 ${width} ${height}`);
+    if(renderer&&width&&height&&(changed||!renderer.width))renderer.resize(width,height,ratio);
+  });
+  draw();
+}
 const surfaceBrushes = {
   frictionBrush: createSurfaceBrush(element('canvas-wrap'), draw, 'friction'),
   restitutionBrush: createSurfaceBrush(element('canvas-wrap'), draw, 'restitution'),
@@ -268,6 +320,7 @@ function triggerRipple(position) {
 }
 const objectMenu = createObjectMenu({
   openTimeline: point => syncTimeline.open(point),
+  openCoordinates: (type,point) => coordinateWindows.add(type,point),
   get: id => objects.find(object => object.id === id),
   all: () => objects,
   defaults: () => plots.options,
@@ -394,7 +447,8 @@ const syncTimeline = createTimelineEditor(element('canvas-wrap'), {
   },
 });
 
-function constructionScene() {
+function constructionScene() { return inViewport(mainViewport,viewportConstructionScene); }
+function viewportConstructionScene() {
   const plotRecipes = {};
   for (const object of selectableObjects().filter(isPlot)) {
     const task = object.plot || plots.get(object.id);
@@ -439,7 +493,7 @@ async function timelineCommand(command, value) {
   pausePhysics();
   const before = snapshot();
   physics.anchors = resolved;
-  syncPhysicsBoundaries(physics, selectableObjects(), view, width, height);
+  inViewport(mainViewport,()=>syncPhysicsBoundaries(physics,selectableObjects(),view,width,height));
   if (command === 'reset') timeline.reset(objects);
   else if (command === 'step') {
     timeline.play(objects);
@@ -495,7 +549,7 @@ async function physicsCommand(id, command, value) {
     const token = ++physicsReplay;
     if (command === 'seek') physicsReplayBefore = before;
     physics.anchors = resolved;
-    syncPhysicsBoundaries(physics, selectableObjects(), view, width, height);
+    inViewport(mainViewport,()=>syncPhysicsBoundaries(physics,selectableObjects(),view,width,height));
     const target = command === 'step' ? Math.max(object.time, Math.min(object.time + PHYSICS_STEP * object.playbackRate, object.duration || Infinity)) : Math.min(value, object.duration || Infinity);
     let ticks = 0;
     while (object.time + 1e-9 < target && token === physicsReplay && objects.includes(object)) {
@@ -554,26 +608,29 @@ function refresh(changed = null) {
 
 function readEnvironment() {
   return {
-    view: { ...view },
+    view: { ...(activeViewport===mainViewport?view:mainViewport.view) },
     display: { ...Object.fromEntries(['grid', 'axes', 'snap'].map(id => [id, element(id).checked])), snapping: snapSettings.read(), touchOffset: element('touch-offset').checked, touchOffsetPixels: touchSettings.read() },
     settings: { locale: getLocale(), theme: getThemeSelection(), themeConfiguration: readThemeConfiguration(), plotDefaults: { ...plots.options } },
-    ui: { ...documentExtras.ui, timeline: syncTimeline.read() },
+    ui: { ...documentExtras.ui, timeline: syncTimeline.read(), coordinateWindows: coordinateWindows?.read() || [] },
   };
 }
 
 function applyEnvironment(document) {
-  if (document.view) view = { ...document.view };
+  if (document.view) { mainViewport.view={...document.view};if(activeViewport===mainViewport)view=mainViewport.view; }
+  element('coordinate-type').value=mainViewport.view.coordinateSystem||'cartesian';
   if (document.display) {
     for (const id of ['grid', 'axes', 'snap']) element(id).checked = document.display[id];
     snapSettings.apply(document.display.snapping);
     element('touch-offset').checked = document.display.touchOffset ?? true;
     touchSettings.apply(document.display.touchOffsetPixels);
   }
-  if (document.settings?.plotDefaults) plots.configure(document.settings.plotDefaults);
+  if (document.settings?.plotDefaults) for(const context of viewports)context.plots.configure(document.settings.plotDefaults);
   if (document.settings?.locale) setLocale(document.settings.locale);
   if (document.settings?.themeConfiguration) applyThemeConfiguration(document.settings.themeConfiguration);
   else if (document.settings?.theme) setTheme(document.settings.theme);
   if (document.ui?.timeline) syncTimeline.apply(document.ui.timeline);
+  coordinateWindows?.apply(document.ui?.coordinateWindows || []);
+  snapSettings.coordinateSystem(view.coordinateSystem);
 }
 
 function readDocument() {
@@ -802,7 +859,7 @@ function newShape(type, parents, construction = null) {
 }
 
 function snapped(position) {
-  return element('snap').checked ? snapToGrid(position, snapSettings.read(), view.scale) : position;
+  return element('snap').checked ? snapToGrid(position, snapSettings.read(), view.scale, view.coordinateSystem) : position;
 }
 
 function plotWorldPoints(object) {
@@ -2166,32 +2223,31 @@ function updateMarquee() {
   draw();
 }
 
-function scene(clean = false) {
+function scene(clean = false, interactive = true) {
   const radius = hitRadius;
   if (touchPreview) hitRadius = 2;
   plots.sync(objects, view, width, height);
-  if (!clean) for (const row of element('objects').children) {
+  if (!clean && interactive) for (const row of element('objects').children) {
     if (row.dataset.id) updateObjectStatus(row.querySelector('.object-status'), plots.status(row.dataset.id));
   }
-  updateEquationSnapPoints();
-  updateEquationIntersections();
+  if(interactive){updateEquationSnapPoints();updateEquationIntersections();}
   regions.sync([...resolved.values()], view, width, height, plots);
-  updateAreaMeasurements();
-  if (!clean) traces.sync(objects, resolved, plots, regions);
+  if(interactive)updateAreaMeasurements();
+  if (!clean && interactive) traces.sync(objects, resolved, plots, regions);
   const geometry = selectableObjects();
-  if (!clean && cadTools.has(activeTool)) geometry.push(...cadPreview(pointer));
-  else if (!clean && pending?.rope && pointer) {
+  if (!clean && interactive && cadTools.has(activeTool)) geometry.push(...cadPreview(pointer));
+  else if (!clean && interactive && pending?.rope && pointer) {
     const second=ropeAnchor(hitTest(pointer,object=>isPhysicsBody(object)||isSoftBody(object)||isPoint(object)),pointer);
     const preview=(activeTool==='spring'?createSpring:createRope)([pending.anchor,second],resolved);if(preview)geometry.push({...preview,preview:true});
   }
-  else if (!clean && pending && activeTool === 'ratioPoint') geometry.push(...ratioPointPreview(pointer));
-  else if (!clean && pending && pointer && measurementTools.has(activeTool)) geometry.push(...measurementPreview(pointer));
-  else if (!clean && pending && pointer && activeTool === 'perpendicularBisector') geometry.push(...perpendicularBisectorPreview(pointer));
-  else if (!clean && pending && pointer && bisectorTypes.has(activeTool)) geometry.push(...bisectorPreview(pointer));
-  else if (!clean && pending && pointer && (conicTypes.has(activeTool) || dualConstructionTools.has(activeTool))) geometry.push(...conicPreview(pointer));
-  else if (!clean && pending && pointer && derivedLineTypes.has(activeTool)) geometry.push(...derivedPreview(pointer));
-  else if (!clean && pending && pointer && toolParents.get(activeTool)?.id === 'circles') geometry.push(...circularToolPreview(pointer));
-  else if (!clean && pending && pointer && !['intersection', 'midpoint', 'select', 'pan'].includes(activeTool)) {
+  else if (!clean && interactive && pending && activeTool === 'ratioPoint') geometry.push(...ratioPointPreview(pointer));
+  else if (!clean && interactive && pending && pointer && measurementTools.has(activeTool)) geometry.push(...measurementPreview(pointer));
+  else if (!clean && interactive && pending && pointer && activeTool === 'perpendicularBisector') geometry.push(...perpendicularBisectorPreview(pointer));
+  else if (!clean && interactive && pending && pointer && bisectorTypes.has(activeTool)) geometry.push(...bisectorPreview(pointer));
+  else if (!clean && interactive && pending && pointer && (conicTypes.has(activeTool) || dualConstructionTools.has(activeTool))) geometry.push(...conicPreview(pointer));
+  else if (!clean && interactive && pending && pointer && derivedLineTypes.has(activeTool)) geometry.push(...derivedPreview(pointer));
+  else if (!clean && interactive && pending && pointer && toolParents.get(activeTool)?.id === 'circles') geometry.push(...circularToolPreview(pointer));
+  else if (!clean && interactive && pending && pointer && !['intersection', 'midpoint', 'select', 'pan'].includes(activeTool)) {
     const first = resolved.get(pending.ids[0]);
     const second = hitTest(pointer, isPoint) || snapped(pointer);
     if (first && distance(first, second) > 0) geometry.push({ type: activeTool, first, second, radius: distance(first, second), preview: true });
@@ -2201,9 +2257,9 @@ function scene(clean = false) {
     grid: element('grid').checked, axes: element('axes').checked,
     snapGrid: element('snap').checked ? snapSettings.read() : null,
     selected, selection, hovered, pending: pending?.ids?.at(-1) || pending?.id || pending?.pointId || pending?.subjectId || pending?.referenceId, clean,
-    marquee: gesture?.mode === 'marquee' ? screenBox(gesture.screen, gesture.current) : null,
-    surfaceOverlay: !clean && surfaceBrushes[activeTool] ? activeTool === 'frictionBrush' ? 'friction' : 'restitution' : null,
-    surfaceBrush: !clean && surfaceBrushes[activeTool] && pointer ? { ...surfaceBrushes[activeTool].state, property: activeTool === 'frictionBrush' ? 'friction' : 'restitution', position: pointer, target: surfaceBrushTarget(pointer) } : null,
+    marquee: interactive && gesture?.mode === 'marquee' ? screenBox(gesture.screen, gesture.current) : null,
+    surfaceOverlay: !clean && interactive && surfaceBrushes[activeTool] ? activeTool === 'frictionBrush' ? 'friction' : 'restitution' : null,
+    surfaceBrush: !clean && interactive && surfaceBrushes[activeTool] && pointer ? { ...surfaceBrushes[activeTool].state, property: activeTool === 'frictionBrush' ? 'friction' : 'restitution', position: pointer, target: surfaceBrushTarget(pointer) } : null,
     ripples: clean ? [] : ripples,
     traces: traces.samples,
     physicsDrag: !clean ? physics.dragGuide() : null,
@@ -2236,7 +2292,7 @@ function draw() {
       if (now - ripples[index].started >= ripples[index].duration) ripples.splice(index, 1);
     }
     physics.anchors = resolved;
-    syncPhysicsBoundaries(physics, selectableObjects(), view, width, height);
+    inViewport(mainViewport,()=>syncPhysicsBoundaries(physics,selectableObjects(),view,width,height));
     const physicsChanged = physicsReplayBefore ? new Set() : tickTimeline(now);
     syncTimeline();
     if (physicsChanged.size) {
@@ -2244,9 +2300,15 @@ function draw() {
       resolved = resolveObjects(objects, resolved, physicsChanged, intersectionTracker);
       renderObjects();
     }
-    const current = scene();
-    renderer.render(current.shapes, false, current.groups);
-    paintText(current.labels);
+    storeViewport();
+    const inputViewport=activeViewport;
+    for(const context of [inputViewport,...[...viewports].filter(item=>item!==inputViewport)]){
+      if(context.closed||!context.renderer||!context.width||!context.height)continue;
+      inViewport(context,()=>{
+        const current=scene(false,context===inputViewport);
+        renderer.render(current.shapes,false,current.groups);paintText(current.labels);
+      });
+    }
     documentEditor?.sync();
     syncReflection();
     const playing = !physicsReplayBefore && (scriptClockOnly() && timeline.state.running || objects.some(object => isPhysicsObject(object) && object.running && !object.hidden));
@@ -2312,7 +2374,7 @@ function beginPhysicsDrag(position, pointerId) {
   for (const item of objects.filter(isPhysicsObject)) if (item.time === 0) item.initialState = bodyState(item);
   timeline.play(objects);
   physics.anchors = resolved;
-  syncPhysicsBoundaries(physics, selectableObjects(), view, width, height);
+  inViewport(mainViewport,()=>syncPhysicsBoundaries(physics,selectableObjects(),view,width,height));
   timeline.sync(objects); timeline.ensureEngine(objects); physics.syncBodies(objects);
   if (!physics.beginDrag(hit.id, position)) { physicsSession = session; restoreSnapshot(before); refresh(); return; }
   selected = hit.id; selection.clear();
@@ -2378,7 +2440,7 @@ function startPointer(event) {
   } else if (['rope','spring'].includes(activeTool)) constructRope(pointer, event.altKey);
   else construct(pointer);
 }
-canvas.addEventListener('pointerdown', event => {
+listenViewport('pointerdown', event => {
   if (event.pointerType === 'touch') {
     if (renderer && !renderer.lost) touchInteraction.down(event);
   } else startPointer(event);
@@ -2437,7 +2499,7 @@ function movePointer(event) {
     draw();
   }
 }
-canvas.addEventListener('pointermove', event => {
+listenViewport('pointermove', event => {
   if (event.pointerType === 'touch') touchInteraction.move(event);
   else movePointer(event);
 });
@@ -2480,7 +2542,7 @@ function finishGesture(event) {
   gesture = null;
   canvas.style.cursor = activeTool === 'pan' || spaceHeld ? 'grab' : activeTool === 'select' ? 'default' : 'crosshair';
 }
-for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) canvas.addEventListener(type, event => {
+for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) listenViewport(type, event => {
   if (event.pointerType === 'touch') touchInteraction.end(event);
   else finishGesture(event);
 });
@@ -2491,9 +2553,9 @@ window.addEventListener('blur', () => {
   finishGesture({ type: 'pointercancel', pointerId });
   if (canvas.hasPointerCapture(pointerId)) canvas.releasePointerCapture(pointerId);
 });
-canvas.addEventListener('pointerleave', () => { if (!gesture && !touchInteraction?.active) { pointer = null; hovered = null; draw(); } });
-canvas.addEventListener('wheel', event => { event.preventDefault(); zoom(Math.exp(-event.deltaY * 0.0015), eventPosition(event)); }, { passive: false });
-canvas.addEventListener('contextmenu', event => {
+listenViewport('pointerleave', () => { if (!gesture && !touchInteraction?.active) { pointer = null; hovered = null; draw(); } });
+listenViewport('wheel', event => { event.preventDefault(); zoom(Math.exp(-event.deltaY * 0.0015), eventPosition(event)); }, { passive: false });
+listenViewport('contextmenu', event => {
   event.preventDefault();
   if (event.pointerType === 'touch') return;
   if (gesture) return;
@@ -2540,7 +2602,7 @@ function redo() {
 }
 element('undo').addEventListener('click', undo);
 element('redo').addEventListener('click', redo);
-element('home').addEventListener('click', () => { if (!gesture) { view = { x: 0, y: 0, scale: 65 }; draw(); } });
+element('home').addEventListener('click', () => { if (!gesture) { view = { x: 0, y: 0, scale: 65, coordinateSystem: view.coordinateSystem||'cartesian' }; draw(); } });
 element('zoom-in').addEventListener('click', () => zoom(1.25));
 element('zoom-out').addEventListener('click', () => zoom(0.8));
 element('settings-toggle').addEventListener('click', () => {
@@ -2846,7 +2908,7 @@ createProjectMenu({
   read: () => createProject(readDocument()),
   apply(project) {
     applyDocument(project.document);
-    if (project.view) view = { ...project.view };
+
     if (project.display) for (const id of ['grid','axes','snap']) element(id).checked = project.display[id];
     snapSettings.apply(project.display?.snapping);
     element('touch-offset').checked = project.display?.touchOffset ?? true;
@@ -2880,7 +2942,8 @@ function touchCandidates(screen) {
   }, 2);
 }
 
-touchInteraction = createTouchInteraction(canvas, {
+function makeTouchInteraction(context) {
+  const actions = {
   position: eventPosition,
   screen: position => toScreen(position, view, width, height),
   selected: () => selected,
@@ -2940,7 +3003,58 @@ touchInteraction = createTouchInteraction(canvas, {
     view = pinchView(gesture.view, gesture.points, points, width, height); draw();
   },
   endPinch() { if (gesture?.mode === 'pinch') gesture = null; pointer = null; draw(); },
+  };
+  const bound=Object.fromEntries(Object.entries(actions).map(([key,action])=>[key,(...args)=>{if(!activateViewport(context))return;return action(...args);} ]));
+  return createTouchInteraction(context.canvas,bound);
+}
+touchInteraction=makeTouchInteraction(mainViewport);storeViewport();
+
+coordinateWindows=createCoordinateWindows(element('canvas-wrap'),{
+  view:()=>({...view}),
+  read(context){if(context===activeViewport)storeViewport();return {...context.view};},
+  create(surface,layer,camera,error){
+    const context={canvas:surface,textLayer:layer,view:camera,width:0,height:0,renderer:null,
+      plots:new PlotManager(draw),regions:new RegionManager(draw),touchInteraction:null,lifecycle:new AbortController()};
+    context.plots.configure(mainViewport.plots.options);viewports.add(context);
+    context.touchInteraction=makeTouchInteraction(context);
+    for(const [type,handler,options]of viewportListeners)attachViewportListener(context,type,handler,options);
+    surface.addEventListener('focus',()=>activateViewport(context),{signal:context.lifecycle.signal});
+    GeometryRenderer.create(surface,problem=>{if(!context.closed){error.hidden=false;error.textContent=errorMessage(problem);}},draw,mainViewport.renderer.device).then(result=>{
+      context.renderer=result;
+      if(context.closed){result.destroy();return;}
+      if(activeViewport===context)renderer=result;
+      resizeViewport(context);
+    }).catch(problem=>{if(!context.closed){error.hidden=false;error.textContent=errorMessage(problem);}});
+    return context;
+  },
+  remove(context){
+    if(context===mainViewport)return false;
+    if(context===activeViewport){
+      regionRequest++;context.regions.cancelQueries();
+      if(gesture)finishGesture({type:'pointercancel',pointerId:gesture.pointerId});
+      context.touchInteraction?.close();useViewport(mainViewport);pointer=null;hovered=null;
+      snapSettings.coordinateSystem(view.coordinateSystem);
+    }
+    context.closed=true;context.lifecycle.abort();context.touchInteraction?.destroy();
+    clearTimeout(context.plots.timer);clearTimeout(context.regions.timer);context.regions.cancelQueries();
+    context.renderer?.destroy();viewports.delete(context);return true;
+  },
+  resize:resizeViewport,
+  canTransform:()=>!gesture&&!touchInteraction?.active,
+  apply(context,camera){context.view=camera;if(context===activeViewport)view=camera;draw();},
+  type(context,type){
+    if(!activateViewport(context))return;
+    view={...view,coordinateSystem:type};storeViewport();snapSettings.coordinateSystem(type);draw();
+  },
+  home(context){if(gesture)return;inViewport(context,()=>{view={x:0,y:0,scale:65,coordinateSystem:view.coordinateSystem||'cartesian'};});draw();},
+  changed(){documentEditor?.sync();draw();},
 });
+element('coordinate-type').addEventListener('change',event=>{
+  if(!activateViewport(mainViewport)){event.target.value=mainViewport.view.coordinateSystem||'cartesian';return;}
+  view={...view,coordinateSystem:event.target.value};storeViewport();snapSettings.coordinateSystem(view.coordinateSystem);
+  documentEditor?.sync();draw();
+});
+for(const type of ['cartesian','polar'])element(`coordinate-new-${type}`).addEventListener('click',()=>coordinateWindows.add(type));
 
 element('touch-properties').addEventListener('click', () => {
   mobileUI.show(true); documentEditor.showObjects();
@@ -2951,19 +3065,12 @@ element('touch-object-menu').addEventListener('click', () => {
 });
 element('touch-cancel').addEventListener('click', () => { touchInteraction.close(); cancelPending(); pointer = null; setHint(''); refresh(); });
 
-function resize() {
-  const bounds = canvas.getBoundingClientRect();
-  width = bounds.width;
-  height = bounds.height;
-  textLayer.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  if (renderer && width && height) renderer.resize(width, height, window.devicePixelRatio || 1);
-  draw();
-}
+function resize() { resizeViewport(mainViewport); }
 new ResizeObserver(resize).observe(element('canvas-wrap'));
 window.addEventListener('resize', resize);
 setTool('select');
 try {
   renderer = await GeometryRenderer.create(canvas, showError, draw);
-  resize();
+  storeViewport();resize();
   document.documentElement.dataset.renderer = 'webgpu';
 } catch (error) { showError(error); }

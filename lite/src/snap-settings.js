@@ -3,11 +3,13 @@ import { localizeDOM } from './i18n.js';
 
 export function createSnapSettings(container, changed) {
   let state = { ...defaultSnapSettings };
+  let polar = false;
   const panel = document.createElement('details'); panel.className = 'snap-settings'; panel.id = 'snap-settings';
   const title = document.createElement('summary'); title.dataset.i18n = 'snap.settings'; panel.append(title);
   const controls = new Map();
   for (const [key, caption, options] of [
     ['spacing', 'snap.spacing', ['fixed', 'auto']], ['stepX', 'snap.stepX'], ['stepY', 'snap.stepY'],
+    ['radialStep', 'snap.radialStep'], ['angularStep', 'snap.angularStep'],
     ['subdivisions', 'snap.subdivisions', [1, 2, 4, 5, 10, 20]],
     ['axis', 'snap.axis', ['both', 'x', 'y']], ['originX', 'snap.originX'], ['originY', 'snap.originY'],
     ['attraction', 'snap.attraction', ['always', 'nearby']], ['tolerance', 'snap.tolerance'],
@@ -22,7 +24,8 @@ export function createSnapSettings(container, changed) {
     }
     else {
       input.type = 'number'; input.step = 'any';
-      if (key.startsWith('step')) { input.min = 1e-12; input.max = 1e12; }
+      if (key.startsWith('step') || key === 'radialStep') { input.min = 1e-12; input.max = 1e12; }
+      else if(key === 'angularStep') { input.min=1e-6; input.max=180; }
       else if (key === 'tolerance') { input.min = 1; input.max = 40; }
       else { input.min = -1e12; input.max = 1e12; }
     }
@@ -40,9 +43,12 @@ export function createSnapSettings(container, changed) {
   function sync() {
     for (const [key, input] of controls) {
       input.value = state[key]; input.removeAttribute('aria-invalid');
-      input.disabled = key.startsWith('step') && state.spacing === 'auto' || key === 'tolerance' && state.attraction !== 'nearby';
+      input.disabled = (key.startsWith('step') || key==='radialStep') && state.spacing === 'auto' || key === 'tolerance' && state.attraction !== 'nearby';
+      input.parentElement.hidden = polar ? ['stepX','stepY'].includes(key) : ['radialStep','angularStep'].includes(key);
+      if(key==='axis')for(const option of input.options)option.dataset.i18n=`snap.${polar&&option.value!=='both'?(option.value==='x'?'radius':'angle'):option.value}`;
     }
+    localizeDOM(panel);
   }
   sync(); localizeDOM(panel);
-  return { read: () => ({ ...state }), apply(value) { state = { ...(validSnapSettings(value) ? value : defaultSnapSettings) }; sync(); } };
+  return { read: () => ({ ...state }), coordinateSystem(value) {polar=value==='polar';sync();}, apply(value) { state = { ...defaultSnapSettings, ...(validSnapSettings(value) ? value : {}) }; sync(); } };
 }

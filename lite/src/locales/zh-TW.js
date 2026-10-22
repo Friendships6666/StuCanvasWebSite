@@ -1,4 +1,18 @@
 export default {
+  "coordinates.main": "主座標系",
+  "coordinates.type": "座標系類型",
+  "coordinates.cartesian": "直角座標系",
+  "coordinates.polar": "極座標系",
+  "coordinates.newCartesian": "新增直角座標視窗",
+  "coordinates.newPolar": "新增極座標視窗",
+  "coordinates.window": "座標系視窗",
+  "coordinates.close": "關閉座標系視窗",
+  "coordinates.resize": "調整座標系視窗大小",
+  "snap.radialStep": "半徑間距",
+  "snap.angularStep": "角度間距（°）",
+  "snap.radius": "僅半徑",
+  "snap.angle": "僅角度",
+
   "project.missingRecipe": "物件 {id} 缺少可重建的構造來源，請從原始色塊重新實例化；無法以構造鏈無損恢復此舊狀態。",
   "timeline.open": "開啟時間軸",
   "timeline.close": "關閉時間軸",

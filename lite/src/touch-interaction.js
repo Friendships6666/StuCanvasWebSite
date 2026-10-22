@@ -3,26 +3,28 @@ import { localizeDOM, onLocaleChange, t } from './i18n.js';
 // Touch owns a complete gesture. Mouse and pen retain their existing paths.
 // In particular, a second finger cancels the first finger's unfinished edit.
 export function createTouchInteraction(canvas, actions) {
+  const lifecycle = new AbortController();
+  const listen = (target, event, callback, options = {}) => target.addEventListener(event, callback, typeof options === 'boolean' ? {capture: options, signal: lifecycle.signal} : {...options, signal: lifecycle.signal});
   const contacts = new Map();
   let current = null, pinch = false, suppress = false, timer = null;
   let suppressClick = false;
   // A compatibility click can be retargeted to a chooser or action button
   // that appeared during pointerup. Require a fresh pointerdown for that UI.
   // Keyboard and assistive/programmatic activations have detail === 0.
-  document.addEventListener('pointerdown', () => { suppressClick = false; }, true);
-  document.addEventListener('click', event => {
+  listen(document, 'pointerdown', () => { suppressClick = false; }, true);
+  listen(document, 'click', event => {
     if (!suppressClick || event.detail === 0) return;
     suppressClick = false; event.preventDefault(); event.stopImmediatePropagation();
   }, true);
   const host = canvas.parentElement;
-  const aim = document.createElement('div'); aim.id = 'touch-aim'; aim.className = 'touch-aim'; aim.hidden = true;
+  const aim = document.createElement('div'); aim.id = canvas.id === 'canvas' ? 'touch-aim' : `${canvas.id}-touch-aim`; aim.className = 'touch-aim'; aim.hidden = true;
   const cross = document.createElement('span'); cross.className = 'touch-crosshair';
   const coordinates = document.createElement('output');
   const caption = document.createElement('small'); caption.dataset.i18n = 'mobile.release';
   aim.append(cross, coordinates, caption); host.append(aim); localizeDOM(aim);
-  const chooser = document.createElement('div'); chooser.id = 'touch-picker'; chooser.className = 'touch-picker';
+  const chooser = document.createElement('div'); chooser.id = canvas.id === 'canvas' ? 'touch-picker' : `${canvas.id}-touch-picker`; chooser.className = 'touch-picker';
   chooser.setAttribute('role', 'dialog'); chooser.hidden = true;
-  const heading = document.createElement('strong'); heading.dataset.i18n = 'mobile.choose'; heading.id = 'touch-picker-title';
+  const heading = document.createElement('strong'); heading.dataset.i18n = 'mobile.choose'; heading.id = `${chooser.id}-title`;
   chooser.setAttribute('aria-labelledby', heading.id);
   const list = document.createElement('div'); list.className = 'touch-picker-list';
   const cancel = document.createElement('button'); cancel.type = 'button'; cancel.dataset.i18n = 'ratio.cancel';
@@ -34,9 +36,9 @@ export function createTouchInteraction(canvas, actions) {
     chooser.hidden = true; actions.hover(null); list.replaceChildren();
     if (chooser.contains(document.activeElement)) canvas.focus({ preventScroll: true });
   }
-  cancel.addEventListener('click', close);
-  document.addEventListener('pointerdown', event => { if (!chooser.hidden && !chooser.contains(event.target)) close(); });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+  listen(cancel, 'click', close);
+  listen(document, 'pointerdown', event => { if (!chooser.hidden && !chooser.contains(event.target)) close(); });
+  listen(document, 'keydown', event => { if (event.key === 'Escape') close(); });
   function choose(candidates, complete, allowEmpty = false, automatic = false) {
     close(); list.replaceChildren();
     const add = (object, label) => {
@@ -44,9 +46,9 @@ export function createTouchInteraction(canvas, actions) {
       const swatch = document.createElement('span'); swatch.className = 'touch-candidate-swatch'; swatch.style.background = object ? actions.color(object) : 'transparent';
       const name = document.createElement('span'); name.textContent = label;
       button.append(swatch, name);
-      button.addEventListener('pointerenter', () => actions.hover(object?.id || null));
-      button.addEventListener('focus', () => actions.hover(object?.id || null));
-      button.addEventListener('click', () => { close(); complete(object); });
+      listen(button, 'pointerenter', () => actions.hover(object?.id || null));
+      listen(button, 'focus', () => actions.hover(object?.id || null));
+      listen(button, 'click', () => { close(); complete(object); });
       list.append(button);
     };
     for (const object of candidates) add(object, actions.describe(object));
@@ -134,10 +136,10 @@ export function createTouchInteraction(canvas, actions) {
       if (saved.candidates.length > 1) choose(saved.candidates, complete); else complete(saved.candidates[0] || null);
     }
   }
-  window.addEventListener('blur', () => {
+  listen(window, 'blur', () => {
     clearTimer(); if (current?.started) actions.cancel(current.event);
     current = null; contacts.clear(); if (pinch) actions.endPinch(); pinch = suppress = false; hideAim(); close();
   });
-  onLocaleChange(() => { close(); localizeDOM(aim); });
-  return { down, move, end, close, get active() { return contacts.size > 0; } };
+  const unlocalize = onLocaleChange(() => { close(); localizeDOM(aim); });
+  return { down, move, end, close, destroy() { clearTimer();close();lifecycle.abort();unlocalize();aim.remove();chooser.remove(); }, get active() { return contacts.size > 0; } };
 }

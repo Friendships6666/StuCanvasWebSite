@@ -22,6 +22,7 @@ import { defaultPhysicsMaterial, validTextureImage } from './physics-material.js
 import { SCRIPT_LIMIT, bindingPatch, formulaParameters, isJavaScript, jsonValue, validVariablePath, variableRoot } from './reflection.js';
 import { jsonData } from './json-data.js';
 import { validSnapSettings, validTouchOffsetPixels } from './grid-snap.js';
+import { validCoordinateView, validCoordinateWindows } from './coordinate-system.js';
 
 export const documentFormat = 'stucanvas-lite';
 export const documentVersion = 1;
@@ -329,13 +330,14 @@ export function parseDocument(text) {
   if (!record(document) || document.format !== documentFormat || !Array.isArray(document.objects)) fail('error.documentRoot');
   if (document.version !== documentVersion) fail('error.documentVersion', { version: String(document.version) });
   finiteTree(document, '$');
-  if (document.view !== undefined && (!record(document.view) || !['x', 'y', 'scale'].every(key => Number.isFinite(document.view[key])) || document.view.scale <= 0)) fail('error.documentValue', { path: '$.view' });
+  if (document.view !== undefined && !validCoordinateView(document.view)) fail('error.documentValue', { path: '$.view' });
   if (document.display !== undefined) {
     if (!record(document.display) || !['grid', 'axes', 'snap'].every(key => typeof document.display[key] === 'boolean')) fail('error.documentValue', { path: '$.display' });
     if (document.display.snapping !== undefined && !validSnapSettings(document.display.snapping)) fail('error.documentValue', { path: '$.display.snapping' });
     if (document.display.touchOffset !== undefined && typeof document.display.touchOffset !== 'boolean') fail('error.documentValue', { path: '$.display.touchOffset' });
     if (document.display.touchOffsetPixels !== undefined && !validTouchOffsetPixels(document.display.touchOffsetPixels)) fail('error.documentValue', { path: '$.display.touchOffsetPixels' });
   }
+  if(document.ui?.coordinateWindows!==undefined&&!validCoordinateWindows(document.ui.coordinateWindows))fail('error.documentValue',{path:'$.ui.coordinateWindows'});
   if (document.ui?.timeline !== undefined) {
     const state = document.ui.timeline;
     if (!record(state) || typeof state.visible !== 'boolean' || typeof state.expanded !== 'boolean') fail('error.documentValue', { path: '$.ui.timeline' });
