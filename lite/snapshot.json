@@ -25,7 +25,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "0c33805dae5d5148fb03a153063022fc6af3504bd45845c3a5557fcb7b1e57f6"
+      "sha256": "912ee8b43d3f2b6b2f9593a96fca1d2a61c438968cc0dccd65b03387c936ec17"
     },
     {
       "path": "licenses/CC-BY-4.0.txt",
@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "4b95a69c015b3935d32721d0e92ba5e400f7d4bb36941447fb0370d69837a2df"
+      "sha256": "47ff5fbb0ee6a32577501fb6c0c094ca56804f3edcb98f8a1a73031f03187a47"
     },
     {
       "path": "src/arc-connection.js",
@@ -197,15 +197,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "8c2154d223d6abcc7cf372b33ddd65849d854fae151a4c5c9af0bb92e62cfe0a"
+      "sha256": "6f6df885584256dd47bd09f7f2916a3fab9e0f0919e2f7957d9a951a5fe83baf"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "490b7e229da6469e8d409d566b6e94037433a8d90e6bf8f22a2260e47a0bf867"
+      "sha256": "680b411cd2a9dab0b44e70a9cccfd4cb343db7325169efb2434a347e6dade81e"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "beea1316cccb161adc23f497489e0bebb0a41bc799712c8fcd401f56a565a2fe"
+      "sha256": "5af6363092c91fb3b28f2cf46d680b3f202ec91831a7140e04e156f6c82cfb9a"
     },
     {
       "path": "src/math-input.js",
@@ -422,6 +422,14 @@
     {
       "path": "src/spring.js",
       "sha256": "f7d7d8609da4f3cc504c699c9c068b309534af05fdace3280554e6553396f7a8"
+    },
+    {
+      "path": "src/start.js",
+      "sha256": "c41b0dfc640b235c474020e42e7f25717406cd33f7c7c75b1ce5eebf49afce5b"
+    },
+    {
+      "path": "src/startup.js",
+      "sha256": "02922c7b970cbe4b9ae70f3837321636be9202bc24fdeabc85261cc50603ac41"
     },
     {
       "path": "src/style.css",

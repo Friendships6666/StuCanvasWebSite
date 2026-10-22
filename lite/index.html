@@ -1,17 +1,63 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-boot-state="loading" aria-busy="true">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>StuCanvas Lite</title>
   <meta name="theme-color" content="#3e1019" />
   <link rel="icon" href="/logo/official/pulsar-auto.svg" type="image/svg+xml" />
-  <script type="module" src="/src/themes.js"></script>
-  <link rel="stylesheet" href="/src/style.css" />
-  <link rel="stylesheet" href="/node_modules/mathlive/mathlive-static.css" />
-  <link rel="stylesheet" href="/node_modules/mathlive/mathlive-fonts.css" />
+  <style id="startup-style">
+    :root { --startup-background:#fffaf9; --startup-ink:#a6243b; --startup-muted:#687585; }
+    @media(prefers-color-scheme:dark) { :root { --startup-background:#0b0b0b; --startup-ink:#62f5eb; --startup-muted:#bec5c7; } }
+    #startup { position:fixed; inset:0; z-index:2147483647; display:grid; place-items:center; margin:0; background:var(--page-background,var(--startup-background)); color:var(--brand-700,var(--startup-ink)); font-family:Arial,"Microsoft YaHei",sans-serif; }
+    .startup-content { display:grid; justify-items:center; gap:20px; padding:28px; transform:translateY(-3vh); text-align:center; }
+    .startup-logo { display:block; width:clamp(156px,28vw,200px); height:clamp(156px,28vw,200px); overflow:visible; }
+    .startup-axis { transform-origin:108px 139px; animation:startup-orbit var(--period) linear infinite; }
+    @keyframes startup-orbit { from { transform:rotate(var(--phase)); } to { transform:rotate(calc(var(--phase) + 360deg)); } }
+    .startup-wordmark { margin:0; font-size:14px; font-weight:500; letter-spacing:.1em; line-height:1.4; }
+    .startup-status { min-height:16px; color:var(--text-secondary,var(--startup-muted)); font-size:11px; line-height:1.5; letter-spacing:.04em; }
+    [data-startup-failure] { display:none; }
+    .startup-detail { max-width:min(300px,72vw); margin:0; font-size:12px; line-height:1.6; color:var(--text-secondary,var(--startup-muted)); }
+    .startup-detail:empty { display:none; }
+    .startup-retry { border:1px solid currentColor; border-radius:7px; padding:8px 20px; background:transparent; color:inherit; font:12px Arial,sans-serif; cursor:pointer; }
+    .startup-retry:focus-visible { outline:2px solid currentColor; outline-offset:4px; }
+    #app-shell { visibility:hidden; }
+    html[data-boot-state="revealing"] #app-shell, html[data-boot-state="ready"] #app-shell { visibility:visible; }
+    html[data-boot-state="failed"] .startup-axis { animation:none; }
+    html[data-boot-state="failed"] [data-startup-loading] { display:none; }
+    html[data-boot-state="failed"] [data-startup-failure] { display:block; }
+    @media(prefers-reduced-motion:reduce) { .startup-axis { animation:none; } }
+  </style>
+  <script src="/src/startup.js" defer onerror="document.documentElement.dataset.bootState='failed'"></script>
+  <script type="module" src="/src/themes.js" data-startup-required onerror="document.documentElement.dataset.bootState='failed'"></script>
+  <link rel="stylesheet" href="/src/style.css" media="print" data-startup-style onload="this.media='all'" onerror="this.dataset.failed='true';document.documentElement.dataset.bootState='failed'" />
+  <link rel="stylesheet" href="/node_modules/mathlive/mathlive-static.css" media="print" data-startup-style onload="this.media='all'" onerror="this.dataset.failed='true';document.documentElement.dataset.bootState='failed'" />
+  <link rel="stylesheet" href="/node_modules/mathlive/mathlive-fonts.css" media="print" data-startup-style onload="this.media='all'" onerror="this.dataset.failed='true';document.documentElement.dataset.bootState='failed'" />
 </head>
 <body theme="light">
+  <div id="startup" role="status" aria-live="polite" aria-label="StuCanvas Lite">
+    <div class="startup-content">
+      <svg class="startup-logo" viewBox="-52 -21 320 320" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="4.1" stroke-linecap="round" stroke-linejoin="round">
+        <g class="startup-axis" data-startup-axis="0" style="--period:8600ms;--phase:22deg"><path d="M108 139L55.100 103.120" /></g>
+        <g class="startup-axis" data-startup-axis="1" style="--period:9070ms;--phase:53deg"><path d="M108 139L95.580 61.720" /><path stroke-width="2.5" d="M100.676 72.000l-6.714 1.079" /></g>
+        <g class="startup-axis" data-startup-axis="2" style="--period:9540ms;--phase:84deg"><path d="M108 139L129.620 87.020" /></g>
+        <g class="startup-axis" data-startup-axis="3" style="--period:10010ms;--phase:115deg"><path d="M108 139L195.400 29.980" /><path stroke-width="2.5" d="M185.817 47.369l-5.306 -4.253" /></g>
+        <g class="startup-axis" data-startup-axis="4" style="--period:10480ms;--phase:146deg"><path d="M108 139L180.680 123.360" /></g>
+        <g class="startup-axis" data-startup-axis="5" style="--period:10950ms;--phase:177deg"><path d="M108 139L229.440 175.800" /><path stroke-width="2.5" d="M211.452 173.902l1.972 -6.508" /></g>
+        <g class="startup-axis" data-startup-axis="6" style="--period:11420ms;--phase:208deg"><path d="M108 139L180.680 252.620" /><path stroke-width="2.5" d="M167.641 238.545l5.728 -3.664" /></g>
+        <g class="startup-axis" data-startup-axis="7" style="--period:11890ms;--phase:239deg"><path d="M108 139L103.860 218.580" /><path stroke-width="2.5" d="M101.044 207.262l6.791 0.353" /></g>
+        <g class="startup-axis" data-startup-axis="8" style="--period:12360ms;--phase:270deg"><path d="M108 139L74.880 177.180" /></g>
+        <g class="startup-axis" data-startup-axis="9" style="--period:12830ms;--phase:301deg"><path d="M108 139L53.720 154.640" /></g>
+        <g class="startup-axis" data-startup-axis="10" style="--period:13300ms;--phase:332deg"><path d="M108 139L13.700 147.280" /><path stroke-width="2.5" d="M26.605 142.734l0.595 6.774" /></g>
+        <g class="startup-axis" data-startup-axis="11" style="--period:13770ms;--phase:3deg"><path d="M108 139L255 139" /><path d="M255 136V142" /></g>
+      </g><circle cx="108" cy="139" r="3.8" fill="currentColor" /></svg>
+      <h1 class="startup-wordmark">StuCanvas Lite</h1>
+      <div class="startup-status"><span data-startup-loading data-i18n="startup.loading">Loading</span><span data-startup-failure data-i18n="startup.failed">Unable to load. Please retry.</span></div>
+      <p class="startup-detail"></p>
+      <button class="startup-retry" type="button" data-startup-failure data-i18n="startup.retry" onclick="location.reload()">Retry</button>
+    </div>
+  </div>
+  <div id="app-shell" inert aria-hidden="true">
   <header class="toolbar" data-i18n-aria-label="ui.toolbar">
     <div class="brand" aria-label="StuCanvas Lite">
       <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg"><g xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="4.1" stroke-linecap="round" stroke-linejoin="round">
@@ -170,7 +216,8 @@
       </div>
     </form>
   </dialog>
-  <script src="/node_modules/matter-js/build/matter.min.js"></script>
-  <script type="module" src="/src/app.js"></script>
+  </div>
+  <script src="/node_modules/matter-js/build/matter.min.js" defer data-startup-required onerror="document.documentElement.dataset.bootState='failed'"></script>
+  <script type="module" src="/src/start.js" data-startup-required onerror="document.documentElement.dataset.bootState='failed'"></script>
 </body>
 </html>

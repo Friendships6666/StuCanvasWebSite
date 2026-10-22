@@ -3083,5 +3083,18 @@ setTool('select');
 try {
   renderer = await GeometryRenderer.create(canvas, showError, draw);
   storeViewport();resize();
-  document.documentElement.dataset.renderer = 'webgpu';
 } catch (error) { showError(error); }
+
+// Startup waits for usable math input, actual font bytes and the first submitted
+// GPU frame. The cover stays in place throughout initialization and painting.
+export async function whenReady() {
+  const gpu=mainViewport.renderer;
+  if(!gpu||gpu.lost)throw new Error(element('gpu-error').textContent||t('error.webgpuUnavailable'));
+  await customElements.whenDefined('math-field');
+  await Promise.all([...document.fonts].map(font=>font.load()));
+  await document.fonts.ready;
+  resize();
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  await gpu.device.queue.onSubmittedWorkDone();
+  if(gpu.lost)throw new Error(element('gpu-error').textContent||t('error.webgpuUnavailable'));
+}

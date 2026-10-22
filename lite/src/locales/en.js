@@ -1,4 +1,7 @@
 export default {
+  "startup.loading": "Loading",
+  "startup.failed": "Unable to load. Please retry.",
+  "startup.retry": "Retry",
   "coordinates.create": "Create window",
   "targets.label": "Render targets",
   "targets.main": "Main canvas (main)",

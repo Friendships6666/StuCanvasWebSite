@@ -1,4 +1,7 @@
 export default {
+  "startup.loading": "正在載入",
+  "startup.failed": "載入失敗，請重試。",
+  "startup.retry": "重試",
   "coordinates.create": "建立視窗",
   "targets.label": "繪製目標",
   "targets.main": "主畫布 (main)",
