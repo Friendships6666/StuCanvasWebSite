@@ -74,6 +74,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, math-field:focu
 .equation-form math-field { color: var(--foreground); display: block; flex: 1; min-width: 0; max-width: 100%; border: 0; border-radius: 0; padding: 8px 7px; font-size: 19px; background: var(--surface); --caret-color: var(--brand-600); --selection-background-color: var(--selection-fill); --contains-highlight-background-color: var(--highlight-fill); }
 .equation-form math-field:focus-within { background: var(--surface-hover); outline: none; box-shadow: inset 0 -2px var(--brand-600); }
 math-field::part(virtual-keyboard-toggle), math-field::part(menu-toggle) { display: none; }
+/* Chromium drops native text input when MathLive's empty editable sink has
+   zero size. Keep it measurable; MathLive still clips it out of view. */
+math-field::part(keyboard-sink) { min-width: 1px; min-height: 1em; }
 .equation-definition { display: flex; align-items: center; gap: 6px; }
 .equation-name { flex-shrink: 0; color: var(--text-secondary); font-size: 13px; }
 .equation-math { color: var(--foreground); display: block; flex: 1; min-width: 0; max-width: 100%; border: 0; border-radius: 0; padding: 2px 0; font-size: 17px; background: transparent; --caret-color: var(--brand-600); --selection-background-color: var(--selection-fill); }

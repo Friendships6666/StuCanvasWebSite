@@ -437,7 +437,7 @@
     },
     {
       "path": "src/style.css",
-      "sha256": "5b566bc2234d460f8ef5dedb30b957d801f5d3f571d8b2353bc7a7214fddbdec"
+      "sha256": "fe1579a64f940cc2529ad022ea36c3c63a6606f29da564b9bb6deea5fa86bd36"
     },
     {
       "path": "src/surface-brush-target.js",
