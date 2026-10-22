@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "059a27774f926f6de9eb31fc5ec17f2065eb80aeb46a639aefba9b94a6241ef0"
+      "sha256": "694045bd9fbc4c71780e29e9286de0cb2a1d2fea39b142447da4efc91fb82a1c"
     },
     {
       "path": "src/arc-connection.js",
@@ -101,7 +101,7 @@
     },
     {
       "path": "src/compact-document.js",
-      "sha256": "ff47b9c2bd91b9145f50d3b4aff05e1e348a2cbceb7ce52d69599a2572cbe9ac"
+      "sha256": "a6e58cee89e8bc2fd1ba1af244c2455a1cd5ae41123949d6a0e67ebad7db6565"
     },
     {
       "path": "src/conics.js",
@@ -133,7 +133,7 @@
     },
     {
       "path": "src/document.js",
-      "sha256": "bfa9080d0d2400081a12b788ea09af38facb4738ad94736ce228427260b7d3e7"
+      "sha256": "2bef2a09bc8d936d7c8e4402f39392527a8acc31ec47314dfd107309e74d0e39"
     },
     {
       "path": "src/equation-intersections.js",
@@ -241,7 +241,7 @@
     },
     {
       "path": "src/physics-boundaries.js",
-      "sha256": "bbc2e822d6025a1fd332123f52d5c8e04a65a66b40808206459a80b799f67cbb"
+      "sha256": "e60aec294e3526e38cc4217c420ecbd1cf05bf50e3b9ef68995b695ef4778ec5"
     },
     {
       "path": "src/physics-contact-friction.js",
@@ -273,7 +273,7 @@
     },
     {
       "path": "src/physics.js",
-      "sha256": "fb3ce69ff653ebe6bf5f5ed9471510d1f44b589d140e885b86c1265aab30c578"
+      "sha256": "d62524ea0bbafdd0df17f62ce250a4d4ce7329613028c6aa112f55d15824d2d4"
     },
     {
       "path": "src/plot/formula.js",

@@ -47,7 +47,7 @@ import { createMobileUI } from './mobile-ui.js';
 import { createTouchInteraction } from './touch-interaction.js';
 import { createCadEditor } from './cad-editor.js';
 import { PhysicsWorld, PHYSICS_STEP, isPhysicsBody, isPhysicsObject, instantiateRegion, bodyContains, bodyState } from './physics.js';
-import { syncPhysicsBoundaries } from './physics-boundaries.js';
+import { syncPhysicsBoundaries, physicsBoundaryFrame } from './physics-boundaries.js';
 import { createPhysicsEditor } from './physics-editor.js';
 import { createRegionEditor } from './region-editor.js';
 import { instanceCell } from './region-options.js';
@@ -200,6 +200,7 @@ function restoreSnapshot(text) {
 }
 const screenToWorld = point => toWorld(point, view, width, height);
 let plots = new PlotManager(draw);
+const physicsPlots = new PlotManager(draw);
 let reflectionRevision = 0;
 let reflectionGeometryRevision = 0;
 const reflection = new ReflectionManager({
@@ -465,10 +466,21 @@ const syncTimeline = createTimelineEditor(element('canvas-wrap'), {
 });
 
 function constructionScene() { return inViewport(mainViewport,viewportConstructionScene); }
+function syncPhysicsScene() {
+  inViewport(mainViewport, () => {
+    const geometry = selectableObjects();
+    const frame = physicsBoundaryFrame(physics, geometry, view, width, height);
+    if (frame) {
+      if (JSON.stringify(physicsPlots.options) !== JSON.stringify(plots.options)) physicsPlots.configure(plots.options);
+      physicsPlots.sync(objects, frame.view, frame.width, frame.height);
+    } else physicsPlots.sync([], view, width, height);
+    syncPhysicsBoundaries(physics, geometry.map(object => isPlot(object) ? { ...object, plot: physicsPlots.get(object.id) } : object), view, width, height);
+  });
+}
 function viewportConstructionScene() {
   const plotRecipes = {};
   for (const object of selectableObjects().filter(isPlot)) {
-    const task = object.plot || plots.get(object.id);
+    const task = physicsPlots.get(object.id) || object.plot || plots.get(object.id);
     if (task?.view) plotRecipes[object.id] = { view: task.view, width: task.width, height: task.height, options: task.options, work: task.work || 0 };
   }
   return {
@@ -510,7 +522,7 @@ async function timelineCommand(command, value) {
   pausePhysics();
   const before = snapshot();
   physics.anchors = resolved;
-  inViewport(mainViewport,()=>syncPhysicsBoundaries(physics,selectableObjects(),view,width,height));
+  syncPhysicsScene();
   if (command === 'reset') timeline.reset(objects);
   else if (command === 'step') {
     timeline.play(objects);
@@ -566,7 +578,7 @@ async function physicsCommand(id, command, value) {
     const token = ++physicsReplay;
     if (command === 'seek') physicsReplayBefore = before;
     physics.anchors = resolved;
-    inViewport(mainViewport,()=>syncPhysicsBoundaries(physics,selectableObjects(),view,width,height));
+    syncPhysicsScene();
     const target = command === 'step' ? Math.max(object.time, Math.min(object.time + PHYSICS_STEP * object.playbackRate, object.duration || Infinity)) : Math.min(value, object.duration || Infinity);
     let ticks = 0;
     while (object.time + 1e-9 < target && token === physicsReplay && objects.includes(object)) {
@@ -626,6 +638,7 @@ function refresh(changed = null) {
 function readEnvironment() {
   return {
     view: { ...(activeViewport===mainViewport?view:mainViewport.view) },
+    physicsFrame: physics.boundaryFrame ? structuredClone(physics.boundaryFrame) : null,
     display: { ...Object.fromEntries(['grid', 'axes', 'snap'].map(id => [id, element(id).checked])), ...canvasVisibility, snapping: snapSettings.read(), touchOffset: element('touch-offset').checked, touchOffsetPixels: touchSettings.read() },
     settings: { locale: getLocale(), theme: getThemeSelection(), themeConfiguration: readThemeConfiguration(), plotDefaults: { ...plots.options } },
     ui: { ...documentExtras.ui, mainWindowId, timeline: syncTimeline.read(), coordinateWindows: coordinateWindows?.read() || [] },
@@ -633,6 +646,12 @@ function readEnvironment() {
 }
 
 function applyEnvironment(document) {
+  const physicalFrame = document.physicsFrame ?? null;
+  if (documentKey(physicalFrame) !== documentKey(physics.boundaryFrame)) {
+    physics.invalidate();
+    physics.boundaryFrame = structuredClone(physicalFrame);
+    timeline.clear(); timeline.signature = null;
+  }
   for (const key of ['hidePoints', 'hideObjectLabels']) canvasVisibility[key] = document.display?.[key] ?? false;
   if (document.view) { mainViewport.view={...document.view};if(activeViewport===mainViewport)view=mainViewport.view; }
   element('coordinate-type').value=mainViewport.view.coordinateSystem||'cartesian';
@@ -2339,7 +2358,7 @@ function draw() {
       if (now - ripples[index].started >= ripples[index].duration) ripples.splice(index, 1);
     }
     physics.anchors = resolved;
-    inViewport(mainViewport,()=>syncPhysicsBoundaries(physics,selectableObjects(),view,width,height));
+    syncPhysicsScene();
     const physicsChanged = physicsReplayBefore ? new Set() : tickTimeline(now);
     syncTimeline();
     if (physicsChanged.size) {
@@ -2421,7 +2440,7 @@ function beginPhysicsDrag(position, pointerId) {
   for (const item of objects.filter(isPhysicsObject)) if (item.time === 0) item.initialState = bodyState(item);
   timeline.play(objects);
   physics.anchors = resolved;
-  inViewport(mainViewport,()=>syncPhysicsBoundaries(physics,selectableObjects(),view,width,height));
+  syncPhysicsScene();
   timeline.sync(objects); timeline.ensureEngine(objects); physics.syncBodies(objects);
   if (!physics.beginDrag(hit.id, position)) { physicsSession = session; restoreSnapshot(before); refresh(); return; }
   selected = hit.id; selection.clear();

@@ -333,6 +333,10 @@ export function parseDocument(text) {
   if (document.version !== documentVersion) fail('error.documentVersion', { version: String(document.version) });
   finiteTree(document, '$');
   if (document.view !== undefined && !validCoordinateView(document.view)) fail('error.documentValue', { path: '$.view' });
+  if (document.physicsFrame !== undefined && document.physicsFrame !== null) {
+    const frame = document.physicsFrame;
+    if (!record(frame) || !validCoordinateView(frame.view) || !['width', 'height'].every(key => Number.isFinite(frame[key]) && frame[key] >= 0)) fail('error.documentValue', { path: '$.physicsFrame' });
+  }
   if (document.display !== undefined) {
     if (!record(document.display) || !['grid', 'axes', 'snap'].every(key => typeof document.display[key] === 'boolean')) fail('error.documentValue', { path: '$.display' });
     for (const key of ['hidePoints', 'hideObjectLabels']) if (document.display[key] !== undefined && typeof document.display[key] !== 'boolean') fail('error.documentValue', { path: `$.display.${key}` });

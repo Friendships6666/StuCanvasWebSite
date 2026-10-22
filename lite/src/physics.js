@@ -93,6 +93,8 @@ export class PhysicsWorld {
     this.softBodies = new Map();
     this.anchors = new Map();
     this.boundaries = new Map();
+    this.boundaryFrame = null;
+    this.boundaryDomain = null;
     this.accumulator = 0;
     this.lastFrame = null;
     this.drag = null;
@@ -108,6 +110,7 @@ export class PhysicsWorld {
     Composite.clear(this.engine.world, false);
     Engine.clear(this.engine);
     this.bodies.clear(); this.ropes.clear(); this.liquids.clear(); this.softBodies.clear(); this.boundaries.clear();
+    this.boundaryFrame = null; this.boundaryDomain = null;
     this.lastFrame = null; this.accumulator = 0;
   }
   syncBodies(objects) {
@@ -182,13 +185,14 @@ export class PhysicsWorld {
   checkpoint() {
     const external = new Set();
     for (const entry of [...this.bodies.values(), ...this.ropes.values(), ...this.liquids.values(), ...this.softBodies.values()]) for (const key of ['object', 'shape', 'geometry', 'mesh', 'buoyancySamples']) external.add(entry[key]);
-    return cloneSolver({ engine: this.engine, bodies: this.bodies, ropes: this.ropes, liquids: this.liquids, softBodies: this.softBodies, boundaries: this.boundaries, constructionPrevious: this.constructionPrevious, constructionSyncKey: this.constructionSyncKey }, external);
+    return cloneSolver({ engine: this.engine, bodies: this.bodies, ropes: this.ropes, liquids: this.liquids, softBodies: this.softBodies, boundaries: this.boundaries, boundaryFrame: this.boundaryFrame, boundaryDomain: this.boundaryDomain, constructionPrevious: this.constructionPrevious, constructionSyncKey: this.constructionSyncKey }, external);
   }
   restore(checkpoint, objects) {
     const external = new Set();
     for (const entry of [...checkpoint.value.bodies.values(), ...checkpoint.value.ropes.values(), ...checkpoint.value.liquids.values(), ...checkpoint.value.softBodies.values()]) for (const key of ['object', 'shape', 'geometry', 'mesh', 'buoyancySamples']) external.add(entry[key]);
     const { value } = cloneSolver(checkpoint.value, external);
     this.engine = value.engine; this.bodies = value.bodies; this.ropes = value.ropes; this.liquids = value.liquids; this.softBodies = value.softBodies; this.boundaries = value.boundaries;
+    this.boundaryFrame = value.boundaryFrame; this.boundaryDomain = value.boundaryDomain;
     this.constructionPrevious = value.constructionPrevious;
     this.constructionSyncKey = value.constructionSyncKey;
     const byId = new Map(objects.map(object => [object.id, object]));

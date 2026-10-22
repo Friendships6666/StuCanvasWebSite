@@ -208,7 +208,7 @@ export function compactDocument(document) {
 export function recordConstructionStep(world, objects, scene, seconds) {
   const physical = objects.filter(isPhysicsObject);
   const inputs = physical.map(object => captureConstruction(object, [...scene.definitions, ...objects]));
-  const context = addConstruction('scene', [], scene);
+  const context = addConstruction('scene', [], { ...scene, ...world.boundaryFrame });
   const previous = world.constructionPrevious;
   const parents = [context, ...inputs];
   const parameters = { seconds, ids: physical.map(object => object.id), drag: world.drag ? jsonData(world.drag) : null };
@@ -231,7 +231,7 @@ export function recordConstructionSync(world, objects, scene) {
   const physical = objects.filter(isPhysicsObject);
   if (!physical.length) { world.constructionPrevious = null; world.constructionSyncKey = null; return; }
   const inputs = physical.map(object => captureConstruction(object, [...scene.definitions, ...objects]));
-  const context = addConstruction('scene', [], scene);
+  const context = addConstruction('scene', [], { ...scene, ...world.boundaryFrame });
   const key = JSON.stringify([context, inputs]);
   if (world.constructionSyncKey === key) return;
   const parents = [context, ...inputs], parameters = { ids: physical.map(object => object.id) };
