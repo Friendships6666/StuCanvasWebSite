@@ -1,3 +1,4 @@
+import { validDocumentRenderTargets } from './render-targets.js';
 import { LocalizedError } from './i18n.js';
 import { parseDocument, serializeDocument } from './document.js';
 import { compactDocument, expandDocument } from './compact-document.js';
@@ -25,6 +26,7 @@ export function parseProject(text) {
       ...(input.view && !input.document.view ? { view: input.view } : {}),
       ...(input.display && !input.document.display ? { display: input.display } : {}) }));
   }
+  if(!validDocumentRenderTargets(document))fail('error.documentValue',{path:'$.objects.renderTargets'});
   document = compactDocument(expandDocument(document));
   return { format: projectFormat, version: projectVersion, document,
     ...(document.view ? { view: document.view } : {}), ...(document.display ? { display: document.display } : {}) };

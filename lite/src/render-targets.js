@@ -9,3 +9,10 @@ export function validRenderTargets(object, available) {
   return Array.isArray(targets) && new Set(targets).size === targets.length && targets.every(id => validWindowId(id) && (!available || available.has(id)))
     && (!mainOnly(object) || targets.length === 1 && targets[0] === mainWindowId);
 }
+
+// Recipe/worker fragments have no window layout. Validate references against
+// the complete document at its import/apply boundary.
+export function validDocumentRenderTargets(document) {
+  const available=new Set([mainWindowId,...(document.ui?.coordinateWindows||[]).map(window=>window.id)]);
+  return document.objects.every(object=>validRenderTargets(object,available));
+}

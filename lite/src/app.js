@@ -39,7 +39,7 @@ import { circularPreview } from './construction-preview.js';
 import { cadPrimitives, cadTools, computeCadCorner, cornerSides, isCad, lineCorner, resolveCadCorner, trimCadSources } from './cad.js';
 import { arcConnectionParameters, isArcSource } from './arc-connection.js';
 import { snapToGrid, touchAim, pinchView } from './grid-snap.js';
-import { mainWindowId, renderTargets, rendersInWindow } from './render-targets.js';
+import { mainWindowId, renderTargets, rendersInWindow, validDocumentRenderTargets } from './render-targets.js';
 import { createCoordinateWindows } from './coordinate-windows.js';
 import { createSnapSettings } from './snap-settings.js';
 import { createTouchSettings } from './touch-settings.js';
@@ -643,6 +643,7 @@ function readDocument() {
 }
 
 function applyDocument(document) {
+  if(!validDocumentRenderTargets(document))throw new LocalizedError('error.documentValue',{path:'$.objects.renderTargets'});
   document = expandDocument(document);
   // Check reconstructibility before touching the current model. Old files
   // without a recoverable generator must never silently lose their state.
