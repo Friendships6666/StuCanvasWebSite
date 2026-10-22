@@ -9,6 +9,8 @@ const source = path.join(root, 'lite');
 const output = path.join(root, 'docs/.vitepress/dist');
 const snapshot = JSON.parse(await readFile(path.join(source, 'snapshot.json'), 'utf8'));
 const snapshotHash = createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
+const buildHash = createHash('sha256').update(snapshotHash).update(await readFile(fileURLToPath(import.meta.url))).digest('hex');
+const moduleRoot = `/lite-build/${buildHash.slice(0, 16)}/src`;
 const commit = process.env.CF_PAGES_COMMIT_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 const isMarkdown = filename => /\.(?:md|markdown|mdown|mkd|mkdn|mdx)$/i.test(filename);
 // A Cloudflare checkout is self-contained: never read a sibling repository here.
@@ -29,11 +31,14 @@ for (const entry of entries) await cp(path.join(source, entry), path.join(output
 });
 // Public dependency URLs use vendor/, independent of deployment tools' handling
 // of node_modules directories. The upstream snapshot remains unchanged.
-const publicPaths = text => text.replaceAll('/node_modules/', '/vendor/');
+const publicPaths = text => text.replaceAll('../node_modules/', '/vendor/').replaceAll('/node_modules/', '/vendor/');
 for (const file of snapshot.files.filter(file => file.path.startsWith('src/') && file.path.endsWith('.js'))) {
   const filename = path.join(output, file.path);
-  await writeFile(filename, publicPaths(await readFile(filename, 'utf8')));
+  await writeFile(filename, publicPaths(await readFile(filename, 'utf8')).replaceAll('../assets/', '/assets/'));
 }
+// The custom domain may enforce a long browser TTL, overriding _headers.
+// Version the complete module tree, including relative imports and workers.
+await cp(path.join(output, 'src'), path.join(output, moduleRoot), { recursive: true });
 for (const optional of ['LICENSE', 'LICENSE.txt']) {
   try { await cp(path.join(source, optional), path.join(output, optional)); }
   catch (error) { if (error.code !== 'ENOENT') throw error; }
@@ -51,9 +56,10 @@ for (const entry of runtime) {
 }
 await cp(path.join(root, 'site'), output, { recursive: true });
 const html = publicPaths(await readFile(path.join(source, 'index.html'), 'utf8'))
-  .replace('</head>', `  <meta name="stucanvas-build" content="${snapshotHash}" />\n</head>`)
+  .replaceAll('/src/', `${moduleRoot}/`)
+  .replace('</head>', `  <meta name="stucanvas-build" content="${buildHash}" />\n</head>`)
   .replace('</head>', '  <link rel="stylesheet" href="/site-links.css" />\n</head>')
   .replace('</body>', '  <script type="module" src="/site-links.js"></script>\n</body>');
 await writeFile(path.join(output, 'index.html'), html);
-await writeFile(path.join(output, 'version.json'), JSON.stringify({ commit, snapshot: snapshotHash, version: snapshot.version }, null, 2) + '\n');
+await writeFile(path.join(output, 'version.json'), JSON.stringify({ commit, snapshot: snapshotHash, build: buildHash, modules: moduleRoot, version: snapshot.version }, null, 2) + '\n');
 console.log('Built Lite at /, tutorial home at /tutorials; existing documentation and toolbox routes retained.');
