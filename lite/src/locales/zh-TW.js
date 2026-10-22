@@ -15,6 +15,7 @@ export default {
   "mobile.properties": "檢視屬性",
   "mobile.help": "雙指移動 / 縮放 · 長按開啟選單",
   "mobile.offset": "觸控瞄準點偏移，避開手指遮擋",
+  "mobile.offsetPixels": "準星抬高（像素）",
   "mobile.cancelConstruction": "取消本次構造",
   "snap.settings": "精細網格吸附",
   "snap.spacing": "網格間距模式",

@@ -37,6 +37,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, math-field:focu
 .settings { position: absolute; right: 10px; top: 58px; width: 310px; padding: 12px; border: 1px solid var(--control-border); border-top: 3px solid var(--brand-600); border-radius: 0 0 12px 12px; background: var(--surface); box-shadow: 0 8px 26px var(--shadow); }
 .settings label { display: flex; align-items: center; gap: 8px; padding: 9px 4px; font-size: 13px; }
 .settings input { accent-color: var(--brand-600); }
+.touch-offset-setting { display: grid; grid-template-columns: minmax(0, 1fr) 80px; align-items: center; gap: 4px 8px; padding: 0 4px 8px; }
+.touch-offset-setting input[type="number"] { width: 100%; min-width: 0; padding: 7px; font: inherit; border: 1px solid var(--control-border); border-radius: 6px; background: var(--input-background); color: var(--foreground); }
+.touch-offset-setting input[type="range"] { grid-column: 1 / -1; width: 100%; min-width: 0; min-height: 44px; margin: 0; }
+.touch-offset-setting input[aria-invalid="true"] { outline: 2px solid var(--error); }
 .settings .language-setting { justify-content: space-between; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
 .settings select { max-width: 180px; padding: 6px 9px; border: 1px solid var(--control-border); border-radius: 6px; background: var(--input-background); color: inherit; font: inherit; }
 .settings button { display: block; width: 100%; border: 0; border-radius: 7px; background: none; padding: 10px 8px; text-align: left; font-size: 13px; color: var(--foreground); }

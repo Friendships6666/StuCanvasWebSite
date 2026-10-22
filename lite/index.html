@@ -70,6 +70,11 @@
       <label><input id="snap" type="checkbox" /><span data-i18n="ui.snap"></span></label>
       <div id="snap-options"></div>
       <label><input id="touch-offset" type="checkbox" checked /><span data-i18n="mobile.offset"></span></label>
+      <div class="touch-offset-setting">
+        <label for="touch-offset-pixels" data-i18n="mobile.offsetPixels"></label>
+        <input id="touch-offset-pixels" type="number" min="0" max="300" step="1" value="120" inputmode="numeric" />
+        <input id="touch-offset-range" type="range" min="0" max="300" step="1" value="120" data-i18n-aria-label="mobile.offsetPixels" />
+      </div>
       <div class="project-actions">
         <button id="project-export" type="button" data-i18n="project.export"></button>
         <button id="project-import" type="button" data-i18n="project.import"></button>

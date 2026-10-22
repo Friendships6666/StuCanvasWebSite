@@ -41,7 +41,11 @@ export function snapToGrid(position, settings, scale) {
   return result;
 }
 
-export function touchAim(screen, width, height, offset = 120) {
+export const defaultTouchOffsetPixels = 120;
+export const maxTouchOffsetPixels = 300;
+export const validTouchOffsetPixels = value => Number.isInteger(value) && value >= 0 && value <= maxTouchOffsetPixels;
+
+export function touchAim(screen, width, height, offset = defaultTouchOffsetPixels) {
   const clamp = (value, size) => Math.max(Math.min(12, size / 2), Math.min(Math.max(size - 12, size / 2), value));
   const above = { x: clamp(screen.x, width), y: clamp(screen.y - offset, height) };
   if (offset <= 0) return above;

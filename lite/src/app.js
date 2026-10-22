@@ -40,6 +40,7 @@ import { cadPrimitives, cadTools, computeCadCorner, cornerSides, isCad, lineCorn
 import { arcConnectionParameters, isArcSource } from './arc-connection.js';
 import { snapToGrid, touchAim, pinchView } from './grid-snap.js';
 import { createSnapSettings } from './snap-settings.js';
+import { createTouchSettings } from './touch-settings.js';
 import { createMobileUI } from './mobile-ui.js';
 import { createTouchInteraction } from './touch-interaction.js';
 import { createCadEditor } from './cad-editor.js';
@@ -162,6 +163,7 @@ let forcedHit = null;
 let touchPreview = false;
 let hitRadius = 1;
 const snapSettings = createSnapSettings(element('snap-options'), draw);
+const touchSettings = createTouchSettings(() => { documentEditor?.sync(); draw(); });
 let frame = 0;
 const ripples = [];
 const ratioDialog = createRatioDialog({
@@ -546,7 +548,7 @@ function refresh(changed = null) {
 function readEnvironment() {
   return {
     view: { ...view },
-    display: { ...Object.fromEntries(['grid', 'axes', 'snap'].map(id => [id, element(id).checked])), snapping: snapSettings.read(), touchOffset: element('touch-offset').checked },
+    display: { ...Object.fromEntries(['grid', 'axes', 'snap'].map(id => [id, element(id).checked])), snapping: snapSettings.read(), touchOffset: element('touch-offset').checked, touchOffsetPixels: touchSettings.read() },
     settings: { locale: getLocale(), theme: getThemeSelection(), themeConfiguration: readThemeConfiguration(), plotDefaults: { ...plots.options } },
     ui: { ...documentExtras.ui, timeline: syncTimeline.read() },
   };
@@ -558,6 +560,7 @@ function applyEnvironment(document) {
     for (const id of ['grid', 'axes', 'snap']) element(id).checked = document.display[id];
     snapSettings.apply(document.display.snapping);
     element('touch-offset').checked = document.display.touchOffset ?? true;
+    touchSettings.apply(document.display.touchOffsetPixels);
   }
   if (document.settings?.plotDefaults) plots.configure(document.settings.plotDefaults);
   if (document.settings?.locale) setLocale(document.settings.locale);
@@ -2836,6 +2839,7 @@ createProjectMenu({
     if (project.display) for (const id of ['grid','axes','snap']) element(id).checked = project.display[id];
     snapSettings.apply(project.display?.snapping);
     element('touch-offset').checked = project.display?.touchOffset ?? true;
+    touchSettings.apply(project.display?.touchOffsetPixels);
     selection.clear(); selected = hovered = null;
     documentEditor.reset(); refresh(new Set());
   },
@@ -2878,7 +2882,7 @@ touchInteraction = createTouchInteraction(canvas, {
   hover(id) { hovered = id; draw(); },
   preview(screen) {
     touchPreview = true;
-    const target = touchAim(screen, width, height, element('touch-offset').checked ? undefined : 0);
+    const target = touchAim(screen, width, height, touchSettings.offset());
     const position = screenToWorld(target);
     pointer = position;
     const candidate = touchCandidates(target)[0];

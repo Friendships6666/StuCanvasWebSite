@@ -21,7 +21,7 @@ import { isArcSource, validArcBranch } from './arc-connection.js';
 import { defaultPhysicsMaterial, validTextureImage } from './physics-material.js';
 import { SCRIPT_LIMIT, bindingPatch, formulaParameters, isJavaScript, jsonValue, validVariablePath, variableRoot } from './reflection.js';
 import { jsonData } from './json-data.js';
-import { validSnapSettings } from './grid-snap.js';
+import { validSnapSettings, validTouchOffsetPixels } from './grid-snap.js';
 
 export const documentFormat = 'stucanvas-lite';
 export const documentVersion = 1;
@@ -333,6 +333,7 @@ export function parseDocument(text) {
     if (!record(document.display) || !['grid', 'axes', 'snap'].every(key => typeof document.display[key] === 'boolean')) fail('error.documentValue', { path: '$.display' });
     if (document.display.snapping !== undefined && !validSnapSettings(document.display.snapping)) fail('error.documentValue', { path: '$.display.snapping' });
     if (document.display.touchOffset !== undefined && typeof document.display.touchOffset !== 'boolean') fail('error.documentValue', { path: '$.display.touchOffset' });
+    if (document.display.touchOffsetPixels !== undefined && !validTouchOffsetPixels(document.display.touchOffsetPixels)) fail('error.documentValue', { path: '$.display.touchOffsetPixels' });
   }
   if (document.ui?.timeline !== undefined) {
     const state = document.ui.timeline;

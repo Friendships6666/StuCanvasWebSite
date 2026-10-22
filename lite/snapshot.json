@@ -25,7 +25,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "01a0294b95c87812944e3b7e4870beca98b7f87bfe7ddd7ac5bff859539d7f16"
+      "sha256": "730da975c55758d69fed1166854cd602190de93c8848c01ae599df28d4651335"
     },
     {
       "path": "licenses/CC-BY-4.0.txt",
@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "bbf03e3bb4a85e2e5c5be6e28495b327e6a59b029847c6b931a0b7c5e07eb392"
+      "sha256": "525577091dbd6f5aff17bac8d59eed8d8cdefff5f38e9d57a7b7efe9e6787213"
     },
     {
       "path": "src/arc-connection.js",
@@ -125,7 +125,7 @@
     },
     {
       "path": "src/document.js",
-      "sha256": "fd623f3a76d52d3ecc98be6496d69906124294c872eaa0d6f9b2c0a99daf5013"
+      "sha256": "63b3cc3fb841d1f93e7b8c50d3dff4f9466fac9389095be757f42b2e930f0a4e"
     },
     {
       "path": "src/equation-intersections.js",
@@ -141,7 +141,7 @@
     },
     {
       "path": "src/grid-snap.js",
-      "sha256": "eefb3074d34e0644f214c1a6328f409c098f69a16c56e2d2a65e41dd86acd8cb"
+      "sha256": "7907052a9e36e51d656fec7d79cd86a0b3ebe3f854441b961703eb06d90d74c5"
     },
     {
       "path": "src/i18n.js",
@@ -185,15 +185,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "894db9a24186832a332fd30c1e8e2d61bd0bceab6536ee225db2ba090a43a324"
+      "sha256": "cd0d3548eb0733de59d5423433cbeafc721a77015aa94ccbd1cb93a779371baf"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "da46dc53ff2bdff4ea6451a12da9e764f1fbea5b1e9fea87fa77bf9f34fbecdb"
+      "sha256": "feb51a65b5465bf8daf4e18c31a55bb3fca60fe3a554d8a2bdda3780ea9ceee4"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "a04edc99aba8994aaed52f1111df8f6de22b19d50950b4ba68d8a05a47727351"
+      "sha256": "dd284f3b10935c3cb223da5050adad636900bab235a6d7f33b0dbbd7d40df915"
     },
     {
       "path": "src/math-input.js",
@@ -401,7 +401,7 @@
     },
     {
       "path": "src/style.css",
-      "sha256": "8d0be5f3e2c52f985764ab8f7a2f519f917dff716acfaebe3665330c5dd8ec64"
+      "sha256": "d27564e5dbd3d02324d07419bdc734679471d9ac7c2863bb1df27c1ae3819b92"
     },
     {
       "path": "src/surface-brush-target.js",
@@ -430,6 +430,10 @@
     {
       "path": "src/touch-interaction.js",
       "sha256": "b1e090d7ca737406234ec908620c0ede481644767529a82eca3c65bf68ce9666"
+    },
+    {
+      "path": "src/touch-settings.js",
+      "sha256": "6681a8b9fc4b8b7b0e94de1e1262e8ba2c8601fa60056a118f935f927fc85dd4"
     },
     {
       "path": "src/traces.js",
