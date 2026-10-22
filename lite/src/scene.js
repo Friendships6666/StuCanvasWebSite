@@ -36,6 +36,7 @@ export function buildScene(objects, view, width, height, options = {}) {
   };
   const labels = [];
   let tracing = false;
+  let drawingObjects = false;
   let textOpacity = 1;
   const groups = [];
   const viewportBounds = [0, 0, width, height];
@@ -122,6 +123,7 @@ export function buildScene(objects, view, width, height, options = {}) {
     line({ x: right, y: bottom - arm }, { x: right, y: bottom }, halfWidth, color);
   };
   const text = (value, x, y, color = palette.text, anchor = 'start', size = 12, measurement = false) => {
+    if (drawingObjects && options.hideObjectLabels) return;
     if (tracing && !measurement) return;
     if (x < -20 || y < -20 || x > width + 20 || y > height + 20) return;
     labels.push({ value, x, y, color, anchor, size, opacity: textOpacity, measurement });
@@ -186,7 +188,8 @@ export function buildScene(objects, view, width, height, options = {}) {
     if (origin.x >= 0 && origin.x <= width && origin.y >= 0 && origin.y <= height) text('0', origin.x - 7, origin.y + 16, palette.text, 'end', 11);
   }
   }
-  const visible = trimCadSources([...(options.traces || []), ...objects].filter(object=>object.preview||rendersInWindow(object,options.windowId))).flatMap(cadPrimitives).filter(object => !object.hidden);
+  drawingObjects = true;
+  const visible = trimCadSources([...(options.traces || []), ...objects].filter(object=>object.preview||rendersInWindow(object,options.windowId))).flatMap(cadPrimitives).filter(object => !object.hidden && !(options.hidePoints && isPoint(object)));
   const ordered = [...visible.filter(object => object.type === 'region'), ...visible.filter(object => !isPoint(object) && !isMeasurement(object) && object.type !== 'region'), ...visible.filter(isPoint), ...visible.filter(isMeasurement)];
   ordered.sort((first, second) => Number(!!second.historical) - Number(!!first.historical));
   for (const object of ordered) {
@@ -363,6 +366,7 @@ export function buildScene(objects, view, width, height, options = {}) {
     }
   }
   tracing = false;
+  drawingObjects = false;
   textOpacity = 1;
   // Only the active brush's channel is visible. Editing colors never leak into
   // ordinary viewing or exports; the saved contact properties stay effective.

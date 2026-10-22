@@ -144,6 +144,7 @@ const dualConstructionTools = new Set(['parabola', 'polar', 'pole']);
 const number = value => value === 0 ? '0' : Number(value.toPrecision(8)).toString();
 let objects = [];
 let documentExtras = {};
+const canvasVisibility = { hidePoints: false, hideObjectLabels: false };
 let documentEditor = null;
 let resolved = new Map();
 const intersectionTracker = new IntersectionTracker();
@@ -323,6 +324,17 @@ function triggerRipple(position) {
 const objectMenu = createObjectMenu({
   openTimeline: point => syncTimeline.open(point),
   openCoordinates: point => coordinateWindows.add(point),
+  canvasVisibility: () => canvasVisibility,
+  changeCanvasVisibility: (key, hidden) => {
+    const before = snapshot();
+    canvasVisibility[key] = hidden;
+    if (key === 'hidePoints' && hidden) {
+      selection = new Set([...selection].filter(id => !isPoint(resolved.get(id))));
+      if (isPoint(resolved.get(selected))) selected = null;
+      if (isPoint(resolved.get(hovered))) hovered = null;
+    }
+    commit(before, new Set());
+  },
   windows:()=>coordinateWindows.ids(),
   get: id => objects.find(object => object.id === id),
   all: () => objects,
@@ -612,13 +624,14 @@ function refresh(changed = null) {
 function readEnvironment() {
   return {
     view: { ...(activeViewport===mainViewport?view:mainViewport.view) },
-    display: { ...Object.fromEntries(['grid', 'axes', 'snap'].map(id => [id, element(id).checked])), snapping: snapSettings.read(), touchOffset: element('touch-offset').checked, touchOffsetPixels: touchSettings.read() },
+    display: { ...Object.fromEntries(['grid', 'axes', 'snap'].map(id => [id, element(id).checked])), ...canvasVisibility, snapping: snapSettings.read(), touchOffset: element('touch-offset').checked, touchOffsetPixels: touchSettings.read() },
     settings: { locale: getLocale(), theme: getThemeSelection(), themeConfiguration: readThemeConfiguration(), plotDefaults: { ...plots.options } },
     ui: { ...documentExtras.ui, mainWindowId, timeline: syncTimeline.read(), coordinateWindows: coordinateWindows?.read() || [] },
   };
 }
 
 function applyEnvironment(document) {
+  for (const key of ['hidePoints', 'hideObjectLabels']) canvasVisibility[key] = document.display?.[key] ?? false;
   if (document.view) { mainViewport.view={...document.view};if(activeViewport===mainViewport)view=mainViewport.view; }
   element('coordinate-type').value=mainViewport.view.coordinateSystem||'cartesian';
   if (document.display) {
@@ -913,7 +926,7 @@ function pickPoint(position, mode = 'snap') {
 
 function nearestObjects(position, radius = Infinity) {
   const candidates = [];
-  for (const object of trimCadSources([...resolved.values()].filter(object=>rendersInWindow(object,activeViewport.id)))) {
+  for (const object of trimCadSources([...resolved.values()].filter(object=>rendersInWindow(object,activeViewport.id) && !(canvasVisibility.hidePoints && isPoint(object))))) {
     if (forcedHit && object.id !== forcedHit.object?.id) continue;
     if (object.hidden || object.invalid || (!shapeTypes.has(object.type) && !isPlot(object))) continue;
     const projection = isPlot(object) ? nearestPlotPoint(position, object) : projectPointOnObject(position, object);
@@ -942,7 +955,7 @@ function movePoint(point, position) {
 }
 
 function hitCandidates(position, filter = () => true, radius = hitRadius) {
-  return trimCadSources([...resolved.values()].filter(object=>rendersInWindow(object,activeViewport.id))).filter(object => !object.hidden && !object.invalid && (isMeasurement(object) || isPoint(object) || shapeTypes.has(object.type) || isPlot(object) || object.type === 'region' || isPhysicsObject(object)) && filter(object))
+  return trimCadSources([...resolved.values()].filter(object=>rendersInWindow(object,activeViewport.id) && !(canvasVisibility.hidePoints && isPoint(object)))).filter(object => !object.hidden && !object.invalid && (isMeasurement(object) || isPoint(object) || shapeTypes.has(object.type) || isPlot(object) || object.type === 'region' || isPhysicsObject(object)) && filter(object))
     .map(object => ({ object, distance: isPlot(object)
       ? plots.get(object.id)?.distance(toScreen(position, view, width, height), view, width, height) ?? Infinity
       : isMeasurement(object) ? measurementDistance(measurementLayout(object, view, width, height), toScreen(position, view, width, height))
@@ -2218,7 +2231,7 @@ function renderObjects() {
 }
 
 function selectableObjects() {
-  return [...resolved.values()].filter(object => !isJavaScript(object)&&rendersInWindow(object,activeViewport.id)).map(object => isPlot(object) ? { ...object, plot: plots.get(object.id) } : object.type === 'region' ? { ...object, region: regions.get(object.id) } : object);
+  return [...resolved.values()].filter(object => !isJavaScript(object)&&rendersInWindow(object,activeViewport.id) && !(canvasVisibility.hidePoints && isPoint(object))).map(object => isPlot(object) ? { ...object, plot: plots.get(object.id) } : object.type === 'region' ? { ...object, region: regions.get(object.id) } : object);
 }
 
 function updateMarquee() {
@@ -2262,6 +2275,7 @@ function scene(clean = false, interactive = true) {
   hitRadius = radius;
   return buildScene(geometry, view, width, height, {
     windowId:activeViewport.id, grid: element('grid').checked, axes: element('axes').checked,
+    ...canvasVisibility,
     snapGrid: element('snap').checked ? snapSettings.read() : null,
     selected, selection, hovered, pending: pending?.ids?.at(-1) || pending?.id || pending?.pointId || pending?.subjectId || pending?.referenceId, clean,
     marquee: interactive && gesture?.mode === 'marquee' ? screenBox(gesture.screen, gesture.current) : null,

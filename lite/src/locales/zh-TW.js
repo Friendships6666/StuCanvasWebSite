@@ -3,6 +3,8 @@ export default {
   "startup.failed": "載入失敗，請重試。",
   "startup.retry": "重試",
   "coordinates.create": "建立視窗",
+  "menu.hidePoints": "隱藏所有點物件",
+  "menu.hideObjectLabels": "隱藏所有物件文字",
   "targets.label": "繪製目標",
   "targets.main": "主畫布 (main)",
   "targets.physics": "物理物件僅支援主畫布。",

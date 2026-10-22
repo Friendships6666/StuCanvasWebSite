@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "47ff5fbb0ee6a32577501fb6c0c094ca56804f3edcb98f8a1a73031f03187a47"
+      "sha256": "50a9e8c47ee8480d522034646152b8c8a9e4683d955bb4f67a038f66484a060b"
     },
     {
       "path": "src/arc-connection.js",
@@ -133,7 +133,7 @@
     },
     {
       "path": "src/document.js",
-      "sha256": "19adbf2cddee8986ff1b72404fb7d92b0ee2618437b092f0eeb88c8987e37260"
+      "sha256": "bfa9080d0d2400081a12b788ea09af38facb4738ad94736ce228427260b7d3e7"
     },
     {
       "path": "src/equation-intersections.js",
@@ -197,15 +197,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "6f6df885584256dd47bd09f7f2916a3fab9e0f0919e2f7957d9a951a5fe83baf"
+      "sha256": "6062c9ab2428bd0502d3d9626ea80a06a5b3e669bbef837670ee5c067bbe5d29"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "680b411cd2a9dab0b44e70a9cccfd4cb343db7325169efb2434a347e6dade81e"
+      "sha256": "13ddbd8a28aac777a551fa96d8be61c1026078cd980f3cc9d0594c0db736925a"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "5af6363092c91fb3b28f2cf46d680b3f202ec91831a7140e04e156f6c82cfb9a"
+      "sha256": "957a770e67491afd752ae03d5a0381bf341e0751ca7a2c58a4caf7118d7ffb4c"
     },
     {
       "path": "src/math-input.js",
@@ -225,7 +225,7 @@
     },
     {
       "path": "src/object-menu.js",
-      "sha256": "6102b503029b5826d45738abcf12a4336d4b923ee17df474991f4f251a0072a1"
+      "sha256": "bec73fd28ee94282b64877287b848a55fecba35910a8745372b2497704856789"
     },
     {
       "path": "src/object-status.js",
@@ -397,7 +397,7 @@
     },
     {
       "path": "src/scene.js",
-      "sha256": "aeaeb0d6df2c13dd62b5b8db23c52aefb969f2d9e227f84b1085e694eabf76f6"
+      "sha256": "f00840fa6595e84d859f20ba71a314224d75ebae7dee777760afa189f12d1ea2"
     },
     {
       "path": "src/selection.js",

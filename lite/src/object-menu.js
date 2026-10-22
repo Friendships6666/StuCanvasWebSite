@@ -299,7 +299,13 @@ export function createObjectMenu(actions) {
   });
   const menu = {
     close,
-    sync() { if (objectId && !actions.get(objectId)) close(); else if(objectId&&!popup.hidden&&panel==='targets')showTargets(); },
+    sync() {
+      if (objectId && !actions.get(objectId)) close();
+      else if(objectId&&!popup.hidden&&panel==='targets')showTargets();
+      else if(!popup.hidden&&panel==='canvas') for(const control of popup.querySelectorAll('[data-canvas-visibility]')) {
+        control.checked = !!actions.canvasVisibility()[control.dataset.canvasVisibility];
+      }
+    },
     openCanvas(control, point) {
       close();
       panel = 'canvas';
@@ -313,6 +319,14 @@ export function createObjectMenu(actions) {
       timeline.dataset.action = 'open-timeline';
       const coordinate=button(t('coordinates.create'),()=>{const at=contextPosition;close();actions.openCoordinates(at);});
       coordinate.dataset.action='open-coordinate-window';
+      for (const key of ['hidePoints', 'hideObjectLabels']) {
+        const control = document.createElement('input');
+        control.type = 'checkbox';
+        control.dataset.canvasVisibility = key;
+        control.checked = !!actions.canvasVisibility()[key];
+        control.addEventListener('change', () => actions.changeCanvasVisibility(key, control.checked));
+        setting(t(`menu.${key}`), control);
+      }
       const clear = button(t('menu.clearTraces'), () => { close(); actions.clearTraces(); });
       clear.dataset.action = 'clear-traces';
       position();

@@ -3,6 +3,8 @@ export default {
   "startup.failed": "Unable to load. Please retry.",
   "startup.retry": "Retry",
   "coordinates.create": "Create window",
+  "menu.hidePoints": "Hide all point objects",
+  "menu.hideObjectLabels": "Hide all object labels",
   "targets.label": "Render targets",
   "targets.main": "Main canvas (main)",
   "targets.physics": "Physics objects are limited to the main canvas.",

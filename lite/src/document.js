@@ -335,6 +335,7 @@ export function parseDocument(text) {
   if (document.view !== undefined && !validCoordinateView(document.view)) fail('error.documentValue', { path: '$.view' });
   if (document.display !== undefined) {
     if (!record(document.display) || !['grid', 'axes', 'snap'].every(key => typeof document.display[key] === 'boolean')) fail('error.documentValue', { path: '$.display' });
+    for (const key of ['hidePoints', 'hideObjectLabels']) if (document.display[key] !== undefined && typeof document.display[key] !== 'boolean') fail('error.documentValue', { path: `$.display.${key}` });
     if (document.display.snapping !== undefined && !validSnapSettings(document.display.snapping)) fail('error.documentValue', { path: '$.display.snapping' });
     if (document.display.touchOffset !== undefined && typeof document.display.touchOffset !== 'boolean') fail('error.documentValue', { path: '$.display.touchOffset' });
     if (document.display.touchOffsetPixels !== undefined && !validTouchOffsetPixels(document.display.touchOffsetPixels)) fail('error.documentValue', { path: '$.display.touchOffsetPixels' });
