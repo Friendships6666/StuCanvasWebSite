@@ -6,10 +6,14 @@ export function createTimelineEditor(container, actions) {
   panel.dataset.i18nAriaLabel = 'timeline.title'; panel.hidden = true;
   const heading = document.createElement('strong'); heading.dataset.i18n = 'timeline.title';
   const header = document.createElement('div'); header.className = 'timeline-header';
-  const close = document.createElement('button'); close.type = 'button'; close.textContent = '×'; close.className = 'timeline-close';
+  const grip = document.createElement('span'); grip.className = 'timeline-grip'; grip.setAttribute('aria-hidden', 'true');
+  grip.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1"/><circle cx="11" cy="4" r="1"/><circle cx="5" cy="8" r="1"/><circle cx="11" cy="8" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="11" cy="12" r="1"/></svg>';
+  const close = document.createElement('button'); close.type = 'button'; close.className = 'timeline-close';
+  close.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8"/></svg>';
   close.dataset.i18nAriaLabel = 'timeline.close'; close.dataset.action = 'timeline-close';
   close.addEventListener('click', () => { panel.hidden = true; actions.uiChanged?.(); });
-  header.append(heading, close);
+  const headerActions = document.createElement('div'); headerActions.className = 'timeline-header-actions';
+  headerActions.append(close); header.append(grip, heading, headerActions);
   let drag = null, location = null;
   function place(x, y) {
     location = { x: Math.max(0, Math.min(x, container.clientWidth - panel.offsetWidth)),
@@ -35,6 +39,7 @@ export function createTimelineEditor(container, actions) {
   const details = document.createElement('button'); details.type = 'button'; details.className = 'timeline-details'; details.dataset.i18n = 'timeline.details';
   details.setAttribute('aria-expanded', 'false');
   details.addEventListener('click', () => { const open = panel.classList.toggle('timeline-expanded'); details.setAttribute('aria-expanded', String(open)); actions.uiChanged?.(); });
+  headerActions.prepend(details);
   const clock = document.createElement('output'); clock.className = 'timeline-clock';
   const buttons = document.createElement('div'); buttons.className = 'timeline-buttons';
   const controls = {};
@@ -66,7 +71,7 @@ export function createTimelineEditor(container, actions) {
   const seek=document.createElement('button');seek.type='button';seek.dataset.i18n='timeline.go';seek.dataset.action='timeline-seek';
   seek.addEventListener('click',()=>{if(inputs.time.checkValidity()&&Number.isFinite(inputs.time.valueAsNumber)&&Math.abs(inputs.time.valueAsNumber-actions.get().time)>1e-6)actions.command('seek',inputs.time.valueAsNumber)});fields.append(seek);
   const note=document.createElement('p');note.className='physics-note';note.dataset.i18n='timeline.note';
-  panel.append(header,clock,details,buttons,track,fields,note);container.append(panel);
+  panel.append(header,clock,buttons,track,fields,note);container.append(panel);
   let seeking=false;
   // Serialize gestures at the UI boundary; cancelling remains available through
   // the normal pause/edit controls in the application.

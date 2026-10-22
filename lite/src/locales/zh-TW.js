@@ -1,7 +1,7 @@
 export default {
   "project.missingRecipe": "物件 {id} 缺少可重建的構造來源，請從原始色塊重新實例化；無法以構造鏈無損恢復此舊狀態。",
-  "timeline.open": "開啟全域時間軸",
-  "timeline.close": "關閉全域時間軸",
+  "timeline.open": "開啟時間軸",
+  "timeline.close": "關閉時間軸",
   "friction.reach": "表面感知距離（像素）",
   "tool.physics": "物理工具",
   "ui.chooseTool": "選擇工具",

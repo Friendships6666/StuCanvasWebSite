@@ -330,23 +330,32 @@ body, math-field {
 .friction-gradient { height: 12px; border-radius: 3px; margin-top: 10px; }
 .friction-ticks { display: flex; justify-content: space-between; margin-top: 3px; font-variant-numeric: tabular-nums; }
 
-.global-timeline { position: absolute; left: 12px; bottom: 12px; width: min(720px, calc(100% - 80px)); z-index: 3; border: 1px solid var(--control-border); border-radius: 10px; padding: 10px 12px; background: var(--surface); color: var(--foreground); box-shadow: 0 3px 16px var(--shadow); display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; font-size: 12px; }
-.timeline-clock { font-variant-numeric: tabular-nums; color: var(--brand-700); }
-.timeline-header { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: move; touch-action: none; user-select: none; }
+.global-timeline { position: absolute; left: 12px; bottom: 12px; width: min(480px, calc(100% - 80px)); z-index: 3; border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px 14px; background: var(--surface); color: var(--foreground); box-shadow: 0 10px 32px var(--shadow), 0 2px 6px var(--shadow-soft); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; font-size: 12px; }
 .global-timeline[hidden] { display: none; }
-.global-timeline .timeline-close { font-size: 20px; line-height: 1; padding: 2px 7px; cursor: pointer; }
+.timeline-header { grid-column: 1 / -1; display: flex; align-items: center; gap: 7px; padding-bottom: 10px; border-bottom: 1px solid var(--line); cursor: grab; touch-action: none; user-select: none; }
+.timeline-header:active { cursor: grabbing; }
+.timeline-header strong { font-size: 13px; font-weight: 600; }
+.timeline-grip { display: flex; color: var(--ink-muted); opacity: .6; }
+.timeline-grip svg { width: 16px; height: 16px; }
+.timeline-header-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.timeline-clock { font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--brand-700); white-space: nowrap; }
+.global-timeline button { border: 1px solid var(--control-border); border-radius: 8px; padding: 7px 10px; font: inherit; color: var(--foreground); background: var(--input-background); cursor: pointer; }
+.global-timeline button:hover:not(:disabled) { background: var(--surface-hover); border-color: var(--ink-muted); }
+.global-timeline button:focus-visible, .global-timeline input:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 3px; }
+.global-timeline button:disabled { opacity: .45; cursor: default; }
+.global-timeline .timeline-close { display: grid; place-items: center; width: 28px; height: 28px; min-height: 28px; padding: 4px; border-color: transparent; border-radius: 8px; background: transparent; color: var(--ink-muted); }
+.global-timeline .timeline-close:hover { border-color: transparent; color: var(--foreground); }
+.timeline-close svg { width: 20px; height: 20px; pointer-events: none; }
 .timeline-buttons { display: flex; gap: 6px; }
-.global-timeline button { border: 1px solid var(--control-border); border-radius: 5px; padding: 5px 9px; color: var(--foreground); background: var(--input-background); }
 .timeline-buttons button:first-child { background: var(--brand-600); color: var(--accent-contrast); border-color: var(--brand-600); }
-.global-timeline input[type="range"] { width: 100%; min-width: 0; accent-color: var(--brand-600); }
-.timeline-fields { grid-column: 1 / -1; display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
-.timeline-fields label { flex: 1; min-width: 80px; display: grid; gap: 4px; }
-.timeline-fields input { width: 100%; min-width: 0; padding: 4px 6px; color: var(--foreground); background: var(--input-background); border: 1px solid var(--control-border); border-radius: 4px; }
-.global-timeline input[aria-invalid="true"] { outline: 1px solid var(--brand-600); }
-.global-timeline .physics-note { grid-column: 1 / -1; margin: 0; }
+.timeline-buttons button:first-child:hover:not(:disabled) { background: var(--brand-700); border-color: var(--brand-700); }
+.global-timeline input[type="range"] { grid-column: 1 / -1; width: 100%; min-width: 0; margin: 0; accent-color: var(--brand-600); cursor: pointer; }
+.timeline-fields { grid-column: 1 / -1; display: flex; gap: 10px; align-items: end; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--line); }
+.timeline-fields label { flex: 1; min-width: 80px; display: grid; gap: 6px; color: var(--ink-muted); font-size: 11px; }
+.timeline-fields input { width: 100%; min-width: 0; padding: 7px 8px; font: inherit; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--foreground); background: var(--input-background); border: 1px solid var(--control-border); border-radius: 7px; }
+.global-timeline input[aria-invalid="true"] { outline: 1px solid var(--error); }
+.global-timeline .physics-note { grid-column: 1 / -1; margin: 0; font-size: 11px; }
 
-.global-timeline input[type="range"] { grid-column: 1 / -1; }
-.timeline-buttons { grid-column: 1 / -1; }
 .canvas-wrap:has(.global-timeline:not([hidden])) > .hint { bottom: 210px; }
 
 .snap-settings { border-block: 1px solid var(--line); margin: 4px 0; }
@@ -424,12 +433,16 @@ body, math-field {
   .touch-selection-actions button, .touch-cancel { min-height: 44px; border: 1px solid var(--control-border); border-radius: 10px; padding: 8px 12px; color: var(--brand-700); background: var(--controls-background); box-shadow: 0 2px 8px var(--shadow-soft); font-size: 13px; }
   .touch-cancel { display: block; position: absolute; right: 10px; top: 38px; z-index: 2; }
   .friction-brush { max-width: calc(100% - 20px); max-height: 50%; overflow: auto; }
-  .global-timeline { left: 10px; bottom: 12px; width: calc(100% - 76px); max-height: 55%; overflow: auto; padding: 8px; grid-template-columns: 1fr auto auto; gap: 6px; }
-  .global-timeline strong { font-size: 11px; }
+  .global-timeline { left: 10px; bottom: 12px; width: min(480px, calc(100% - 76px)); max-height: 55%; overflow: auto; padding: 10px 12px; gap: 10px; }
+  .global-timeline strong { font-size: 13px; }
   .timeline-details { display: block; font-size: 12px; }
-  .timeline-clock { font-size: 11px; }
+  .timeline-clock { font-size: 13px; }
+  .timeline-buttons { grid-column: 1 / -1; }
+  .timeline-buttons button { flex: 1; }
+  .timeline-clock { grid-column: 1 / -1; }
   .timeline-buttons { gap: 5px; }
   .global-timeline button { min-height: 40px; padding: 5px 8px; }
+  .global-timeline .timeline-close { width: 40px; height: 40px; min-height: 40px; padding: 10px; }
   .global-timeline input[type="range"] { height: 28px; }
   .timeline-fields, .global-timeline .physics-note { display: none; }
   .timeline-expanded .timeline-fields { display: flex; }

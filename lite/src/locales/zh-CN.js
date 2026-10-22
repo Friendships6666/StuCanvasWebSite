@@ -1,7 +1,7 @@
 export default {
   "project.missingRecipe": "对象 {id} 缺少可重建的构造来源，请从原始色块重新实例化；无法用构造链无损恢复此旧状态。",
-  "timeline.open": "打开全局时间线",
-  "timeline.close": "关闭全局时间线",
+  "timeline.open": "打开时间线",
+  "timeline.close": "关闭时间线",
   "friction.reach": "表面感知距离（像素）",
   "tool.physics": "物理工具",
   "ui.chooseTool": "选择工具",

@@ -1,7 +1,7 @@
 export default {
   "project.missingRecipe": "Object {id} has no recoverable construction source. Recreate it from its original region; this legacy state cannot be rebuilt losslessly from a construction graph.",
-  "timeline.open": "Open global timeline",
-  "timeline.close": "Close global timeline",
+  "timeline.open": "Open timeline",
+  "timeline.close": "Close timeline",
   "friction.reach": "Surface detection distance (px)",
   "tool.physics": "Physics tools",
   "ui.chooseTool": "Choose a tool",

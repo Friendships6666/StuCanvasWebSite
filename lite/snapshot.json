@@ -189,15 +189,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "f2c00b2972f94273eb297b2a4c97decf9c72dd2f02188827767743f9bcc83330"
+      "sha256": "ab2ca4d5f2632b71163a36cf373869c0337476213952b72373ad95f1a03230a8"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "aa5aff94abd9b55db1629098df39be0d4a2d349efa06904c32560ab6949169f7"
+      "sha256": "bc639a6dfe51cd0281665638fe60cee45b53bc39ebe7a8cc218b2698e7c9bf24"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "87c568c37861e5a5edcbabd04ff1d4ddf723c2161b4767492329fecb6dba0abd"
+      "sha256": "2d9d2b4ecf709e17291228fea703de564b6c61dc3784b97b78a73995bc13b1f3"
     },
     {
       "path": "src/math-input.js",
@@ -413,7 +413,7 @@
     },
     {
       "path": "src/style.css",
-      "sha256": "d27564e5dbd3d02324d07419bdc734679471d9ac7c2863bb1df27c1ae3819b92"
+      "sha256": "eadd2c3f54719a8187235c8bdca0af14b54cac1501eef048a1ae35da7ab5409a"
     },
     {
       "path": "src/surface-brush-target.js",
@@ -433,7 +433,7 @@
     },
     {
       "path": "src/timeline-editor.js",
-      "sha256": "24323c87614c43cfabe8f47d7fa19023100f4c3ea082f9b699e5067c6ae70fe5"
+      "sha256": "6feb7bd49616e34cb8203d3b28938cd1807a779ff06c1abceaa777c4ceede209"
     },
     {
       "path": "src/timeline-state.js",
