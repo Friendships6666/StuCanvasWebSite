@@ -59,7 +59,7 @@ export function initializeMathInput() {
     tooltip: t('keyboard.functionsEquations'),
     rows: [
       ['x', 'y', '=', '+', '-', '\\cdot', '\\frac{#0}{#?}', '#@^{2}', '#@^{#?}', '[backspace]'],
-      ['7', '8', '9', '\\sin(#0)', '\\cos(#0)', '\\tan(#0)', '\\ln(#0)', '\\log_{10}(#0)', '\\sqrt{#0}', '\\sqrt[3]{#0}'],
+      ['7', '8', '9', ...['\\sin', '\\cos', '\\tan', '\\ln', '\\log_{10}'].map(latex => ({ latex, insert: `${latex}(#0)`, class: 'small' })), '\\sqrt{#0}', '\\sqrt[3]{#0}'],
       ['4', '5', '6', '(', ')', '\\left|#0\\right|', '\\pi', 'e', 'e^{#0}', '[left]'],
       ['1', '2', '3', '0', '.', ',', '[undo]', '[redo]', '[right]', '[return]'],
     ],
@@ -92,6 +92,12 @@ export function initializeMathInput() {
     ],
   };
   const compact = window.matchMedia('(max-width: 600px)');
+  // MathLive's default key widths assume ten columns, including for custom
+  // six-column rows. Use a scoped container so numeric/function keys can grow.
+  for (const layout of [compactLayout, functionLayout]) {
+    layout.layers = [{ container: 'stucanvas-keyboard-six', rows: layout.rows }];
+    delete layout.rows;
+  }
   const updateLayouts = () => {
     fullLayout.tooltip = t('keyboard.functionsEquations');
     compactLayout.tooltip = t('keyboard.numbersEquations');

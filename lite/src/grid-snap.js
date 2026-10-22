@@ -41,7 +41,7 @@ export function snapToGrid(position, settings, scale) {
   return result;
 }
 
-export function touchAim(screen, width, height, offset = 72) {
+export function touchAim(screen, width, height, offset = 120) {
   const clamp = (value, size) => Math.max(Math.min(12, size / 2), Math.min(Math.max(size - 12, size / 2), value));
   const above = { x: clamp(screen.x, width), y: clamp(screen.y - offset, height) };
   if (offset <= 0) return above;

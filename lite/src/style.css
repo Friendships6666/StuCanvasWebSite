@@ -359,6 +359,12 @@ body, math-field {
 .touch-aim output, .touch-aim small { position: absolute; left: 0; transform: translateX(-50%); white-space: nowrap; border: 1px solid var(--control-border); border-radius: 6px; background: var(--surface); padding: 5px 8px; box-shadow: 0 2px 8px var(--shadow-soft); }
 .touch-aim output { top: -51px; font-size: 13px; font-variant-numeric: tabular-nums; }
 .touch-aim small { top: 23px; font-size: 11px; }
+.stucanvas-keyboard-six { width: 100%; }
+.stucanvas-keyboard-six .MLK__rows { padding-inline: 8px; }
+.stucanvas-keyboard-six .MLK__rows > .MLK__row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); max-width: 606px; gap: 6px; }
+.stucanvas-keyboard-six .MLK__rows > .MLK__row > div { min-width: 0; width: auto; font-size: clamp(18px, 5cqw, 24px); overflow: hidden; }
+.stucanvas-keyboard-six .MLK__rows > .MLK__row > div.action { padding-inline: 4px; }
+.stucanvas-keyboard-six .MLK__rows > .MLK__row > div.small { font-size: clamp(13px, 3.8cqw, 17px); }
 .touch-picker { position: fixed; z-index: 130; bottom: max(16px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(400px, calc(100vw - 24px)); max-height: min(58dvh, 460px); overflow: auto; overscroll-behavior: contain; padding: 12px; border: 1px solid var(--control-border); border-radius: 16px; background: var(--surface); box-shadow: 0 8px 40px var(--shadow-strong); color: var(--foreground); }
 .touch-picker > strong { display: block; margin: 4px 6px 10px; font-size: 14px; }
 .touch-picker button { width: 100%; min-height: 48px; padding: 10px; border: 0; border-radius: 8px; background: transparent; color: var(--foreground); text-align: left; }
