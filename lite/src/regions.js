@@ -344,6 +344,9 @@ export class RegionManager {
       if (!entry.lastGood && entry.result) entry.lastGood = entry.result;
       const ready = parents.every(parent => !isPlot(parent) || plots.status(parent.id)?.done);
       if (entry.desired?.key !== key || entry.desired.ready !== ready) {
+        // Retain the last complete fill while replacing obsolete work. An old
+        // pan/geometry job must never flash its result into the latest view.
+        if (entry.job?.key !== key) entry.iterator = null;
         const boundaries = parents.map(parent => isPlot(parent) ? { ...parent, plot: plots.entries.get(parent.id)?.task || plots.get(parent.id) } : parent);
         entry.desired = { key, content, ready, boundaries, seed: object.seed, mode: object.mode, cell: object.subdivision ?? REGION_CELL, view: { ...view }, width, height, frame: parents.every(parent => !isPlot(parent)) ? frameFromBounds(geometryBounds(parents)) : null };
       }
@@ -394,7 +397,7 @@ export class RegionManager {
           const completed = job.job;
           job.iterator = null;
           if (completed.key === job.desired?.key && completed.tracking.frame) job.desired.frame = completed.tracking.frame;
-          if (step.value) {
+          if (step.value && completed.key === job.desired?.key) {
             job.result = job.lastGood = step.value;
             job.content = completed.content;
           } else if (completed.key === job.desired?.key && completed.content !== job.content) {

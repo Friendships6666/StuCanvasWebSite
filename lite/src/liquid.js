@@ -41,8 +41,14 @@ export function liquidFromBody(body, count = DEFAULT_LIQUID_DROPS) {
 }
 
 export function liquidDistance(object,point) {
-  let distance=Infinity;
-  for(const particle of object.particles) distance=Math.min(distance,Math.hypot(point.x-particle.position.x,point.y-particle.position.y));
+  let distance=Infinity,density=0;
+  const support=object.radius*2;
+  for(const particle of object.particles){
+    const dx=point.x-particle.position.x,dy=point.y-particle.position.y,squared=dx*dx+dy*dy;
+    distance=Math.min(distance,Math.sqrt(squared));
+    const weight=Math.max(0,1-squared/(support*support));density+=weight*weight*weight;
+  }
+  if(density>=.421875)return 0;
   return Math.max(0,distance-object.radius);
 }
 

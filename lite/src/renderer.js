@@ -1,6 +1,7 @@
 import { LocalizedError } from './i18n.js';
 import { getTheme, rgba } from './themes.js';
 import { PhysicsTextureCache } from './physics-material.js';
+import { LiquidRenderer } from './liquid-renderer.js';
 const sampleCount = 4;
 const shader = /* wgsl */ `
 struct Viewport { size: vec2f, ratio: f32, padding: f32 }
@@ -16,18 +17,26 @@ struct VertexOutput {
   @location(1) @interpolate(flat) index: u32,
 }
 @vertex fn vertexMain(@builtin(vertex_index) vertex: u32, @builtin(instance_index) instance: u32) -> VertexOutput {
+  // Rectangular fill strips need real quad coverage at every MSAA sample.
+  // Clipping oversized triangles at the fragment center drops subpixel rows.
+  let corner = select(vertex, 0u, vertex >= 3u);
   let corners = array<vec2f, 3>(vec2f(0, 0), vec2f(2, 0), vec2f(0, 2));
   let shape = shapes[instance];
-  var pixel = shape.bounds.xy + corners[vertex] * shape.bounds.zw;
-  if (u32(shape.style.x) == 6u || u32(shape.style.x) == 7u) {
+  var pixel = shape.bounds.xy + corners[corner] * shape.bounds.zw;
+  if (u32(shape.style.x) == 4u) {
+    let quad = array<vec2f, 6>(vec2f(0, 0), vec2f(1, 0), vec2f(0, 1), vec2f(0, 1), vec2f(1, 0), vec2f(1, 1));
+    // Store both endpoints, so adjacent rows reuse exactly the same f32
+    // coordinate instead of rounding top + independently rounded height.
+    pixel = vec2f(select(shape.geometry.x,shape.geometry.z,quad[vertex].x>0),select(shape.geometry.y,shape.geometry.w,quad[vertex].y>0));
+  } else if (u32(shape.style.x) == 6u || u32(shape.style.x) == 7u) {
     let points = array<vec2f, 3>(shape.geometry.xy, shape.geometry.zw, shape.style.zw);
-    pixel = points[vertex];
+    pixel = points[corner];
   } else if (u32(shape.style.x) == 5u) {
     // Rasterize in the rectangle's own orientation. The axis-aligned bounding
     // box of a rotated subpixel strip can cover thousands of times its area.
     // A rasterization margin absorbs hardware vertex quantization; binary
     // fragment coverage still clips to the actual geometric edge.
-    let local = (corners[vertex] * 2.0 - 1.0) * (shape.geometry.zw + vec2f(0.25 / viewport.ratio));
+    let local = (corners[corner] * 2.0 - 1.0) * (shape.geometry.zw + vec2f(0.25 / viewport.ratio));
     let cosine = cos(shape.style.z);
     let sine = sin(shape.style.z);
     pixel = shape.geometry.xy + vec2f(local.x * cosine - local.y * sine, local.x * sine + local.y * cosine);
@@ -89,8 +98,7 @@ fn shade(input: VertexOutput) -> vec4f {
     let interior = 1.0 - smoothstep(-antialias * 0.5, antialias * 0.5, radial + shape.style.y);
     color = mix(shape.color, shape.fill, interior);
   }
-  if (any(pixel < shape.bounds.xy) || any(pixel > shape.bounds.xy + shape.bounds.zw)) { discard; }
-  if (kind == 4u && any(pixel >= shape.bounds.xy + shape.bounds.zw)) { discard; }
+  if (kind != 4u && (any(pixel < shape.bounds.xy) || any(pixel > shape.bounds.xy + shape.bounds.zw))) { discard; }
   return vec4f(color.rgb, color.a * coverage);
 }
 @fragment fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
@@ -156,6 +164,8 @@ export class GeometryRenderer {
       { binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float' } },
     ] });
     const layout = this.device.createPipelineLayout({ bindGroupLayouts: [bindings, this.materialLayout] });
+    this.liquidRenderer = new LiquidRenderer(this.device, this.format, sampleCount);
+    await this.liquidRenderer.initialize(bindings);
     this.pipeline = await this.device.createRenderPipelineAsync({
       layout,
       vertex: { module, entryPoint: 'vertexMain' },
@@ -219,6 +229,7 @@ export class GeometryRenderer {
     this.height = height;
     this.canvas.width = Math.max(1, Math.round(width * this.ratio));
     this.canvas.height = Math.max(1, Math.round(height * this.ratio));
+    this.liquidRenderer.resize(this.canvas.width, this.canvas.height);
     this.multisampleTexture?.destroy();
     this.unionMultisampleTexture?.destroy();
     this.unionTexture?.destroy();
@@ -248,6 +259,9 @@ export class GeometryRenderer {
     const sources = new Set(groups.filter(group => group.material?.type === 'image').map(group => group.material.image));
     this.textures.retain(sources);
     const materials = groups.map((group, index) => group.material ? this.materialBinding(index + 1, group.material) : this.emptyMaterial);
+    let liquidCount = 0;
+    const liquids = groups.map(group => group.liquid ? this.liquidRenderer.prepare(liquidCount++, group.liquid, this.ratio) : null);
+    this.liquidRenderer.retain(liquidCount);
     while (this.materialBindings.length > groups.length + 1) this.materialBindings.pop()?.uniform.destroy();
     const texture = this.context.getCurrentTexture();
     const encoder = this.device.createCommandEncoder();
@@ -274,13 +288,13 @@ export class GeometryRenderer {
     while (this.batches.length > batchIndex) this.batches.pop().storage.destroy();
     const drawRange = (pass, start, length, pipeline = this.pipeline, material = this.emptyMaterial) => {
       pass.setPipeline(pipeline);
-      pass.setBindGroup(1, material);
+      if (material) pass.setBindGroup(1, material);
       while (length > 0) {
         const index = Math.floor(start / batchSize);
         const first = start % batchSize;
         const size = Math.min(length, batchSize - first);
         pass.setBindGroup(0, this.batches[index].bindGroup);
-        pass.draw(3, size, 0, first);
+        pass.draw(6, size, 0, first);
         start += size;
         length -= size;
       }
@@ -295,6 +309,17 @@ export class GeometryRenderer {
     for (const [index, group] of groups.entries()) {
       drawRange(pass, cursor, group.start - cursor);
       pass.end();
+      if (group.liquid) {
+        const density = this.liquidRenderer.begin(encoder);
+        drawRange(density, group.start, group.count, this.liquidRenderer.densityPipeline, null);
+        density.end();
+        pass = mainPass('load');
+        pass.setPipeline(this.liquidRenderer.surfacePipeline);
+        pass.setBindGroup(0, liquids[index]);
+        pass.draw(3);
+        cursor = group.start + group.count;
+        continue;
+      }
       const union = encoder.beginRenderPass({ colorAttachments: [{
         view: this.unionMultisampleView, resolveTarget: this.unionView,
         clearValue: { r: 0, g: 0, b: 0, a: 0 }, loadOp: 'clear', storeOp: 'discard',

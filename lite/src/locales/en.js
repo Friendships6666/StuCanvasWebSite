@@ -64,7 +64,7 @@ export default {
   "liquid.cohesion": "Cohesion (0–1)",
   "liquid.buoyancy": "Buoyancy strength (0–3)",
   "liquid.summary": "{count} droplets · volume {volume} m³ · mass {mass} kg",
-  "liquid.note": "A fast 2D particle approximation at 1 m depth. Density determines mass; viscosity slows relative motion, cohesion holds droplets together. Buoyancy supports interacting rigid bodies; 0 disables it. Liquids cannot attach to ropes or springs.",
+  "liquid.note": "A fast 2D particle approximation at 1 m depth. Nearby droplets merge into a continuous surface and separate into splashes. Density determines mass; viscosity slows relative motion, cohesion holds droplets together. Buoyancy supports interacting rigid bodies; 0 disables it. Liquids cannot attach to ropes or springs.",
   "tool.physicsDrag": "Physics drag",
   "drag.hint": "Drag a rigid body, soft body, droplet, rope or spring to pull it. Simulation starts automatically; release to keep moving. Escape cancels this grab.",
   "drag.physicalOnly": "Grab a rigid body, soft body, droplet, rope or spring. Fixed geometry cannot be pulled.",

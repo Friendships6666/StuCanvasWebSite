@@ -75,7 +75,7 @@ export function buildScene(objects, view, width, height, options = {}) {
     top = Math.max(0, top);
     right = Math.min(width, right);
     bottom = Math.min(height, bottom);
-    if (right > left && bottom > top) add([left, top, right - left, bottom - top], [0, 0, 0, 0], [4, 0, 0, 0], color);
+    if (right > left && bottom > top) add([left, top, right - left, bottom - top], [left, top, right, bottom], [4, 0, 0, 0], color);
   };
   const drawRipple = ripple => {
     const elapsed = (options.now ?? performance.now()) - ripple.started;
@@ -200,11 +200,20 @@ export function buildScene(objects, view, width, height, options = {}) {
     }
     if (isLiquid(object)) {
       const radius=Math.max(.7,object.radius*view.scale);
+      const start=used/20,support=radius*2;
       for(const particle of object.particles) {
         const p=toScreen(particle.position,view,width,height);
-        if(p.x < -radius-6 || p.y < -radius-6 || p.x > width+radius+6 || p.y > height+radius+6)continue;
-        if(highlighted)cloudPoint(p.x,p.y,radius+3,halo);
-        cloudPoint(p.x,p.y,radius,stroke);
+        if(p.x < -support-6 || p.y < -support-6 || p.x > width+support+6 || p.y > height+support+6)continue;
+        cloudPoint(p.x,p.y,support,stroke);
+      }
+      if(used/20>start){
+        const liquid={color:stroke,halo:highlighted?halo:[0,0,0,0]},previous=groups.at(-1);
+        // Adjacent pools with the same appearance share a continuous surface.
+        if(previous?.liquid&&previous.start+previous.count===start&&previous.liquid.color.every((value,i)=>value===liquid.color[i])&&!tracing&&!previous.historical){
+          previous.count+=used/20-start;
+          if(liquid.halo[3]>previous.liquid.halo[3])previous.liquid.halo=liquid.halo;
+        }
+        else groups.push({start,count:used/20-start,liquid,historical:tracing});
       }
       continue;
     }

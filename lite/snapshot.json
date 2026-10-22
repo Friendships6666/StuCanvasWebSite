@@ -180,20 +180,24 @@
       "sha256": "3b16d2f9d55579382b8719956207de357d2e5219e3b326986fe3ee756a952d6e"
     },
     {
+      "path": "src/liquid-renderer.js",
+      "sha256": "723ef77a785b70fcc10decb6de95116397bf6253e5a953ab8fc892ac92d9bec5"
+    },
+    {
       "path": "src/liquid.js",
-      "sha256": "d20f79ab68cbe8463d25f5ae5dcc26de65ca6735ca307eacffd1e378631e4b14"
+      "sha256": "a99b6920dac690318bdb886beac5639993a8da73ced539eefdd83a560c9d3618"
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "54fa75b25ccd4669a0a7a987ceea7b034acdc6aa401cd9152a78c6cb62c1398a"
+      "sha256": "00c408ff2bd6acac040a6927750a991b18acea1baa870e0bffbcf66c6f775e13"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "9cd8de87669ddd7d73b77cb7d3c535842918b3e4e4f58278321f2f0b11e8446d"
+      "sha256": "47bc91b5a460347e591e1e3f236cb45cab0abdd7fdee7413fe98a10c03937ca3"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "134656c318b8e15abff7eb68956f2dd948f4744c25e0accf7c6d13e37b07d95a"
+      "sha256": "1c31e3f12e57d933cfbb65b05583a3e4ab34df38c5995bcb65fb08618531b65c"
     },
     {
       "path": "src/math-input.js",
@@ -357,11 +361,11 @@
     },
     {
       "path": "src/regions.js",
-      "sha256": "d580ef7d38a5cf9f147d19eb1f7267c40114d11e689e3e70dcd4c1302b25b450"
+      "sha256": "e9f2a1c2676d82ce9a77696428cc3c2e8b8b7a51ba70c625be0170dff6efc048"
     },
     {
       "path": "src/renderer.js",
-      "sha256": "40ea11f70d2d609c121095d398dd04262478ad6878a222e297d565186b800ef5"
+      "sha256": "4c4e87c7ee971b7bf70f6a7293c334b07bcd2f06cf5cc02303d76858a58bf4ed"
     },
     {
       "path": "src/rope-editor.js",
@@ -377,11 +381,11 @@
     },
     {
       "path": "src/scene.js",
-      "sha256": "18e1a2f073269e1f89b19215091f388fed31fc2a7b47e2b7d599a71c91676822"
+      "sha256": "49e764399dcac0f44f161ebb503c1f63c3efbf8a8e0b4a2b6f71d6dbe248feeb"
     },
     {
       "path": "src/selection.js",
-      "sha256": "71b5bbe0821c5825f1e16e791d697c43309a503b3122342e816b1fe023009105"
+      "sha256": "4a75e9ef379eac571a139f59915133a2a03403e664f04d934eda44372d287cfc"
     },
     {
       "path": "src/snap-settings.js",

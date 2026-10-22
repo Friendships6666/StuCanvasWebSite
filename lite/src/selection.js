@@ -1,5 +1,5 @@
 import { isFlexible } from './rope.js';
-import { isLiquid } from './liquid.js';
+import { isLiquid, liquidDistance } from './liquid.js';
 import { isSoftBody, softTriangles, softDistance } from './soft-body.js';
 import { flexiblePath as ropePath } from './spring.js';
 import { isPhysicsBody, bodyRectangles, bodyContains } from './physics.js';
@@ -48,6 +48,7 @@ export function objectsInBox(objects, view, width, height, box) {
     } else if (isLiquid(object)) {
       const r=object.radius*view.scale;
       hit=object.particles.some(p=>{const s=toScreen(p.position,view,width,height);return s.x+r>=box.left&&s.x-r<=box.right&&s.y+r>=box.top&&s.y-r<=box.bottom;});
+      if(!hit)hit=[[box.left,box.top],[box.right,box.top],[box.left,box.bottom],[box.right,box.bottom],[(box.left+box.right)/2,(box.top+box.bottom)/2]].some(([x,y])=>liquidDistance(object,toWorld({x,y},view,width,height))===0);
     } else if (isFlexible(object)) {
       const points=ropePath(object).map(p=>toScreen(p,view,width,height));
       const padded={left:box.left-object.radius*view.scale,right:box.right+object.radius*view.scale,top:box.top-object.radius*view.scale,bottom:box.bottom+object.radius*view.scale};
