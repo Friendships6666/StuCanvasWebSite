@@ -197,15 +197,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "8ca1aaa01ced07d73b61e1b9e9f7c223e0554be2c055c92e36395107ae60fce1"
+      "sha256": "8c2154d223d6abcc7cf372b33ddd65849d854fae151a4c5c9af0bb92e62cfe0a"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "206af23ccaea32354466e932e1c9e1cb6a7de10877a689e1c47ea5992e2ae07d"
+      "sha256": "490b7e229da6469e8d409d566b6e94037433a8d90e6bf8f22a2260e47a0bf867"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "f2c7ea26528c6f11db2715469b50888d6a388031f9b45fbd36f9beb2d1c650e8"
+      "sha256": "beea1316cccb161adc23f497489e0bebb0a41bc799712c8fcd401f56a565a2fe"
     },
     {
       "path": "src/math-input.js",
