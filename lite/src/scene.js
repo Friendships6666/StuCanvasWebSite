@@ -11,7 +11,8 @@ import { bodyGeometry } from './physics-shape.js';
 import { physicsMaterial } from './physics-material.js';
 import { cadPrimitives, trimCadSources } from './cad.js';
 import { objectColor, objectOpacity } from './object-style.js';
-import { regionScreenBounds } from './regions.js';
+import { regionScreenProjection } from './regions.js';
+import { regionMesh } from './region-mesh.js';
 import { isPlot } from './plot/types.js';
 import { conicSegments, isConic } from './conics.js';
 import { isMeasurement, measurementLayout } from './measurements.js';
@@ -258,8 +259,14 @@ export function buildScene(objects, view, width, height, options = {}) {
       text(object.name, center.x + 10, center.y - 10, objectColor(object));
     } else if (object.type === 'region') {
       if (!object.region) continue;
-      for (let index = 0; index < object.region.rectangles.length; index += 4) {
-        rectangle(...regionScreenBounds(object.region, index, view, width, height), [...color, highlighted ? Math.min(1, alpha * 1.15) : alpha]);
+      const mesh=regionMesh(object.region),projection=regionScreenProjection(object.region,view,width,height);
+      const points=mesh.vertices.map(p=>({x:projection.horizontal(p.x),y:projection.vertical(p.y)}));
+      const fill=[...color,highlighted?Math.min(1,alpha*1.15):alpha];
+      for(let i=0;i<mesh.indices.length;i+=3){
+        const a=points[mesh.indices[i]],b=points[mesh.indices[i+1]],c=points[mesh.indices[i+2]];
+        const left=Math.max(0,Math.min(a.x,b.x,c.x)-2),top=Math.max(0,Math.min(a.y,b.y,c.y)-2);
+        const right=Math.min(width,Math.max(a.x,b.x,c.x)+2),bottom=Math.min(height,Math.max(a.y,b.y,c.y)+2);
+        if(right>left&&bottom>top)add([left,top,right-left,bottom-top],[a.x,a.y,b.x,b.y],[7,0,c.x,c.y],fill);
       }
     } else if (isMeasurement(object)) {
       const layout = measurementLayout(object, view, width, height);

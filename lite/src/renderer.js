@@ -98,7 +98,7 @@ fn shade(input: VertexOutput) -> vec4f {
     let interior = 1.0 - smoothstep(-antialias * 0.5, antialias * 0.5, radial + shape.style.y);
     color = mix(shape.color, shape.fill, interior);
   }
-  if (kind != 4u && (any(pixel < shape.bounds.xy) || any(pixel > shape.bounds.xy + shape.bounds.zw))) { discard; }
+  if (kind != 4u && kind != 7u && (any(pixel < shape.bounds.xy) || any(pixel > shape.bounds.xy + shape.bounds.zw))) { discard; }
   return vec4f(color.rgb, color.a * coverage);
 }
 @fragment fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {

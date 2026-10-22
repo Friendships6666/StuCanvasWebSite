@@ -257,15 +257,20 @@ export function regionContains(region, position) {
   return false;
 }
 
-export function regionScreenBounds(region, index, view, width, height) {
+export function regionScreenProjection(region, view, width, height) {
   if (region.motion) {
     const { from, to } = region.motion;
     const horizontal = coordinate => width / 2 + ((to.x - view.x) + ((coordinate - region.width / 2) / region.view.scale + (region.view.x - from.x)) / from.spanX * to.spanX) * view.scale;
     const vertical = coordinate => height / 2 - ((to.y - view.y) + ((region.height / 2 - coordinate) / region.view.scale + (region.view.y - from.y)) / from.spanY * to.spanY) * view.scale;
-    return [horizontal(region.rectangles[index]), vertical(region.rectangles[index + 1]), horizontal(region.rectangles[index + 2]), vertical(region.rectangles[index + 3])];
+    return {horizontal,vertical};
   }
   const horizontal = coordinate => width / 2 + ((coordinate - region.width / 2) / region.view.scale + (region.view.x - view.x)) * view.scale;
   const vertical = coordinate => height / 2 + ((coordinate - region.height / 2) / region.view.scale - (region.view.y - view.y)) * view.scale;
+  return {horizontal,vertical};
+}
+
+export function regionScreenBounds(region, index, view, width, height) {
+  const {horizontal,vertical}=regionScreenProjection(region,view,width,height);
   return [horizontal(region.rectangles[index]), vertical(region.rectangles[index + 1]), horizontal(region.rectangles[index + 2]), vertical(region.rectangles[index + 3])];
 }
 
@@ -349,6 +354,12 @@ export class RegionManager {
         if (entry.job?.key !== key) entry.iterator = null;
         const boundaries = parents.map(parent => isPlot(parent) ? { ...parent, plot: plots.entries.get(parent.id)?.task || plots.get(parent.id) } : parent);
         entry.desired = { key, content, ready, boundaries, seed: object.seed, mode: object.mode, cell: object.subdivision ?? REGION_CELL, view: { ...view }, width, height, frame: parents.every(parent => !isPlot(parent)) ? frameFromBounds(geometryBounds(parents)) : null };
+        // A completed component has world coordinates and a closed contour.
+        // Panning only reprojects it; resampling on a shifted pixel grid makes
+        // its edge jump even though the defining geometry never changed.
+        if(entry.content===content&&entry.lastGood?.view.scale===view.scale){
+          entry.iterator=null;entry.attempted=key;
+        }
       }
       this.preview(entry);
       this.start(entry);

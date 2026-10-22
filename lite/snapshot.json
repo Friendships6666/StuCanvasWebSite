@@ -356,16 +356,20 @@
       "sha256": "03acf2b2bb1bee0f45c3905217c24a8f050fdad029d5ff79a4b3d0acb4e120cc"
     },
     {
+      "path": "src/region-mesh.js",
+      "sha256": "5ddf928ed555c4e87cee9e3a1a23fa402724fb7ba52b5845e4fa39e2450daafc"
+    },
+    {
       "path": "src/region-options.js",
       "sha256": "43fe1354bef5737acb358d074c91a8e6486a7411f709fa432c66f19e79914a1c"
     },
     {
       "path": "src/regions.js",
-      "sha256": "e9f2a1c2676d82ce9a77696428cc3c2e8b8b7a51ba70c625be0170dff6efc048"
+      "sha256": "0ab63b5261f15261b5f8459e68dfe9615afd436a9e3630fb7592311815f57063"
     },
     {
       "path": "src/renderer.js",
-      "sha256": "4c4e87c7ee971b7bf70f6a7293c334b07bcd2f06cf5cc02303d76858a58bf4ed"
+      "sha256": "6c6776ccbe18cf12ea346de83b40bf3e564c44428930420f6c1a6e6382d5ebab"
     },
     {
       "path": "src/rope-editor.js",
@@ -381,7 +385,7 @@
     },
     {
       "path": "src/scene.js",
-      "sha256": "49e764399dcac0f44f161ebb503c1f63c3efbf8a8e0b4a2b6f71d6dbe248feeb"
+      "sha256": "041be94c114797b25c18b962f9819aa1caaebd2a99c82ea0012cc52fcbaa6818"
     },
     {
       "path": "src/selection.js",
