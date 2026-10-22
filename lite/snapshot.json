@@ -8,16 +8,12 @@
   },
   "files": [
     {
-      "path": "THIRD_PARTY_NOTICES.txt",
-      "sha256": "266879ae4c8be5be686b1b01eb3d6967a0936f6c40c267ecc81cdc2f99b60744"
+      "path": "assets/javascript-syntax.js",
+      "sha256": "03760f72eb1787308deaf03ec3f4ef06b34a4eae5336acfcddf5e874bb519d6e"
     },
     {
       "path": "assets/javascript-syntax.LICENSE.txt",
       "sha256": "11c589b02451298a9e9f43f44c357a677062e21d4bae472df7cfa101e3159a29"
-    },
-    {
-      "path": "assets/javascript-syntax.js",
-      "sha256": "03760f72eb1787308deaf03ec3f4ef06b34a4eae5336acfcddf5e874bb519d6e"
     },
     {
       "path": "assets/textures/concrete.png",
@@ -38,6 +34,10 @@
     {
       "path": "licenses/Earcut-ISC.txt",
       "sha256": "0b348fff56384b43dbb37593906904e56d0f9deb51eae590d4dc6d427fbf1808"
+    },
+    {
+      "path": "licenses/esbuild-MIT.txt",
+      "sha256": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
     },
     {
       "path": "licenses/Fira-Sans-OFL-1.1.txt",
@@ -64,10 +64,6 @@
       "sha256": "ed182087be5b26734aa6d4789743de3a97417950e8c1e3ff2e3d19c6462720d3"
     },
     {
-      "path": "licenses/esbuild-MIT.txt",
-      "sha256": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
-    },
-    {
       "path": "logo/official/pulsar-auto.svg",
       "sha256": "b1dcd9586eeee9e04cce0cdfe12b2f6e36ce971663f9f80c1c1b7b976552e920"
     },
@@ -89,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "449cf9468a7dad650d57b4c33ea703eed4bb0efe201070baef2f2389f268f1d6"
+      "sha256": "bbf03e3bb4a85e2e5c5be6e28495b327e6a59b029847c6b931a0b7c5e07eb392"
     },
     {
       "path": "src/arc-connection.js",
@@ -145,7 +141,7 @@
     },
     {
       "path": "src/grid-snap.js",
-      "sha256": "f218ab1e8ce6c79c186de23ce74cbc88c692c7cfede351faa7bcd63f10ef94d1"
+      "sha256": "06eb11b471b7a6c8a1264f77c0e08b22430292879865ca91bb344a32c97a49ee"
     },
     {
       "path": "src/i18n.js",
@@ -189,15 +185,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "e1fe17611482b793a4322b6783d39f0839acbe3c5de9959d33e9085a98306960"
+      "sha256": "894db9a24186832a332fd30c1e8e2d61bd0bceab6536ee225db2ba090a43a324"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "058d284e4f60adf9ee573df81c1da65e66cff88ad0d19d7d0cd245eac4083e7c"
+      "sha256": "da46dc53ff2bdff4ea6451a12da9e764f1fbea5b1e9fea87fa77bf9f34fbecdb"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "908077b5843401cbe67d1d985be98945c0e09ff98811ac89b662be8dc3ec7604"
+      "sha256": "a04edc99aba8994aaed52f1111df8f6de22b19d50950b4ba68d8a05a47727351"
     },
     {
       "path": "src/math-input.js",
@@ -438,6 +434,10 @@
     {
       "path": "src/traces.js",
       "sha256": "a86ade693944c5718e77df416a5c3e19794c11be1b9b05fe0f07aff2a4dd0a3d"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.txt",
+      "sha256": "266879ae4c8be5be686b1b01eb3d6967a0936f6c40c267ecc81cdc2f99b60744"
     }
   ]
 }

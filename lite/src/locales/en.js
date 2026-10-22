@@ -14,7 +14,7 @@ export default {
   "mobile.object": "Object",
   "mobile.properties": "Properties",
   "mobile.help": "Two fingers to pan / zoom · Hold for menu",
-  "mobile.offset": "Offset touch aim above your finger",
+  "mobile.offset": "Offset touch aim to keep it clear of your finger",
   "mobile.cancelConstruction": "Cancel construction",
   "snap.settings": "Fine grid snapping",
   "snap.spacing": "Grid spacing mode",

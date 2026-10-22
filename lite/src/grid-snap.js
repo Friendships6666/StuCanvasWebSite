@@ -41,8 +41,20 @@ export function snapToGrid(position, settings, scale) {
   return result;
 }
 
-export function touchAim(screen, width, height, offset = 52) {
-  return { x: Math.max(12, Math.min(width - 12, screen.x)), y: Math.max(12, Math.min(height - 12, screen.y - offset)) };
+export function touchAim(screen, width, height, offset = 72) {
+  const clamp = (value, size) => Math.max(Math.min(12, size / 2), Math.min(Math.max(size - 12, size / 2), value));
+  const above = { x: clamp(screen.x, width), y: clamp(screen.y - offset, height) };
+  if (offset <= 0) return above;
+  // Clamping at the top must not put the reticle back underneath the finger.
+  // Slide sideways continuously as the available vertical gap shrinks.
+  const horizontal = Math.sqrt(Math.max(0, offset ** 2 - (above.y - screen.y) ** 2));
+  const direction = screen.x <= width / 2 ? 1 : -1;
+  above.x = clamp(screen.x + direction * horizontal, width);
+  const distance = point => Math.hypot(point.x - screen.x, point.y - screen.y);
+  if (distance(above) >= offset - 1e-6) return above;
+  // Very narrow viewports can have more usable space below the finger.
+  const below = { x: clamp(screen.x, width), y: clamp(screen.y + offset, height) };
+  return distance(below) > distance(above) ? below : above;
 }
 
 // Preserve the world point under the original midpoint, then translate it to

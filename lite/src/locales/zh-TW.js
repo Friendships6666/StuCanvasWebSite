@@ -14,7 +14,7 @@ export default {
   "mobile.object": "物件",
   "mobile.properties": "檢視屬性",
   "mobile.help": "雙指移動 / 縮放 · 長按開啟選單",
-  "mobile.offset": "觸控瞄準點上移，避開手指遮擋",
+  "mobile.offset": "觸控瞄準點偏移，避開手指遮擋",
   "mobile.cancelConstruction": "取消本次構造",
   "snap.settings": "精細網格吸附",
   "snap.spacing": "網格間距模式",

@@ -2878,7 +2878,7 @@ touchInteraction = createTouchInteraction(canvas, {
   hover(id) { hovered = id; draw(); },
   preview(screen) {
     touchPreview = true;
-    const target = touchAim(screen, width, height, element('touch-offset').checked ? 52 : 0);
+    const target = touchAim(screen, width, height, element('touch-offset').checked ? undefined : 0);
     const position = screenToWorld(target);
     pointer = position;
     const candidate = touchCandidates(target)[0];
