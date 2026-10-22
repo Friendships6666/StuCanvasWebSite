@@ -1,8 +1,9 @@
-import { bodyGeometry, polygonArea } from './physics-shape.js';
+import { bodyGeometry, polygonArea, simplifyRing, validLoops, triangulate } from './physics-shape.js';
 import { rememberParticleCreation } from './construction-store.js';
 
 export const isSoftBody = object => object?.type === 'softBody';
 export const DEFAULT_SOFT_SUBDIVISIONS = 10;
+export const DEFAULT_SOFT_SMOOTHING = 30;
 export const MAX_SOFT_SUBDIVISIONS = 24;
 export const MAX_SOFT_NODES = 4096;
 export const validSoftSubdivisions = value => Number.isInteger(value) && value >= 3 && value <= MAX_SOFT_SUBDIVISIONS;
@@ -13,10 +14,21 @@ const edgeKey = (a,b) => a<b ? `${a}:${b}` : `${b}:${a}`;
 // Triangulate the actual occupied contour (including holes and islands), then
 // bisect shared longest edges. Every split is conforming: no cracks or hanging
 // vertices. This mesh is a snapshot and never retains the region's live state.
-export function softFromBody(body, subdivisions = DEFAULT_SOFT_SUBDIVISIONS) {
-  if (!body || !validSoftSubdivisions(subdivisions)) return null;
-  const geometry = bodyGeometry({ ...body, smoothing: 100/subdivisions });
+export function softFromBody(body, subdivisions = DEFAULT_SOFT_SUBDIVISIONS, smoothing = 0) {
+  if (!body || !validSoftSubdivisions(subdivisions) || !Number.isFinite(smoothing) || smoothing < 0 || smoothing > 100) return null;
+  const geometry = bodyGeometry({ ...body, smoothing: Math.max(100/subdivisions, smoothing) });
   if (!geometry.triangles?.length) return null;
+  const mesh = softMesh(geometry.triangles, subdivisions);
+  if (!mesh) return null;
+  const object={type:'softBody',parents:[],mesh,
+    nodes:mesh.vertices.map(p=>({position:{x:body.position.x+p.x,y:body.position.y+p.y},velocity:{x:0,y:0}})),
+    smoothing,mass:1,stretchStiffness:.65,shearStiffness:.45,bendStiffness:.08,areaStiffness:.6,damping:.12,collisionRadius:1,selfCollision:false,
+    gravity:{x:0,y:-9.81},restitution:.2,airFriction:.01,collideGeometry:true,collideBodies:true,freeFall:false,ignored:[],
+    running:false,time:0,duration:0,playbackRate:1,opacity:1,showMesh:false};
+  object.initialState=softState(object);rememberParticleCreation(object,body,'soft',{subdivisions,smoothing});return object;
+}
+
+function softMesh(triangles, subdivisions) {
   const vertices=[],indices=new Map(),faces=new Map(),edges=new Map(),heap=[];
   const vertex=p=>{const key=`${p.x}:${p.y}`;if(!indices.has(key)){indices.set(key,vertices.length);vertices.push({...p});}return indices.get(key);};
   const push = value => {
@@ -40,7 +52,7 @@ export function softFromBody(body, subdivisions = DEFAULT_SOFT_SUBDIVISIONS) {
     const face=faces.get(id);faces.delete(id);
     for(let i=0;i<3;i++){const key=edgeKey(face[i],face[(i+1)%3]),edge=edges.get(key);edge.faces.delete(id);if(!edge.faces.size)edges.delete(key);}
   };
-  for(const triangle of geometry.triangles)addFace(triangle.map(vertex));
+  for(const triangle of triangles)addFace(triangle.map(vertex));
   if(vertices.length>MAX_SOFT_NODES)return null;
   const extent=Math.max(...vertices.map(p=>p.x))-Math.min(...vertices.map(p=>p.x));
   const height=Math.max(...vertices.map(p=>p.y))-Math.min(...vertices.map(p=>p.y));
@@ -54,8 +66,8 @@ export function softFromBody(body, subdivisions = DEFAULT_SOFT_SUBDIVISIONS) {
     for(const {id}of adjacent)removeFace(id);
     for(const {face}of adjacent){const c=face.find(i=>i!==edge.a&&i!==edge.b);addFace([edge.a,mid,c]);addFace([mid,edge.b,c]);}
   }
-  const triangles=[...faces.values()],boundary=[],links=[],weights=vertices.map(()=>0),radii=vertices.map(()=>Infinity);
-  for(const face of triangles){const area=polygonArea(face.map(i=>vertices[i]));for(const i of face)weights[i]+=area/3;}
+  const meshTriangles=[...faces.values()],boundary=[],links=[],weights=vertices.map(()=>0),radii=vertices.map(()=>Infinity);
+  for(const face of meshTriangles){const area=polygonArea(face.map(i=>vertices[i]));for(const i of face)weights[i]+=area/3;}
   for(const edge of edges.values()){
     links.push({a:edge.a,b:edge.b,length:edge.length,kind:edge.faces.size===1?'stretch':'shear'});
     if(edge.faces.size===1){
@@ -70,12 +82,55 @@ export function softFromBody(body, subdivisions = DEFAULT_SOFT_SUBDIVISIONS) {
   }
   const total=weights.reduce((a,b)=>a+b,0);
   if(!(total>0)||radii.some(r=>!(r>0)))return null;
-  const object={type:'softBody',parents:[],mesh:{vertices,triangles,boundary,links,weights:weights.map(w=>w/total),radii:radii.map(r=>r*.48),area:total,subdivisions},
-    nodes:vertices.map(p=>({position:{x:body.position.x+p.x,y:body.position.y+p.y},velocity:{x:0,y:0}})),
-    mass:1,stretchStiffness:.65,shearStiffness:.45,bendStiffness:.08,areaStiffness:.6,damping:.12,collisionRadius:1,selfCollision:false,
-    gravity:{x:0,y:-9.81},restitution:.2,airFriction:.01,collideGeometry:true,collideBodies:true,freeFall:false,ignored:[],
-    running:false,time:0,duration:0,playbackRate:1,opacity:1,showMesh:false};
-  object.initialState=softState(object);rememberParticleCreation(object,body,'soft',{subdivisions});return object;
+  return {vertices,triangles:meshTriangles,boundary,links,weights:weights.map(w=>w/total),radii:radii.map(r=>r*.48),area:total,subdivisions};
+}
+
+const smoothingMeshes = new WeakMap();
+const boundaryLoops = mesh => {
+  const next = new Map(mesh.boundary.map(([a,b])=>[a,b])), loops=[];
+  while(next.size){
+    const first=next.keys().next().value,loop=[];let index=first;
+    do { if(!next.has(index))return null;loop.push(mesh.vertices[index]);const to=next.get(index);next.delete(index);index=to; } while(index!==first);
+    loops.push(loop);
+  }
+  return loops;
+};
+
+// Rebuild from the original material contour, never from an already simplified
+// mesh. Interpolation carries the current deformation and velocity to new nodes.
+export function smoothSoftBody(object, level, originalMesh = object.mesh) {
+  if (!Number.isFinite(level) || level < 0 || level > 100) return false;
+  let cache=smoothingMeshes.get(originalMesh);
+  if(!cache){cache=new Map([[0,originalMesh]]);smoothingMeshes.set(originalMesh,cache);}
+  let mesh=cache.get(level);
+  if(!mesh){
+    const loops=boundaryLoops(originalMesh);if(!loops)return false;
+    const xs=originalMesh.vertices.map(p=>p.x),ys=originalMesh.vertices.map(p=>p.y);
+    const extent=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys));
+    for(let attempt=0;attempt<9&&!mesh;attempt++){
+      const simplified=loops.map(loop=>simplifyRing(loop,extent*level/10000/2**attempt));
+      if(!validLoops(simplified,loops,extent))continue;
+      const triangles=triangulate(simplified);
+      if(triangles)mesh=softMesh(triangles,originalMesh.subdivisions);
+    }
+    if(!mesh)mesh=originalMesh;
+    cache.set(level,mesh);
+    while(cache.size>9)cache.delete([...cache.keys()].find(key=>key!==0&&key!==level));
+  }
+  if(mesh!==object.mesh){
+    const coordinates=mesh.vertices.map(point=>softCoordinates(object,point,true));
+    if(coordinates.some(value=>!value))return false;
+    const transfer=states=>coordinates.map(({indices,weights})=>{
+      const state={position:{x:0,y:0},velocity:{x:0,y:0}};
+      for(let i=0;i<3;i++)for(const field of ['position','velocity'])for(const axis of ['x','y'])state[field][axis]+=states[indices[i]][field][axis]*weights[i];
+      return state;
+    });
+    object.nodes=transfer(object.nodes);
+    object.initialState={nodes:transfer(object.initialState.nodes)};
+    object.mesh=mesh;
+  }
+  object.smoothing=level;
+  return true;
 }
 
 export function softCenter(object) {

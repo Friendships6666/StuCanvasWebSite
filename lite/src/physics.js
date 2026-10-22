@@ -194,7 +194,7 @@ export class PhysicsWorld {
     for (const [id, entry] of this.bodies) { entry.object = byId.get(id); this.bindSurface(entry); }
     for (const [id, entry] of this.ropes) entry.object = byId.get(id);
     for (const [id, entry] of this.liquids) entry.object = byId.get(id);
-    for (const [id, entry] of this.softBodies) {entry.object = byId.get(id);bindSoftSurface(entry,SCALE);}
+    for (const [id, entry] of this.softBodies) {entry.object = byId.get(id);bindSoftSurface(entry,SCALE,this);}
     this.lastFrame = null; this.accumulator = 0;
   }
   // Cached static fixtures are replaced only when their geometry/view changes.
@@ -233,9 +233,9 @@ export class PhysicsWorld {
     // Adaptive subdivision reduces tunnelling through thin geometric strokes.
     const travel = Math.max(...active.map(({ body, object }) => {
       const speed=(Math.hypot(body.velocity.x,body.velocity.y)+Math.abs(body.angularVelocity)*Math.hypot(body.bounds.max.x-body.bounds.min.x,body.bounds.max.y-body.bounds.min.y)/2)*60*body.timeScale;
-      // Droplets have a finite collision radius. Advancing by half that radius
-      // avoids repeating neighbor searches at the rigid stroke's .5 px scale.
-      const distance=isLiquid(object)?Math.max(.5,object.radius*SCALE*.5):.5;
+      // Droplets and soft nodes have finite radii. Advancing by half a radius
+      // bounds travel without using a thin rigid stroke's .5 px scale.
+      const distance=isLiquid(object)?Math.max(.5,object.radius*SCALE*.5):isSoftBody(object)?Math.max(.5,body.circleRadius*.5):.5;
       return speed*seconds/distance;
     }));
     const substeps = Math.min(128, Math.max(1, Math.ceil(travel)));

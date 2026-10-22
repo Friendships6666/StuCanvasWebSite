@@ -1,6 +1,6 @@
 import { isFlexible } from './rope.js';
 import { isLiquid } from './liquid.js';
-import { isSoftBody, softCenter, softTriangles, softEdges } from './soft-body.js';
+import { isSoftBody, softCenter } from './soft-body.js';
 import { flexiblePath as ropePath } from './spring.js';
 import { surfaceSegments, paintedSurfaceSegments, surfaceColor } from './surface-friction.js';
 import { clipLinear, gridStep, gridTicks, projectCircle, toScreen } from './projection.js';
@@ -182,18 +182,19 @@ export function buildScene(objects, view, width, height, options = {}) {
     const halfWidth = (object.strokeWidth || 2.4) / 2;
     if (isSoftBody(object)) {
       const start=used/20;
-      for(const triangle of softTriangles(object)){
-        const p=triangle.map(p=>toScreen(p,view,width,height));
-        const left=Math.max(0,Math.min(...p.map(p=>p.x))-2),top=Math.max(0,Math.min(...p.map(p=>p.y))-2);
-        const right=Math.min(width,Math.max(...p.map(p=>p.x))+2),bottom=Math.min(height,Math.max(...p.map(p=>p.y))+2);
-        if(right>left&&bottom>top)add([left,top,right-left,bottom-top],[p[0].x,p[0].y,p[1].x,p[1].y],[7,0,p[2].x,p[2].y],stroke);
+      const points=object.nodes.map(node=>toScreen(node.position,view,width,height));
+      for(const [one,two,three] of object.mesh.triangles){
+        const a=points[one],b=points[two],c=points[three];
+        const left=Math.max(0,Math.min(a.x,b.x,c.x)-2),top=Math.max(0,Math.min(a.y,b.y,c.y)-2);
+        const right=Math.min(width,Math.max(a.x,b.x,c.x)+2),bottom=Math.min(height,Math.max(a.y,b.y,c.y)+2);
+        if(right>left&&bottom>top)add([left,top,right-left,bottom-top],[a.x,a.y,b.x,b.y],[7,0,c.x,c.y],stroke);
       }
       if(used/20>start)groups.push({start,count:used/20-start});
-      for(const edge of softEdges(object)){
-        const a=toScreen(edge.first,view,width,height),b=toScreen(edge.second,view,width,height);
+      for(const [one,two] of object.mesh.boundary){
+        const a=points[one],b=points[two];
         if(highlighted)line(a,b,halfWidth+3,halo);line(a,b,Math.max(.65,halfWidth),stroke);
       }
-      if(object.showMesh&&!options.clean)for(const link of object.mesh.links)if(link.kind!=='bend')line(toScreen(object.nodes[link.a].position,view,width,height),toScreen(object.nodes[link.b].position,view,width,height),.45,[...color,alpha*.35]);
+      if(object.showMesh&&!options.clean)for(const link of object.mesh.links)if(link.kind!=='bend')line(points[link.a],points[link.b],.45,[...color,alpha*.35]);
       const center=toScreen(softCenter(object),view,width,height);text(object.name,center.x+10,center.y-10,objectColor(object));
       continue;
     }

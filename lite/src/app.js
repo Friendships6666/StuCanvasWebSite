@@ -1,6 +1,6 @@
 import { createSpring, flexibleDistance as ropeDistance } from './spring.js';
 import { isLiquid, liquidFromBody, liquidDistance, liquidMass, DEFAULT_LIQUID_DROPS } from './liquid.js';
-import { isSoftBody, softFromBody, softDistance, DEFAULT_SOFT_SUBDIVISIONS } from './soft-body.js';
+import { isSoftBody, softFromBody, softDistance, DEFAULT_SOFT_SUBDIVISIONS, DEFAULT_SOFT_SMOOTHING } from './soft-body.js';
 import { isFlexible, createRope, ropeAnchor, ropeBuildKey, rebuildRope } from './rope.js';
 import { PhysicsTimeline, defaultTimeline } from './physics-timeline.js';
 import { createTimelineEditor } from './timeline-editor.js';
@@ -30,7 +30,7 @@ import { conicTypes, createConic, isConic, isPolarCurve, polarLine, polePoint } 
 import { isMeasurement, measurementDistance, measurementLayout, measurementText, regionMeasurement, resolveMeasurement } from './measurements.js';
 import { TraceManager } from './traces.js';
 import { createDocument, documentKey, parseDocument, reconcileDocument } from './document.js';
-import { compactDocument, expandDocument, rememberRegionConstruction, recordConstructionStep, recordConstructionSync } from './compact-document.js';
+import { compactDocument, expandDocument, rememberRegionConstruction, recordConstructionStep, recordConstructionSync, captureConstruction } from './compact-document.js';
 import { createDocumentEditor } from './document-editor.js';
 import { createProject } from './project-file.js';
 import { createProjectMenu } from './project-menu.js';
@@ -207,7 +207,9 @@ const reflection = new ReflectionManager({
       if (!needsReflection(object) || reflectionSource(object) !== update.source) continue;
       const patch = update.patch;
       if (Object.keys(patch).every(key => documentKey(object[key]) === documentKey(patch[key]))) continue;
+      const smoothing = object.smoothing ?? 0;
       Object.assign(object, patch);
+      if (isSoftBody(object) && (object.smoothing ?? 0) !== smoothing) captureConstruction(object, objects);
       if (['source', 'xSource', 'ySource'].some(key => Object.hasOwn(patch, key))) {
         for (const key of ['latex', 'xLatex', 'yLatex', 'draft', 'invalid', 'error']) delete object[key];
       }
@@ -344,7 +346,7 @@ async function instantiatePhysicsBody(id, mode = false) {
   if (cell !== (liquid ? Math.max(.5, instanceCell(source, window.devicePixelRatio)) : instanceCell(source, window.devicePixelRatio))) { setHint('hint.changedBoundary'); return; }
   if(soft&&softSubdivisions!==(source.softSubdivisions??DEFAULT_SOFT_SUBDIVISIONS)){setHint('hint.changedBoundary');return;}
   const body = instantiateRegion(region, view, width, height);
-  const object = soft ? softFromBody(body,softSubdivisions) : liquid ? liquidFromBody(body, source.liquidDrops ?? DEFAULT_LIQUID_DROPS) : body;
+  const object = soft ? softFromBody(body,softSubdivisions,DEFAULT_SOFT_SMOOTHING) : liquid ? liquidFromBody(body, source.liquidDrops ?? DEFAULT_LIQUID_DROPS) : body;
   if (!object) { setHint(soft?'soft.meshFailed':'physics.notReady'); return; }
   const before = snapshot();
   object.id = crypto.randomUUID();
@@ -1950,7 +1952,9 @@ function createObjectRow(object, existing) {
         const current = objects.find(item => item.id === id);
         if (!current) return;
         const build = isFlexible(current) ? ropeBuildKey(current) : null;
+        const smoothing = current.smoothing ?? 0;
         update(current);
+        if (isSoftBody(current) && (current.smoothing ?? 0) !== smoothing) captureConstruction(current, objects);
         if (isFlexible(current) && build !== ropeBuildKey(current)) rebuildRope(current, resolved);
         if (current.time === 0) current.initialState = bodyState(current);
         refresh(new Set([id]));

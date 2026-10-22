@@ -95,7 +95,7 @@ function simplifyPath(points, tolerance) {
   }
   return points.filter((_,i)=>keep[i]);
 }
-function simplifyRing(ring,tolerance) {
+export function simplifyRing(ring,tolerance) {
   let pivot = 1, farthest = 0;
   for (let i = 1; i < ring.length; i++) {
     const distance = (ring[i].x-ring[0].x)**2+(ring[i].y-ring[0].y)**2;
@@ -110,7 +110,7 @@ function intersect(a,b,c,d) {
   const p=cross(a,b,c),q=cross(a,b,d),r=cross(c,d,a),s=cross(c,d,b);
   return (p<=0&&q>=0||p>=0&&q<=0)&&(r<=0&&s>=0||r>=0&&s<=0);
 }
-function validLoops(loops,original,extent) {
+export function validLoops(loops,original,extent) {
   if (loops.some((loop,i)=>loop.length<3||polygonArea(loop)*polygonArea(original[i])<=0)) return false;
   // Spatial buckets bound topology checks to nearby edge pairs, even for a
   // densely sampled contour. No self-crossings or new hole/outline contacts.
@@ -133,7 +133,7 @@ function validLoops(loops,original,extent) {
     &&polygonContains(loops[j],loops[i][0])!==polygonContains(original[j],original[i][0]))return false;
   return true;
 }
-function triangulate(loops) {
+export function triangulate(loops) {
   const outers=loops.filter(loop=>polygonArea(loop)>0).map(loop=>({loop,holes:[]}));
   for(const hole of loops.filter(loop=>polygonArea(loop)<0)) {
     const outer=outers.filter(outer=>polygonContains(outer.loop,hole[0])).sort((a,b)=>polygonArea(a.loop)-polygonArea(b.loop))[0];

@@ -123,6 +123,7 @@ export function objectDefinition(source, { plotDefaults = defaults, resolved } =
     object.material = { ...defaultPhysicsMaterial(), ...object.material };
     object.smoothing ??= 0;
   }
+  if (isSoftBody(object)) object.smoothing ??= 0;
   if (object.type === 'region') {
     object.subdivision ??= .25;
     object.instanceSubdivisions ??= DEFAULT_INSTANCE_SUBDIVISIONS;

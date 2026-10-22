@@ -49,7 +49,8 @@ export default {
   "soft.selfCollision": "Self-collision (excluding adjacent nodes)",
   "soft.showMesh": "Show deformation mesh",
   "soft.summary": "{nodes} nodes · {triangles} triangles · subdivisions {subdivisions}",
-  "soft.note": "Independent triangulated elastic material. Stretch, shear and bending resist deformation; area preservation resists compression. Node collisions approximate its surface. Drag to move the whole body; physics drag pulls locally. Ropes and springs follow material coordinates. Mesh density is fixed at instantiation.",
+  "soft.note": "Independent triangulated elastic material. Stretch, shear and bending resist deformation; area preservation resists compression. Node collisions approximate its surface. Drag to move the whole body; physics drag pulls locally. Ropes and springs follow material coordinates. Base subdivisions are set at instantiation; edge smoothing can reduce nodes and constraints.",
+  "soft.smoothingNote": "Merge small edge steps and rebuild the soft mesh for both rendering and collisions, preserving holes and islands. Higher levels usually reduce nodes and constraints. Current position, velocity and deformation are interpolated. 0 restores the original mesh.",
   "soft.meshFailed": "Unable to build this soft-body mesh within the 4096-node limit. Lower the mesh subdivisions or simplify the region.",
 
   "liquid.object": "Liquid",

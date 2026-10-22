@@ -2,7 +2,7 @@ import { createDocument, documentKey, objectDefinition, parseDocument, setConstr
 import { jsonData } from './json-data.js';
 import { addConstruction, constructionNode, evaluatedConstructions, rememberConstruction, rememberBodyCreation, constructionDefinition, collectConstructions, cloneConstructionValue as clone } from './construction-store.js';
 import { PhysicsWorld, bodyState, instantiateRegion, isPhysicsObject } from './physics.js';
-import { softFromBody } from './soft-body.js';
+import { softFromBody, smoothSoftBody } from './soft-body.js';
 import { liquidFromBody } from './liquid.js';
 import { isFlexible, rebuildRope, anchorWorld } from './rope.js';
 import { resolveObjects } from './geometry.js';
@@ -67,7 +67,7 @@ export function rememberRegionConstruction(object, source, definitions, region, 
     seed: region.seed, mode: source.mode, view: region.view, width: region.width, height: region.height, cell: region.cell, instance });
   const bodyNode = addConstruction('rigid', [regionNode], { definition: mode === 'rigid' ? constructionDefinition(object) : {} });
   const id = mode === 'rigid' ? bodyNode : addConstruction(mode, [bodyNode], { definition: constructionDefinition(object),
-    ...(mode === 'soft' ? { subdivisions: object.mesh.subdivisions } : { count: object.particleCount }) });
+    ...(mode === 'soft' ? { subdivisions: object.mesh.subdivisions, smoothing: object.smoothing ?? 0 } : { count: object.particleCount }) });
   rememberConstruction(object, id);
 }
 
@@ -117,6 +117,26 @@ export function captureConstruction(object, objects = []) {
       if (!same(rebuilt.links, object.links)) throw new LocalizedError('project.missingRecipe', { id: object.id });
       rememberConstruction(object, id); before = evaluatedConstructions.get(id);
     } else throw new LocalizedError('project.missingRecipe', { id: object.id });
+  }
+  if (object.type === 'softBody' && (object.smoothing ?? 0) !== (before.smoothing ?? 0)) {
+    const level = object.smoothing;
+    object.smoothing = before.smoothing ?? 0;
+    const current = captureConstruction(object, objects);
+    let base = current;
+    while (true) {
+      const node = constructionNode(base);
+      if (node.kind === 'soft') break;
+      if (node.kind === 'softSmooth') { base = node.parents[1]; break; }
+      if (node.kind === 'edit') base = node.parents[0];
+      else if (node.kind === 'result') {
+        const step = constructionNode(node.parents[0]), index = step.parameters.ids.indexOf(object.id);
+        if (index < 0) fail(`${object.id}.derivation`);
+        base = step.parents[index + 1];
+      } else fail(`${object.id}.derivation`);
+    }
+    const original = evaluatedConstructions.get(base) || expandDocument({ objects: [{ id: object.id, type: object.type, derivation: base }], constructionGraph: collectConstructions([base]) }).objects[0];
+    if (!smoothSoftBody(object, level, original.mesh)) fail(`${object.id}.smoothing`);
+    return rememberConstruction(object, addConstruction('softSmooth', [current, base], { level }));
   }
   const a = { ...before }, b = { ...object }; delete a.derivation; delete b.derivation;
   // Shared geometry must not be serialized on every solver synchronization.
@@ -208,7 +228,7 @@ export function recordConstructionSync(world, objects, scene) {
 
 function checkedGraph(graph) {
   if (!graph || typeof graph !== 'object' || Array.isArray(graph)) fail('constructionGraph');
-  const kinds = new Set(['contour', 'region', 'rigid', 'soft', 'liquid', 'rope', 'edit', 'scene', 'synchronize', 'simulate', 'result']);
+  const kinds = new Set(['contour', 'region', 'rigid', 'soft', 'softSmooth', 'liquid', 'rope', 'edit', 'scene', 'synchronize', 'simulate', 'result']);
   const entries = Object.entries(graph), counts = new Map(), children = new Map(entries.map(([id]) => [id, []]));
   for (const [id, node] of entries) {
     if (!/^[a-zA-Z0-9_-]+$/.test(id) || !node || !kinds.has(node.kind) || !Array.isArray(node.parents) || !node.parameters || typeof node.parameters !== 'object' || Array.isArray(node.parameters)) fail(`constructionGraph.${id}`);
@@ -254,9 +274,14 @@ export function expandDocument(document) {
       if (node.parents.length !== 1) fail(`construction.${node.kind}.parents`);
       const body = evaluate(node.parents[0]);
       if (p.position) body.position = clone(p.position);
-      value = node.kind === 'soft' ? softFromBody(body, p.subdivisions) : liquidFromBody(body, p.count);
+      value = node.kind === 'soft' ? softFromBody(body, p.subdivisions, p.smoothing ?? 0) : liquidFromBody(body, p.count);
       if (!value) fail(`construction.${node.kind}`);
       Object.assign(value, clone(p.definition)); delete value.derivation;
+    } else if (node.kind === 'softSmooth') {
+      if (node.parents.length !== 2) fail('construction.softSmooth.parents');
+      value = evaluate(node.parents[0]);
+      const original = evaluate(node.parents[1]);
+      if (value.type !== 'softBody' || original.type !== 'softBody' || !smoothSoftBody(value, p.level, original.mesh)) fail('construction.softSmooth');
     } else if (node.kind === 'rope') {
       value = clone(p.definition);
       if (!Array.isArray(p.positions) || p.positions.length !== 2) fail('construction.rope.positions');

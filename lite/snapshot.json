@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "979767802b7ff3e946f275cea99e7232cf194ac8ca9de6f1e183c79fab94a88b"
+      "sha256": "432ab98892f48fe60bf727a2dcc8732809570b4361ae08986b1bac3ce4572ba9"
     },
     {
       "path": "src/arc-connection.js",
@@ -101,7 +101,7 @@
     },
     {
       "path": "src/compact-document.js",
-      "sha256": "d358ee808f774ac8b2833638d8a319ba072cdbaacc6d0d2d4bfe31b08ac2462b"
+      "sha256": "ce943226381bf55da0449223444f5fbdc19efb6c657c8ce898f1f057e7d61c9d"
     },
     {
       "path": "src/conics.js",
@@ -125,7 +125,7 @@
     },
     {
       "path": "src/document.js",
-      "sha256": "63b3cc3fb841d1f93e7b8c50d3dff4f9466fac9389095be757f42b2e930f0a4e"
+      "sha256": "593441569ea2ffb31dd6bccc246b83df98c2621a9a2bedbd3690df9241255d7e"
     },
     {
       "path": "src/equation-intersections.js",
@@ -185,15 +185,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "cd0d3548eb0733de59d5423433cbeafc721a77015aa94ccbd1cb93a779371baf"
+      "sha256": "54fa75b25ccd4669a0a7a987ceea7b034acdc6aa401cd9152a78c6cb62c1398a"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "feb51a65b5465bf8daf4e18c31a55bb3fca60fe3a554d8a2bdda3780ea9ceee4"
+      "sha256": "9cd8de87669ddd7d73b77cb7d3c535842918b3e4e4f58278321f2f0b11e8446d"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "dd284f3b10935c3cb223da5050adad636900bab235a6d7f33b0dbbd7d40df915"
+      "sha256": "134656c318b8e15abff7eb68956f2dd948f4744c25e0accf7c6d13e37b07d95a"
     },
     {
       "path": "src/math-input.js",
@@ -249,7 +249,7 @@
     },
     {
       "path": "src/physics-shape.js",
-      "sha256": "3782c273de6fb4ca10455064626308ed465683e7b896c1d3ca57ac079d9252c4"
+      "sha256": "0565537df166b6f99d04e626b9ea49220bc314e810b784939f02de1d4fdf8fb8"
     },
     {
       "path": "src/physics-timeline.js",
@@ -257,7 +257,7 @@
     },
     {
       "path": "src/physics.js",
-      "sha256": "0fb339bd8e3a3e8013dc7991c8e5959d5ad0313328d98552623bc8e14c801ffc"
+      "sha256": "f8798c2cc83e1195acc89e588807900bb85f62106f5fb660dbcf171e383719aa"
     },
     {
       "path": "src/plot/formula.js",
@@ -373,7 +373,7 @@
     },
     {
       "path": "src/scene.js",
-      "sha256": "7a08af6c3f16464d1afb2acc2a61306733febe56d6df1fa31932d80f7c2cde73"
+      "sha256": "18e1a2f073269e1f89b19215091f388fed31fc2a7b47e2b7d599a71c91676822"
     },
     {
       "path": "src/selection.js",
@@ -385,15 +385,15 @@
     },
     {
       "path": "src/soft-body.js",
-      "sha256": "ff71f7f2d8f827cf9d1b57d71ed609a1e57db0775f7cacf5e81cf372c3ec6032"
+      "sha256": "046fefd6c30a0e0d4a22dd90faba443e357b96b353756ceaec717c0a9cd23765"
     },
     {
       "path": "src/soft-editor.js",
-      "sha256": "c46e69c068ff6bb721f7826ee56bd6a7a1e4a382f2145f32735d52b6f63c64fc"
+      "sha256": "57974f6371b104ff4b08c97d4080b4de9353b5563f46eff485f7b29c719a4702"
     },
     {
       "path": "src/soft-physics.js",
-      "sha256": "d2906d6da771aff7361b440db738f97a1c631081737cce7c49708d3a32496d4a"
+      "sha256": "3f4eeb9fd14b6755d9ba37c54646226108d1911ee4d7e7467792fb8b2a756416"
     },
     {
       "path": "src/spring.js",
