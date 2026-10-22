@@ -1,5 +1,6 @@
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -7,6 +8,8 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const source = path.join(root, 'lite');
 const output = path.join(root, 'docs/.vitepress/dist');
 const snapshot = JSON.parse(await readFile(path.join(source, 'snapshot.json'), 'utf8'));
+const snapshotHash = createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
+const commit = process.env.CF_PAGES_COMMIT_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 const isMarkdown = filename => /\.(?:md|markdown|mdown|mkd|mkdn|mdx)$/i.test(filename);
 // A Cloudflare checkout is self-contained: never read a sibling repository here.
 for (const [name, version] of Object.entries(snapshot.dependencies)) {
@@ -48,7 +51,9 @@ for (const entry of runtime) {
 }
 await cp(path.join(root, 'site'), output, { recursive: true });
 const html = publicPaths(await readFile(path.join(source, 'index.html'), 'utf8'))
+  .replace('</head>', `  <meta name="stucanvas-build" content="${snapshotHash}" />\n</head>`)
   .replace('</head>', '  <link rel="stylesheet" href="/site-links.css" />\n</head>')
   .replace('</body>', '  <script type="module" src="/site-links.js"></script>\n</body>');
 await writeFile(path.join(output, 'index.html'), html);
+await writeFile(path.join(output, 'version.json'), JSON.stringify({ commit, snapshot: snapshotHash, version: snapshot.version }, null, 2) + '\n');
 console.log('Built Lite at /, tutorial home at /tutorials; existing documentation and toolbox routes retained.');

@@ -1,0 +1,19 @@
+# These URLs are stable across deployments. Revalidate before reusing code so
+# a new HTML document cannot load the previous deployment's cached modules.
+/src/*
+  Cache-Control: no-cache
+
+/
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
+
+/version.json
+  Cache-Control: no-cache
+
+/site-links.js
+  Cache-Control: no-cache
+
+/site-links.css
+  Cache-Control: no-cache
