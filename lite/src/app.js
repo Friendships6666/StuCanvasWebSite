@@ -9,7 +9,7 @@ import { createSurfaceBrush } from './friction-brush.js';
 import { findBrushSurface } from './surface-brush-target.js';
 import { paintSurface, surfaceFrame } from './surface-friction.js';
 import { t, LocalizedError, errorMessage, getLocale, languages, localizeDOM, messageText, onLocaleChange, setLocale, setMessage } from './i18n.js';
-import { angleBisector, arcTypes, bisectorTypes, derivedLines, derivedLineTypes, distance, distanceToObject, intersections, isLinear, isPoint, isTangentCurve, linearDirection, linearTypes, midpoint, perpendicularBisector, projectPointOnObject, ratioPoint, resolveObjects } from './geometry.js';
+import { angleBisector, arcTypes, bisectorTypes, commonTangents, derivedLines, derivedLineTypes, distance, distanceToObject, intersections, isLinear, isPoint, isTangentCurve, isCommonTangentCurve, linearDirection, linearTypes, midpoint, perpendicularBisector, projectPointOnObject, ratioPoint, resolveObjects } from './geometry.js';
 import { scaleBounds, toScreen, toWorld, zoomView } from './projection.js';
 import { GeometryRenderer } from './renderer.js';
 import { buildScene } from './scene.js';
@@ -84,6 +84,7 @@ const tools = [
     { id: 'innerBisector', get name() { return t('tool.innerBisector'); }, get description() { return t('description.bisector'); }, key: 'D', icon: '<path d="m20 4-16 16h18M4 20 22 12"/><path d="M10 14a8 8 0 0 1 2 6m-4-3 2 2m1-6 2 2"/><circle cx="4" cy="20" r="1.7"/>' },
     { id: 'outerBisector', get name() { return t('tool.outerBisector'); }, get description() { return t('description.bisector'); }, key: '⇧D', icon: '<path d="m20 4-12 12h14M8 16 2 2"/><path d="M8 16 2 22" stroke-dasharray="2 2"/><path d="M3 11a7 7 0 0 1 10-1"/><circle cx="8" cy="16" r="1.7"/>' },
     { id: 'tangent', get name() { return t('tool.tangent'); }, get description() { return t('description.tangent'); }, key: 'T', icon: '<circle cx="10" cy="13" r="7"/><path d="m5 1 18 18"/><circle cx="15" cy="8" r="2.2"/>' },
+    { id: 'commonTangent', get name() { return t('tool.commonTangent'); }, get description() { return t('description.commonTangent'); }, key: '⇧Z', icon: '<circle cx="6" cy="13" r="4"/><circle cx="18" cy="11" r="5"/><path d="m1 10 22-4M2 18l20-2"/>' },
   ] },
   { id: 'circles', get name() { return t('tool.circles'); }, key: 'C', icon: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1.6"/><path d="M17.7 6.3 20 4"/>', children: [
     { id: 'circle', get name() { return t('tool.circle'); }, get description() { return t('description.circle'); }, key: 'C', requiredPoints: 2, shapeType: 'circle', icon: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1.7"/><circle cx="18" cy="7" r="2"/>' },
@@ -146,6 +147,7 @@ Object.assign(labels, { ellipse: 'tool.ellipse', parabola: 'tool.parabola', hype
 Object.assign(labels, { perpendicularBisector: 'tool.perpendicularBisector', innerBisector: 'tool.innerBisector', outerBisector: 'tool.outerBisector' });
 Object.assign(labels, { lengthMeasure: 'object.length', angleMeasure: 'object.angle', areaMeasure: 'object.area' });
 Object.assign(labels, Object.fromEntries([...transformTypes].map(type => [type, `tool.${type}`])));
+labels.commonTangent = 'tool.commonTangent';
 const measurementTools = new Set(['measureLength', 'measureAngleInner', 'measureAngleReflex', 'measureAngleSupplementary', 'measureArea']);
 const shapeTypes = new Set([...linearTypes, 'circle', ...arcTypes, ...conicTypes]);
 const dualConstructionTools = new Set(['parabola', 'polar', 'pole']);
@@ -762,7 +764,7 @@ function setTool(tool) {
   selected = null;
   selection.clear();
   hovered = null;
-  setHint(transformTypes.has(tool) ? 'transform.source' : tool === 'arcConnection' ? 'cad.selectArcs' : tool === 'physicsDrag' ? 'drag.hint' : ['rope','spring'].includes(tool) ? `${tool}.hint` : '');
+  setHint(tool === 'commonTangent' ? 'hint.commonTangentFirst' : transformTypes.has(tool) ? 'transform.source' : tool === 'arcConnection' ? 'cad.selectArcs' : tool === 'physicsDrag' ? 'drag.hint' : ['rope','spring'].includes(tool) ? `${tool}.hint` : '');
   for (const button of element('tools').children) {
     const active = button.dataset.tool === tool || Boolean(button.dataset.group && toolParents.get(tool)?.id === button.dataset.group);
     button.classList.toggle('active', active);
@@ -1199,6 +1201,31 @@ function pickSmartPoint(position) {
     return existing;
   }
   return (!forcedHit && createSmartIntersection(position)) || pickPoint(position, 'snap');
+}
+
+function constructCommonTangent(position, chosen = null) {
+  const target = chosen || hitTest(position, object => isCommonTangentCurve(object) && object.id !== pending?.sourceId);
+  if (!isCommonTangentCurve(target) || target.id === pending?.sourceId) return;
+  if (!pending) {
+    pending = { sourceId: target.id, before: snapshot() };
+    selected = target.id;
+    setHint('hint.commonTangentSecond'); refresh(); return;
+  }
+  const lines = commonTangents(resolved.get(pending.sourceId), target);
+  if (!lines.some(Boolean)) { setHint('hint.noCommonTangent'); return; }
+  const before = pending.before;
+  lines.forEach((line, branch) => {
+    if (!line) return;
+    const object = newShape('commonTangent', [pending.sourceId, target.id]);
+    object.branch = branch; object.renderTargets = [activeViewport.id]; selected = object.id;
+  });
+  pending = null; setHint('hint.commonTangentFirst'); commit(before);
+}
+
+function commonTangentPreview(position) {
+  if (!pending?.sourceId) return [];
+  const target = hitTest(position, object => isCommonTangentCurve(object) && object.id !== pending.sourceId);
+  return commonTangents(resolved.get(pending.sourceId), target).filter(Boolean).map(line => ({ ...line, type: 'commonTangent', preview: true }));
 }
 
 function derivedReference(object) {
@@ -1748,6 +1775,7 @@ function transformPreview(position) {
 }
 
 function construct(position) {
+  if (activeTool === 'commonTangent') { constructCommonTangent(position); return; }
   if (transformTypes.has(activeTool)) { constructTransform(position); return; }
   if (cadTools.has(activeTool)) {
     constructCadCorner(position);
@@ -2212,6 +2240,11 @@ function createObjectRow(object, existing) {
     const object = objects.find(item => item.id === id);
     if (!object) return;
     if (!gesture) {
+      if (activeTool === 'commonTangent') {
+        const geometry = resolved.get(id);
+        if (geometry) constructCommonTangent(null, geometry);
+        return;
+      }
       if (transformTypes.has(activeTool)) {
         const geometry = resolved.get(id);
         if (geometry) constructTransform(null, geometry);
@@ -2385,7 +2418,8 @@ function scene(clean = false, interactive = true) {
   if(interactive)updateAreaMeasurements();
   if (!clean && interactive) traces.sync(objects, resolved, plots, regions);
   const geometry = selectableObjects();
-  if (!clean && interactive && transformTypes.has(activeTool) && pointer) geometry.push(...transformPreview(pointer));
+  if (!clean && interactive && activeTool === 'commonTangent' && pointer) geometry.push(...commonTangentPreview(pointer));
+  else if (!clean && interactive && transformTypes.has(activeTool) && pointer) geometry.push(...transformPreview(pointer));
   else if (!clean && interactive && cadTools.has(activeTool)) geometry.push(...cadPreview(pointer));
   else if (!clean && interactive && pending?.rope && pointer) {
     if(activeViewport===mainViewport){
@@ -3084,6 +3118,7 @@ function withTouchHit(target, action) {
 
 function touchCandidates(screen) {
   return hitCandidates(screenToWorld(screen), object => {
+    if (activeTool === 'commonTangent') return isCommonTangentCurve(object) && object.id !== pending?.sourceId;
     if (activeTool === 'point') return isPoint(object);
     if (transformTypes.has(activeTool)) return pending?.transform ? activeTool === 'axialSymmetry' ? isLinear(object) : isPoint(object) : canTransform(object);
     if (toolParents.get(activeTool)?.id === 'circles' && !pending) return isPoint(object);

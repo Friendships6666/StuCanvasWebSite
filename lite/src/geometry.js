@@ -14,9 +14,9 @@ export const distance = (first, second) => Math.hypot(first.x - second.x, first.
 export const isPoint = object => !!object && ['point', 'snapPoint', 'intersection', 'midpoint', 'ratioPoint', 'pole'].includes(object.type);
 export const derivedLineTypes = new Set(['parallel', 'perpendicular', 'tangent']);
 export const bisectorTypes = new Set(['innerBisector', 'outerBisector']);
-export const linearTypes = new Set(['line', 'segment', 'chamfer', 'ray', 'polar', 'perpendicularBisector', ...derivedLineTypes, ...bisectorTypes]);
+export const linearTypes = new Set(['line', 'segment', 'chamfer', 'ray', 'polar', 'perpendicularBisector', 'commonTangent', ...derivedLineTypes, ...bisectorTypes]);
 export const isLinear = object => !!object && linearTypes.has(object.type);
-export const isInfiniteLine = object => object.type === 'line' || object.type === 'polar' || object.type === 'perpendicularBisector' || derivedLineTypes.has(object.type) || bisectorTypes.has(object.type);
+export const isInfiniteLine = object => object.type === 'line' || object.type === 'polar' || object.type === 'perpendicularBisector' || object.type === 'commonTangent' || derivedLineTypes.has(object.type) || bisectorTypes.has(object.type);
 const middle = (first, second) => Math.sign(first) === Math.sign(second) ? first + (second - first) / 2 : (first + second) / 2;
 export const midpoint = (first, second) => ({ x: middle(first.x, second.x), y: middle(first.y, second.y) });
 export const validDivisionRatio = ratio => Array.isArray(ratio) && ratio.length === 2 && ratio.every(value => Number.isFinite(value) && value > 0);
@@ -47,6 +47,7 @@ const within = (object, parameter) => {
 };
 export const arcTypes = new Set(['semicircle', 'arc', 'circumArc', 'sector', 'circumSector', 'fillet', 'arcConnection']);
 export const isTangentCurve = object => !!object && (isConic(object) || object.type === 'circle' || arcTypes.has(object.type) || object.type === 'equation');
+export const isCommonTangentCurve = object => !!object && !object.invalid && (object.type === 'circle' || arcTypes.has(object.type));
 const positiveAngle = angle => (angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
 const tangentEquationCache = new WeakMap();
 
@@ -65,6 +66,38 @@ function lineThrough(first, direction) {
   const radius = Math.hypot(direction.x, direction.y);
   if (!(radius > 0) || ![first.x, first.y, radius].every(Number.isFinite)) return null;
   return { first, second: { x: first.x + direction.x, y: first.y + direction.y }, direction, radius };
+}
+
+// Four stable branch slots: two external tangents, then two internal tangents.
+// Missing/merged branches stay null so moving a parent never renumbers a line.
+export function commonTangents(first, second) {
+  const result = [null, null, null, null];
+  if (![first, second].every(isCommonTangentCurve) || first === second) return result;
+  if (![first.radius, second.radius].every(radius => Number.isFinite(radius) && radius > 0)) return result;
+  if (![first, second].every(curve => Number.isFinite(curve.first?.x) && Number.isFinite(curve.first?.y)
+    && (curve.type === 'circle' || Number.isFinite(curve.arcStart?.x) && Number.isFinite(curve.arcStart?.y) && Number.isFinite(curve.sweep)))) return result;
+  const dx = second.first.x - first.first.x, dy = second.first.y - first.first.y;
+  const separation = Math.hypot(dx, dy);
+  if (!(separation > 0) || !Number.isFinite(separation)) return result;
+  const scale = Math.max(separation, first.radius, second.radius);
+  const d = separation / scale, r1 = first.radius / scale, r2 = second.radius / scale;
+  const ux = dx / separation, uy = dy / separation;
+  for (const [family, sign] of [1, -1].entries()) {
+    const ratio = (r1 - sign * r2) / d;
+    if (!Number.isFinite(ratio) || Math.abs(ratio) > 1 + Number.EPSILON * 64) continue;
+    const q = Math.abs(Math.abs(ratio) - 1) <= Number.EPSILON * 64 ? Math.sign(ratio) : ratio;
+    const h = Math.sqrt(Math.max(0, (1 - q) * (1 + q)));
+    for (const [side, orientation] of [1, -1].entries()) {
+      if (side && h === 0) continue;
+      const normal = { x: q * ux - orientation * h * uy, y: q * uy + orientation * h * ux };
+      const contact1 = { x: first.first.x + first.radius * normal.x, y: first.first.y + first.radius * normal.y };
+      const contact2 = { x: second.first.x + sign * second.radius * normal.x, y: second.first.y + sign * second.radius * normal.y };
+      if (![contact1.x, contact1.y, contact2.x, contact2.y].every(Number.isFinite)) continue;
+      if (arcTypes.has(first.type) && !pointOnArc(contact1, first) || arcTypes.has(second.type) && !pointOnArc(contact2, second)) continue;
+      result[family * 2 + side] = lineThrough(contact1, { x: -normal.y, y: normal.x });
+    }
+  }
+  return result;
 }
 
 export function perpendicularBisector(parents) {
@@ -335,6 +368,9 @@ export function resolveObjects(objects, previous = new Map(), changed = null, in
       if (line) resolved.set(id, { ...object, ...line });
     } else if (bisectorTypes.has(object.type)) {
       const line = angleBisector(object.type, parents.map(parent => resolved.get(parent)));
+      if (line) resolved.set(id, { ...object, ...line });
+    } else if (object.type === 'commonTangent') {
+      const line = commonTangents(...parents.map(parent => resolved.get(parent)))[object.branch ?? 0];
       if (line) resolved.set(id, { ...object, ...line });
     } else if (derivedLineTypes.has(object.type)) {
       const point = resolved.get(parents[0]);

@@ -6,7 +6,7 @@ import { supportsSurfaceFriction } from './surface-friction.js';
 import { DEFAULT_INSTANCE_SUBDIVISIONS, validInstanceSubdivisions } from './region-options.js';
 import { LocalizedError, languages } from './i18n.js';
 import { listThemes, validateThemeConfiguration } from './themes.js';
-import { arcTypes, isLinear, isPoint, isTangentCurve, validDivisionRatio } from './geometry.js';
+import { arcTypes, isLinear, isPoint, isTangentCurve, isCommonTangentCurve, validDivisionRatio } from './geometry.js';
 import { conicTypes } from './conics.js';
 import { objectOpacity } from './object-style.js';
 import { isMeasurement } from './measurements.js';
@@ -58,6 +58,7 @@ const parentRules = {
   parallel: parents => parents.length === 2 && isPoint(parents[0]) && isLinear(parents[1]),
   perpendicular: parents => parents.length === 2 && isPoint(parents[0]) && isLinear(parents[1]),
   tangent: parents => parents.length === 2 && isPoint(parents[0]) && isTangentCurve(parents[1]),
+  commonTangent: parents => parents.length === 2 && parents.every(isCommonTangentCurve) && parents[0].id !== parents[1].id,
   innerBisector: linesOrPoints, outerBisector: linesOrPoints,
   fillet: parents => parents.length === 2 && lines(parents),
   chamfer: parents => parents.length === 2 && lines(parents),
@@ -158,7 +159,7 @@ export function objectDefinition(source, { plotDefaults = defaults, resolved } =
   }
   if (isMeasurement(object)) object.labelOffset ??= { x: 0, y: 0 };
   if (object.type === 'angleMeasure') object.angleMode ??= 'inner';
-  if (object.type === 'intersection' || object.type === 'tangent') object.branch ??= 0;
+  if (object.type === 'intersection' || object.type === 'tangent' || object.type === 'commonTangent') object.branch ??= 0;
   if (object.type === 'intersection' && Number.isFinite(resolved?.x) && Number.isFinite(resolved?.y)) object.position = { x: resolved.x, y: resolved.y };
   return object;
 }
@@ -409,6 +410,7 @@ export function parseDocument(text) {
     if (object.strokeWidth !== undefined && (typeof object.strokeWidth !== 'number' || object.strokeWidth <= 0)) fail('error.documentValue', { path: `${path}.strokeWidth` });
     if (object.labelOffset !== undefined) position(object.labelOffset, `${path}.labelOffset`);
     if (object.branch !== undefined && (!Number.isInteger(object.branch) || object.branch < 0)) fail('error.documentValue', { path: `${path}.branch` });
+    if (object.type === 'commonTangent' && (object.branch ?? 0) > 3) fail('error.documentValue', { path: `${path}.branch` });
     if (object.construction !== undefined && !['center', 'three-point'].includes(object.construction)) fail('error.documentValue', { path: `${path}.construction` });
     if (object.draft !== undefined) {
       if (!isPlot(object) || !record(object.draft)) fail('error.documentValue', { path: `${path}.draft` });

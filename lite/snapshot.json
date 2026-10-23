@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "da6937038ba1c2a4af146fefd353bf27151bc3e4728a3bd8523b9541b94a1dde"
+      "sha256": "c860a62249072d2905dd545ca87770a5b749e60f3d59ae6a3ed836b5a0081613"
     },
     {
       "path": "src/arc-connection.js",
@@ -133,7 +133,7 @@
     },
     {
       "path": "src/document.js",
-      "sha256": "7d7126a30c5607fc57fa08a9ea7bc7458b37c94750d5db75c5ae61fc75c5bc61"
+      "sha256": "68681bd18edb571283ac5faa4575d2967721beaf6295dda41a54ade670222516"
     },
     {
       "path": "src/equation-intersections.js",
@@ -145,7 +145,7 @@
     },
     {
       "path": "src/geometry.js",
-      "sha256": "c042fcacb85a013c65e736dee64bd741d80a7a82b946011b63dbaa5f9f506f50"
+      "sha256": "e5793a14043b3209623d37cb0608712893b0b062791511c27c5cd76170e26420"
     },
     {
       "path": "src/grid-snap.js",
@@ -197,15 +197,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "adc438a7c9c81e55be464ea48e4130fbc050bdfe63750139cd4d6d1304dbaa82"
+      "sha256": "dfec992a2545aade4ec92520f569c66ff55fe4e4756586ddd38280deb7498faa"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "7425329c7a954a9761a47e7f378f9ddc375ebd11cc3de420143a0453e7ac6a53"
+      "sha256": "f600bf5121b7cad95ac488deda43e061fb1060d4f2a4e0b7e54c5f554a0eefa0"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "b13ca108e65f70ee485cfa5794fcbf7c838e3222799a2ca8f7989395af1550ea"
+      "sha256": "66d7a472c5f506415b20361045c8308800917aeee5e310abf6f9ec2ba9e34dfa"
     },
     {
       "path": "src/math-input.js",
