@@ -3106,7 +3106,7 @@ coordinateWindows=createCoordinateWindows(element('canvas-wrap'),{
       snapSettings.coordinateSystem(view.coordinateSystem);
     }
     context.closed=true;context.lifecycle.abort();context.touchInteraction?.destroy();
-    clearTimeout(context.plots.timer);clearTimeout(context.regions.timer);context.regions.cancelQueries();
+    context.plots.destroy();clearTimeout(context.regions.timer);context.regions.cancelQueries();
     context.renderer?.destroy();viewports.delete(context);return true;
   },
   resize:resizeViewport,

@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "694045bd9fbc4c71780e29e9286de0cb2a1d2fea39b142447da4efc91fb82a1c"
+      "sha256": "c923f99ae4a433869156b795ad9bcf9f5ef6cb539c1844dba533bd6f74b893ba"
     },
     {
       "path": "src/arc-connection.js",
@@ -277,7 +277,7 @@
     },
     {
       "path": "src/plot/formula.js",
-      "sha256": "9fd8c9996b7d708f959f460bd31fbd596332539e02bfdbb3cc1b1ff7754a54d8"
+      "sha256": "e0684459066e9815f4b1c4b87b00a5ba24a5690b2928c0c8cf4313b76be4fa69"
     },
     {
       "path": "src/plot/interval.js",
@@ -289,7 +289,7 @@
     },
     {
       "path": "src/plot/manager.js",
-      "sha256": "88371a06c8e508be7d27d5790cb4324f86ed36c5da9f30afb0c7ae4df889e471"
+      "sha256": "20a50026eff78a069e29ef1b96647e4c878f0558b82c46ad998b414298539078"
     },
     {
       "path": "src/plot/options.js",
@@ -310,6 +310,14 @@
     {
       "path": "src/plot/sampler.js",
       "sha256": "152bdede4e5e707fa0dc155912804291a41d0965d85416819575d51b8beec253"
+    },
+    {
+      "path": "src/plot/sampling-queue.js",
+      "sha256": "c40a2449eda4a49d43e35949472dab251ef478136c86e09d7bbaaf922f679d8b"
+    },
+    {
+      "path": "src/plot/sampling-worker.js",
+      "sha256": "7882619c4d6d6b5dc589b5a9389bd6ce899ee1dd1e1d2ec254fff4f300ce1e45"
     },
     {
       "path": "src/plot/stuplot-interval.js",

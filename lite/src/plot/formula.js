@@ -133,8 +133,17 @@ function compileScalar(node) {
   if (node.op === 'y') return (x, y) => y;
   const left = compileScalar(node.left);
   const right = node.right && compileScalar(node.right);
-  const operation = node.op;
-  return (x, y) => scalar(operation, left(x, y), right?.(x, y));
+  // Bind the operation once, rather than dispatching on its name at every
+  // corner/edge evaluation (millions of times in dense implicit curves).
+  if (node.op === '+') return (x, y) => left(x, y) + right(x, y);
+  if (node.op === '-') return (x, y) => left(x, y) - right(x, y);
+  if (node.op === '*') return (x, y) => left(x, y) * right(x, y);
+  if (node.op === '/') return (x, y) => left(x, y) / right(x, y);
+  if (node.op === '^') return (x, y) => left(x, y) ** right(x, y);
+  if (node.op === 'neg') return (x, y) => -left(x, y);
+  if (node.op === 'fmod') return (x, y) => left(x, y) % right(x, y);
+  const operation = Math[node.op];
+  return right ? (x, y) => operation(left(x, y), right(x, y)) : (x, y) => operation(left(x, y));
 }
 
 function compileInterval(node, arithmetic = ranges) {
