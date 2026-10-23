@@ -22,7 +22,7 @@ import { createObjectMenu } from './object-menu.js';
 import { createObjectStatus, updateObjectStatus } from './object-status.js';
 import { IntersectionTracker, intersectionContext, intersectionKey } from './intersection-tracker.js';
 import { equationGeometryIntersections } from './equation-intersections.js';
-import { objectColor } from './object-style.js';
+import { objectColor, randomObjectColor } from './object-style.js';
 import { getTheme, getThemeSelection, listThemes, onThemeChange, setTheme, readThemeConfiguration, applyThemeConfiguration } from './themes.js';
 import { objectsInBox, screenBox } from './selection.js';
 import { isBoundary, RegionManager, regionContains, SNAPSHOT_CELL } from './regions.js';
@@ -798,7 +798,7 @@ function createParametric() {
   finishObjectEdit();
   setTool('select');
   const before = snapshot();
-  const object = { id: crypto.randomUUID(), type: 'parametric', name: nextParametricName(), xSource: 'cos(t)', ySource: 'sin(t)', xLatex: '\\cos(t)', yLatex: '\\sin(t)', tMin: 0, tMax: 2 * Math.PI };
+  const object = { id: crypto.randomUUID(), type: 'parametric', name: nextParametricName(), color: randomObjectColor(), xSource: 'cos(t)', ySource: 'sin(t)', xLatex: '\\cos(t)', yLatex: '\\sin(t)', tMin: 0, tMax: 2 * Math.PI };
   objects.push(object);
   selected = object.id;
   commit(before);
@@ -2785,7 +2785,7 @@ function addDraftEquation() {
     cancelPending();
     finishObjectEdit();
     const before = snapshot();
-    const object = { id: crypto.randomUUID(), type: 'equation', name: nextEquationName(), source: compiled.source, latex };
+    const object = { id: crypto.randomUUID(), type: 'equation', name: nextEquationName(), color: randomObjectColor(), source: compiled.source, latex };
     objects.push(object);
     selected = object.id;
     editingSession = { id: object.id, before };

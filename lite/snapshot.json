@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "c923f99ae4a433869156b795ad9bcf9f5ef6cb539c1844dba533bd6f74b893ba"
+      "sha256": "eed5f159f6c88f07eb957eb28bf80b6af7e4a340a1ed5fee44145436ee54fa6c"
     },
     {
       "path": "src/arc-connection.js",
@@ -233,7 +233,7 @@
     },
     {
       "path": "src/object-style.js",
-      "sha256": "b758f9501c3e52002379bb20c953702c65b2c05785f4d3b596a5d02a804adfe8"
+      "sha256": "e9fcd4111ca3b0bc46b6e7d7c0850d2cccd9ee28b9a93ca4cea7a83bdf636510"
     },
     {
       "path": "src/particle-state.js",
