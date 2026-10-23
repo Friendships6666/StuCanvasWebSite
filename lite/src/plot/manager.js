@@ -46,7 +46,7 @@ export class PlotManager {
       const source = plotSourceKey(object);
       const configurationKey = JSON.stringify(configurations[index]);
       const unchangedParameters = old?.parameterNamesKey === parameterNamesKey && old.dependencyKey === JSON.stringify(old.compiled.parameterNames.map(name => [name, parameters[name]]));
-      const compiled = old?.source === source && unchangedParameters ? old.compiled : object.type === 'parametric' ? compileParametric(object, parameters) : compileEquation(object.source, parameters);
+      const compiled = old?.source === source && unchangedParameters ? old.compiled : object.type === 'parametric' ? compileParametric(object, parameters) : compileEquation(object, parameters);
       const dependencyKey = JSON.stringify(compiled.parameterNames.map(name => [name, parameters[name]]));
       if (old?.source === source && old.configurationKey === configurationKey && old.dependencyKey === dependencyKey && this.covers(old.task, view, width, height)) {
         old.parameterNamesKey = parameterNamesKey;
@@ -72,6 +72,7 @@ export class PlotManager {
         const definition = object.type === 'parametric'
           ? { type: object.type, xSource: object.xSource, ySource: object.ySource, tMin: object.tMin, tMax: object.tMax }
           : { type: object.type, source: object.source };
+        if (object.plotTransform) definition.plotTransform = object.plotTransform;
         this.sampling.submit(object.id, compatibility, task, {
           object: definition, parameters, view: task.view, width: task.width, height: task.height, options: task.options,
         }, completed => {

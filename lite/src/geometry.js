@@ -7,6 +7,7 @@ import { conicIntersections, conicPoint, conicTangents, createConic, isConic, po
 import { isMeasurement, resolveMeasurement } from './measurements.js';
 import { isCad, resolveCadCorner } from './cad.js';
 import { formulaParameters, isJavaScript, variableRoot } from './reflection.js';
+import { isTransform, resolveTransform } from './transforms.js';
 
 export const EPSILON = 1e-9;
 export const distance = (first, second) => Math.hypot(first.x - second.x, first.y - second.y);
@@ -50,11 +51,11 @@ const positiveAngle = angle => (angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math
 const tangentEquationCache = new WeakMap();
 
 function compileTangentEquation(object, parameters) {
-  const key = JSON.stringify([object.source, parameters]);
+  const key = JSON.stringify([plotSourceKey(object), parameters]);
   const cached = tangentEquationCache.get(object);
   if (cached?.key === key) return cached.compiled;
   let compiled = null;
-  try { compiled = compileEquation(object.source, parameters); }
+  try { compiled = compileEquation(object, parameters); }
   catch {}
   tangentEquationCache.set(object, { key, compiled });
   return compiled;
@@ -237,7 +238,7 @@ export function resolveObjects(objects, previous = new Map(), changed = null, in
         const key = JSON.stringify([plotSourceKey(object), parameterNamesKey]);
         let dependencies = plotDependencyCache.get(object);
         if (dependencies?.key !== key) {
-          const compiled = object.type === 'parametric' ? compileParametric(object, parameters) : compileEquation(object.source, parameters);
+          const compiled = object.type === 'parametric' ? compileParametric(object, parameters) : compileEquation(object, parameters);
           dependencies = { key, names: compiled.parameterNames };
           plotDependencyCache.set(object, dependencies);
         }
@@ -276,6 +277,10 @@ export function resolveObjects(objects, previous = new Map(), changed = null, in
     const parents = object.parents || [];
     const mustResolve = dirty.has(id) || !previous.has(id);
     if (!mustResolve) resolved.set(id, previous.get(id));
+    else if (isTransform(object)) {
+      const geometry = resolveTransform(object, parents.map(parent => resolved.get(parent)));
+      if (geometry) resolved.set(id, geometry);
+    }
     else if (object.type === 'point' || isPlot(object) || object.type === 'slider' || isJavaScript(object) || object.type === 'physicsBody' || object.type === 'liquid' || object.type === 'softBody') resolved.set(id, { ...object });
     else if (isMeasurement(object)) {
       const measurement = resolveMeasurement(object, parents.map(parent => resolved.get(parent)));
@@ -334,7 +339,8 @@ export function resolveObjects(objects, previous = new Map(), changed = null, in
     } else if (derivedLineTypes.has(object.type)) {
       const point = resolved.get(parents[0]);
       const reference = resolved.get(parents[1]);
-      const line = derivedLines(object.type, point, reference, tangentEquations.get(reference?.id))[object.branch || 0];
+      const equation = reference?.type === 'equation' ? compileTangentEquation(reference, parameters) : null;
+      const line = derivedLines(object.type, point, reference, equation)[object.branch || 0];
       if (line) resolved.set(id, { ...object, ...line });
     } else if (object.type === 'circle' || arcTypes.has(object.type)) {
       const points = parents.map(parent => resolved.get(parent));

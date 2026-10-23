@@ -1,4 +1,15 @@
 export default {
+  "tool.transforms": "变换工具",
+  "tool.centralSymmetry": "中心对称",
+  "tool.axialSymmetry": "轴对称",
+  "tool.rotation": "旋转",
+  "transform.source": "选择要变换的对象",
+  "transform.center": "选择中心点，或点击空白处创建",
+  "transform.axis": "选择对称轴（直线、射线或线段）",
+  "transform.centerHint": "先选择对象，再选择中心点",
+  "transform.axisHint": "先选择对象，再选择对称轴",
+  "transform.angle": "旋转角度（°，逆时针为正）",
+
   "startup.loading": "正在加载",
   "startup.failed": "加载失败，请重试。",
   "startup.retry": "重试",

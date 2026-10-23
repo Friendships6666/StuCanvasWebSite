@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "eed5f159f6c88f07eb957eb28bf80b6af7e4a340a1ed5fee44145436ee54fa6c"
+      "sha256": "da6937038ba1c2a4af146fefd353bf27151bc3e4728a3bd8523b9541b94a1dde"
     },
     {
       "path": "src/arc-connection.js",
@@ -101,7 +101,7 @@
     },
     {
       "path": "src/compact-document.js",
-      "sha256": "a6e58cee89e8bc2fd1ba1af244c2455a1cd5ae41123949d6a0e67ebad7db6565"
+      "sha256": "d8e2de53279db6830fbba43e8527cb9078ccaceab0064ded3d6f8e3484c8ebf7"
     },
     {
       "path": "src/conics.js",
@@ -133,7 +133,7 @@
     },
     {
       "path": "src/document.js",
-      "sha256": "2bef2a09bc8d936d7c8e4402f39392527a8acc31ec47314dfd107309e74d0e39"
+      "sha256": "7d7126a30c5607fc57fa08a9ea7bc7458b37c94750d5db75c5ae61fc75c5bc61"
     },
     {
       "path": "src/equation-intersections.js",
@@ -145,7 +145,7 @@
     },
     {
       "path": "src/geometry.js",
-      "sha256": "6616a56feca92a74c69367f939cebc009af5f8e737598d08b384637da735c76e"
+      "sha256": "c042fcacb85a013c65e736dee64bd741d80a7a82b946011b63dbaa5f9f506f50"
     },
     {
       "path": "src/grid-snap.js",
@@ -157,7 +157,7 @@
     },
     {
       "path": "src/intersection-tracker.js",
-      "sha256": "3403b2d7602d9ff53f516168f1275aa4c7676b6eb6b18d00a85b0fe8cc7161c1"
+      "sha256": "73c90afdd15b2ec31f0c273e7d6c78565e30c5fff433f07553581c9a0568f107"
     },
     {
       "path": "src/javascript-syntax.js",
@@ -197,15 +197,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "e415f872c24063ed76b5b0ec17c4a365d6771b1b4a8cf4b8cae249a165e05050"
+      "sha256": "adc438a7c9c81e55be464ea48e4130fbc050bdfe63750139cd4d6d1304dbaa82"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "99f87a8a033c74f0e5145adc8a0d828816db28baeea8812304c916d8cf3d73a9"
+      "sha256": "7425329c7a954a9761a47e7f378f9ddc375ebd11cc3de420143a0453e7ac6a53"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "0386bdddbaa8a624b47f807b7d5d460fca0f950a86a12277f06d2db2b052d521"
+      "sha256": "b13ca108e65f70ee485cfa5794fcbf7c838e3222799a2ca8f7989395af1550ea"
     },
     {
       "path": "src/math-input.js",
@@ -277,7 +277,7 @@
     },
     {
       "path": "src/plot/formula.js",
-      "sha256": "e0684459066e9815f4b1c4b87b00a5ba24a5690b2928c0c8cf4313b76be4fa69"
+      "sha256": "ae68aea8fb410c99acab3919b270d49df3cb350b5111b3a1159ad0394f33a2d4"
     },
     {
       "path": "src/plot/interval.js",
@@ -289,7 +289,7 @@
     },
     {
       "path": "src/plot/manager.js",
-      "sha256": "20a50026eff78a069e29ef1b96647e4c878f0558b82c46ad998b414298539078"
+      "sha256": "b4f4443168639396342a386c683e1e5c5f2c3648d46ea78eca94c063f1840b43"
     },
     {
       "path": "src/plot/options.js",
@@ -297,7 +297,7 @@
     },
     {
       "path": "src/plot/parametric-formula.js",
-      "sha256": "8b95be035db73de08de49ef73b183cb083acdb8cb4afc9afc34043d88482573e"
+      "sha256": "258c5dfa89880f92abf1543f9ed20d842e727397c19dd5f5bc0bd1228b99da84"
     },
     {
       "path": "src/plot/parametric-options.js",
@@ -317,15 +317,19 @@
     },
     {
       "path": "src/plot/sampling-worker.js",
-      "sha256": "7882619c4d6d6b5dc589b5a9389bd6ce899ee1dd1e1d2ec254fff4f300ce1e45"
+      "sha256": "2ad295b3d9a15273eae934fad32c65fba6fc0215a9995051a1b5a68d18229bcf"
     },
     {
       "path": "src/plot/stuplot-interval.js",
       "sha256": "ce60442e26b2210aa31d9d89dbcb976217c967d6a759ae4e704c1b95b28d98a3"
     },
     {
+      "path": "src/plot/transform.js",
+      "sha256": "893c94d697808a69cce27d073ff68fe86ea4953b3bc847cbc5cae1b8634bf06c"
+    },
+    {
       "path": "src/plot/types.js",
-      "sha256": "b90fb02707180f344dba25c22b8708a195e7db4a2d956b9a0dfc8f8887139e83"
+      "sha256": "0b72989f06325f3fd77da78ac6c89227b2ae5cc34386c2e07dde0989818d6bb2"
     },
     {
       "path": "src/project-file.js",
@@ -408,6 +412,10 @@
       "sha256": "dbdfba65a6c3d319b4f2f76bb041bcc88a5855d5aaa227ebb2f5fdea541dc1d2"
     },
     {
+      "path": "src/rotation-dialog.js",
+      "sha256": "a9833bb0d2321a5c5358e9bab0fe4a586f4882e6852cdffa5cbff722777d09dc"
+    },
+    {
       "path": "src/scene.js",
       "sha256": "f00840fa6595e84d859f20ba71a314224d75ebae7dee777760afa189f12d1ea2"
     },
@@ -486,6 +494,10 @@
     {
       "path": "src/traces.js",
       "sha256": "a1033b7db32b47c478123c8b76d13e7cfc0009f4e42edbae85545f24864e15bf"
+    },
+    {
+      "path": "src/transforms.js",
+      "sha256": "8d073e5516bef0c84586367065fbef23ccc7a729ba1129dfcc6d887495ddb257"
     },
     {
       "path": "THIRD_PARTY_NOTICES.txt",

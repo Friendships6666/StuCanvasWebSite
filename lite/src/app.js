@@ -54,6 +54,8 @@ import { instanceCell } from './region-options.js';
 import { ReflectionManager } from './reflection-manager.js';
 import { createReflectionEditor } from './reflection-editor.js';
 import { formulaParameters, hasBindings, hasScript, isJavaScript, needsReflection, reflectionSource, variableRoot } from './reflection.js';
+import { canTransform, isTransform, resolveTransform, transformTypes } from './transforms.js';
+import { createRotationDialog } from './rotation-dialog.js';
 
 const element = id => document.getElementById(id);
 localizeDOM();
@@ -116,6 +118,11 @@ const tools = [
     { id: 'measureAngleSupplementary', get name() { return t('tool.measureAngleSupplementary'); }, get description() { return t('description.supplementary'); }, key: '⇧F', angleMode: 'supplementary', icon: '<path d="M2 20h20M12 20 20 5M5 20a7 7 0 0 1 10-6"/><circle cx="12" cy="20" r="1.5"/>' },
     { id: 'measureArea', get name() { return t('tool.measureArea'); }, get description() { return t('description.measureArea'); }, key: 'Z', icon: '<path d="m4 8 9-5 8 7-5 11-12-5ZM5 13l10-8m-9 12 13-10m-8 12 9-8"/><path d="M3 3h4M3 3v4m18 14h-4m4 0v-4"/>' },
   ] },
+  { id: 'transforms', key: 'X', get name() { return t('tool.transforms'); }, children: [
+    { id: 'centralSymmetry', key: 'X', get name() { return t('tool.centralSymmetry'); }, get description() { return t('transform.centerHint'); }, icon: '<path d="m3 6 5-3v7ZM21 18l-5 3v-7ZM7 7l10 10"/><circle cx="12" cy="12" r="1.6"/>' },
+    { id: 'axialSymmetry', key: '⇧X', get name() { return t('tool.axialSymmetry'); }, get description() { return t('transform.axisHint'); }, icon: '<path d="M12 2v20" stroke-dasharray="3 2"/><path d="m3 7 5-3v15l-5-3ZM21 7l-5-3v15l5-3Z"/>' },
+    { id: 'rotation', key: '⇧V', get name() { return t('tool.rotation'); }, get description() { return t('transform.centerHint'); }, icon: '<path d="M6 8a8 8 0 1 1-1 9M3 4l3 4 5-1M16 5l4 6-6 1Z"/><circle cx="12" cy="12" r="1.5"/>' },
+  ] },
   { id: 'physics', get name() { return t('tool.physics'); }, key: 'Y', children: [
     { id: 'rope', key: 'Y', get name() { return t('tool.rope'); }, get description() { return t('rope.hint'); }, icon: '<path d="M3 5c0 16 18 16 18 0"/><circle cx="3" cy="5" r="2"/><circle cx="21" cy="5" r="2"/>' },
     { id: 'spring', key: '⇧Y', get name() { return t('tool.spring'); }, get description() { return t('spring.hint'); }, icon: '<path d="M2 12h3c2 0 1-8 3-8s0 16 3 16 0-16 3-16 0 16 3 16 1-8 3-8h2"/>' },
@@ -138,6 +145,7 @@ Object.assign(labels, { fillet: 'tool.fillet', chamfer: 'tool.chamfer', arcConne
 Object.assign(labels, { ellipse: 'tool.ellipse', parabola: 'tool.parabola', hyperbola: 'tool.hyperbola', pole: 'tool.pole', polar: 'tool.polar' });
 Object.assign(labels, { perpendicularBisector: 'tool.perpendicularBisector', innerBisector: 'tool.innerBisector', outerBisector: 'tool.outerBisector' });
 Object.assign(labels, { lengthMeasure: 'object.length', angleMeasure: 'object.angle', areaMeasure: 'object.area' });
+Object.assign(labels, Object.fromEntries([...transformTypes].map(type => [type, `tool.${type}`])));
 const measurementTools = new Set(['measureLength', 'measureAngleInner', 'measureAngleReflex', 'measureAngleSupplementary', 'measureArea']);
 const shapeTypes = new Set([...linearTypes, 'circle', ...arcTypes, ...conicTypes]);
 const dualConstructionTools = new Set(['parabola', 'polar', 'pole']);
@@ -175,6 +183,11 @@ const ripples = [];
 const ratioDialog = createRatioDialog({
   preview(ratio) { if (pending?.ratioInput) { pending.ratio = ratio; draw(); } },
   submit: finishRatioPoint,
+  cancel() { cancelPending(); setHint(''); refresh(); canvas.focus(); },
+});
+const rotationDialog = createRotationDialog({
+  preview(angle) { if (pending?.transform) { pending.angle = angle; draw(); } },
+  submit: finishTransform,
   cancel() { cancelPending(); setHint(''); refresh(); canvas.focus(); },
 });
 const cadEditors = new WeakMap();
@@ -472,7 +485,7 @@ function syncPhysicsScene() {
     const frame = physicsBoundaryFrame(physics, geometry, view, width, height);
     if (frame) {
       if (JSON.stringify(physicsPlots.options) !== JSON.stringify(plots.options)) physicsPlots.configure(plots.options);
-      physicsPlots.sync(objects, frame.view, frame.width, frame.height);
+      physicsPlots.sync([...resolved.values()], frame.view, frame.width, frame.height);
     } else physicsPlots.sync([], view, width, height);
     syncPhysicsBoundaries(physics, geometry.map(object => isPlot(object) ? { ...object, plot: physicsPlots.get(object.id) } : object), view, width, height);
   });
@@ -622,7 +635,7 @@ function refresh(changed = null) {
     if (!ids.has(entry.equationId) || !ids.has(entry.geometryId)) equationIntersectionCache.delete(key);
   }
   resolved = resolveObjects(objects, resolved, changed, intersectionTracker);
-  if (width && height) plots.sync(objects, view, width, height);
+  if (width && height) plots.sync([...resolved.values()], view, width, height);
   updateEquationIntersections();
   renderObjects();
   objectMenu.sync();
@@ -728,6 +741,7 @@ function applyDocument(document) {
 
 function cancelPending() {
   ratioDialog.close();
+  rotationDialog.close();
   if (pending?.before) restoreSnapshot(pending.before);
   pending = null;
 }
@@ -748,7 +762,7 @@ function setTool(tool) {
   selected = null;
   selection.clear();
   hovered = null;
-  setHint(tool === 'arcConnection' ? 'cad.selectArcs' : tool === 'physicsDrag' ? 'drag.hint' : ['rope','spring'].includes(tool) ? `${tool}.hint` : '');
+  setHint(transformTypes.has(tool) ? 'transform.source' : tool === 'arcConnection' ? 'cad.selectArcs' : tool === 'physicsDrag' ? 'drag.hint' : ['rope','spring'].includes(tool) ? `${tool}.hint` : '');
   for (const button of element('tools').children) {
     const active = button.dataset.tool === tool || Boolean(button.dataset.group && toolParents.get(tool)?.id === button.dataset.group);
     button.classList.toggle('active', active);
@@ -1690,7 +1704,51 @@ function constructRope(position, precise=false, candidate=null) {
   rope.name=`${activeTool}${index}`;objects.push(rope);pending=null;selected=rope.id;selection.clear();setHint('');commit(before);
 }
 
+function constructTransform(position, chosen = null) {
+  if (!pending?.transform) {
+    const source = chosen ? canTransform(chosen) ? chosen : null : hitTest(position, canTransform);
+    if (!source) { setHint('transform.source'); return; }
+    pending = { transform: true, sourceId: source.id, before: snapshot(), angle: 90 };
+    selected = source.id;
+    setHint(activeTool === 'axialSymmetry' ? 'transform.axis' : 'transform.center');
+    refresh();
+    return;
+  }
+  if (pending.referenceId) return;
+  const matches = activeTool === 'axialSymmetry' ? isLinear : isPoint;
+  const reference = chosen ? matches(chosen) && chosen : activeTool === 'axialSymmetry' ? hitTest(position, isLinear) : hitTest(position, isPoint) || newPoint(snapped(position));
+  if (!reference) { setHint(activeTool === 'axialSymmetry' ? 'transform.axis' : 'transform.center'); return; }
+  pending.referenceId = reference.id;
+  if (activeTool === 'rotation') { refresh(); rotationDialog.open(); draw(); }
+  else finishTransform();
+}
+
+function finishTransform(angle = 90) {
+  if (!pending?.transform || !pending.referenceId) return;
+  const before = pending.before;
+  const source = resolved.get(pending.sourceId);
+  if (!canTransform(source)) { cancelPending(); refresh(); return; }
+  const object = newShape(activeTool, [pending.sourceId, pending.referenceId]);
+  object.color = objectColor(source);
+  object.renderTargets = [activeViewport.id];
+  if (activeTool === 'rotation') object.angle = angle;
+  pending = null; rotationDialog.close();
+  selected = object.id; selection.clear();
+  setHint('transform.source'); commit(before); canvas.focus();
+}
+
+function transformPreview(position) {
+  if (!pending?.transform || pending.angle === null) return [];
+  const source = resolved.get(pending.sourceId);
+  const reference = pending.referenceId ? resolved.get(pending.referenceId) : activeTool === 'axialSymmetry' ? hitTest(position, isLinear) : hitTest(position, isPoint) || { type: 'point', ...snapped(position) };
+  const geometry = resolveTransform({ id: '__transform-preview', type: activeTool, name: '', parents: [], angle: pending.angle, preview: true, renderTargets: [activeViewport.id] }, [source, reference]);
+  // Function previews use their normal plot tasks once committed; no duplicate
+  // sampling jobs are started for every pointer movement.
+  return geometry && !isPlot(geometry) ? [geometry] : [];
+}
+
 function construct(position) {
+  if (transformTypes.has(activeTool)) { constructTransform(position); return; }
   if (cadTools.has(activeTool)) {
     constructCadCorner(position);
     return;
@@ -1838,7 +1896,7 @@ function removeObjects(ids) {
       const dependencies = [...(object.parents || []), ...Object.values(object.bindings || {}).map(reference => variables.get(variableRoot(reference)))];
       if (isPlot(object) && !object.invalid) {
         try {
-          const compiled = object.type === 'parametric' ? compileParametric(object, parameters) : compileEquation(object.source, parameters);
+          const compiled = object.type === 'parametric' ? compileParametric(object, parameters) : compileEquation(object, parameters);
           dependencies.push(...compiled.parameterNames.map(name => variables.get(variableRoot(name))));
         } catch { /* Keep incomplete formula drafts editable. */ }
       }
@@ -1853,6 +1911,7 @@ function removeObjects(ids) {
 }
 
 function equation(object) {
+  if (object.transformNode) return isPoint(object) ? `(${number(object.x)}, ${number(object.y)})` : '';
   if (isLiquid(object)) return t('liquid.summary',{count:object.particleCount,volume:number(object.volume),mass:number(liquidMass(object))});
   if (isPhysicsObject(object)) return t('physics.detail', { mass: number(object.mass) });
   if (isMeasurement(object)) return `${t(labels[object.type])} · ${object.parents.map(id => objects.find(parent => parent.id === id)?.name).join(', ')}${object.type === 'angleMeasure' ? ` · ${{ inner: t('angle.inner'), reflex: t('angle.reflex'), supplementary: t('angle.supplementary') }[object.angleMode || 'inner']}` : ''}`;
@@ -2090,6 +2149,25 @@ function createObjectRow(object, existing) {
       },
       end: finishObjectEdit,
     }));
+  } else if (object.type === 'rotation') {
+    const controls = document.createElement('div');
+    controls.className = 'cad-controls rotation-controls';
+    controls.innerHTML = '<label><span data-i18n="transform.angle"></span><input type="number" step="any" value="90" data-rotation-angle></label>';
+    const input = controls.querySelector('input');
+    controls.addEventListener('click', event => event.stopPropagation());
+    input.addEventListener('focus', () => beginObjectEdit(id));
+    input.addEventListener('input', () => {
+      const valid = input.value.trim() && Number.isFinite(input.valueAsNumber);
+      input.setAttribute('aria-invalid', String(!valid));
+      if (!valid) return;
+      const current = objects.find(item => item.id === id);
+      if (!current) return;
+      current.angle = input.valueAsNumber;
+      refresh(new Set([id]));
+    });
+    input.addEventListener('blur', () => { input.value = objects.find(item => item.id === id)?.angle ?? 90; input.removeAttribute('aria-invalid'); finishObjectEdit(); });
+    input.addEventListener('change', finishObjectEdit);
+    row.querySelector('.object-info').append(controls);
   } else if (object.type === 'parametric') {
     createParametricEditor(row, id);
   } else if (object.type === 'equation') {
@@ -2134,6 +2212,11 @@ function createObjectRow(object, existing) {
     const object = objects.find(item => item.id === id);
     if (!object) return;
     if (!gesture) {
+      if (transformTypes.has(activeTool)) {
+        const geometry = resolved.get(id);
+        if (geometry) constructTransform(null, geometry);
+        return;
+      }
       if (['rope','spring'].includes(activeTool) && (isPhysicsBody(object) || isPoint(object))) {
         const target=resolved.get(id);if(target)constructRope(isPhysicsBody(target)?target.position:target,false,target);return;
       }
@@ -2198,7 +2281,11 @@ function renderObjects() {
     row.style.setProperty('--object-color', objectColor(object));
     if (object.type === 'slider') row.querySelector('.object-info').style.opacity = object.hidden ? '0.3' : String(object.opacity ?? 1);
     const parents = object.parents?.map(id => objects.find(parent => parent.id === id)?.name).join(', ');
-    if (isJavaScript(object)) {
+    if (isTransform(object)) {
+      row.querySelector('.object-definition').textContent = `${object.name} : ${t(labels[object.type])} (${parents})`;
+      const input = row.querySelector('[data-rotation-angle]');
+      if (input && document.activeElement !== input) input.value = object.angle ?? 90;
+    } else if (isJavaScript(object)) {
       row.querySelector('.object-definition').hidden = true;
     } else if (object.type === 'parametric') {
       row.querySelector('.parametric-name').textContent = `${object.name}:`;
@@ -2289,7 +2376,7 @@ function updateMarquee() {
 function scene(clean = false, interactive = true) {
   const radius = hitRadius;
   if (touchPreview) hitRadius = 2;
-  plots.sync(objects, view, width, height);
+  plots.sync([...resolved.values()], view, width, height);
   if (!clean && interactive) for (const row of element('objects').children) {
     if (row.dataset.id) updateObjectStatus(row.querySelector('.object-status'), plots.status(row.dataset.id));
   }
@@ -2298,7 +2385,8 @@ function scene(clean = false, interactive = true) {
   if(interactive)updateAreaMeasurements();
   if (!clean && interactive) traces.sync(objects, resolved, plots, regions);
   const geometry = selectableObjects();
-  if (!clean && interactive && cadTools.has(activeTool)) geometry.push(...cadPreview(pointer));
+  if (!clean && interactive && transformTypes.has(activeTool) && pointer) geometry.push(...transformPreview(pointer));
+  else if (!clean && interactive && cadTools.has(activeTool)) geometry.push(...cadPreview(pointer));
   else if (!clean && interactive && pending?.rope && pointer) {
     if(activeViewport===mainViewport){
     const second=ropeAnchor(hitTest(pointer,object=>isPhysicsBody(object)||isSoftBody(object)||isPoint(object)),pointer);
@@ -2499,7 +2587,7 @@ function startPointer(event) {
     } else if (isPhysicsBody(hit)) {
       pausePhysics();
       gesture = { mode: 'physics', id: hit.id, before: snapshot(), offset: { x: hit.position.x - pointer.x, y: hit.position.y - pointer.y }, pointerId: event.pointerId };
-    } else if ((hit?.type === 'point' || hit?.type === 'snapPoint') && !hasBindings(hit)) { pausePhysics(); gesture = { mode: 'point', id: hit.id, before: snapshot(), offset: { x: hit.x - pointer.x, y: hit.y - pointer.y }, pointerId: event.pointerId }; }
+    } else if ((hit?.type === 'point' || hit?.type === 'snapPoint') && !hit.transformNode && !hasBindings(hit)) { pausePhysics(); gesture = { mode: 'point', id: hit.id, before: snapshot(), offset: { x: hit.x - pointer.x, y: hit.y - pointer.y }, pointerId: event.pointerId }; }
     else if (isMeasurement(hit)) { pausePhysics(); gesture = { mode: 'measurement', id: hit.id, before: snapshot(), screen, offset: { ...(hit.labelOffset || { x: 0, y: 0 }) }, pointerId: event.pointerId }; }
     else if (!hit) gesture = { mode: 'pan', screen, view: { ...view }, pointerId: event.pointerId };
     refresh();
@@ -2751,7 +2839,7 @@ document.addEventListener('keydown', event => {
     draw();
     return;
   }
-  if (event.target.matches('input, textarea, select, math-field, [contenteditable]') || gesture) return;
+  if (event.target.matches?.('input, textarea, select, math-field, [contenteditable]') || gesture) return;
   const key = event.key.toLowerCase();
   if ((event.ctrlKey || event.metaKey) && key === 'z') { event.preventDefault(); if (event.shiftKey) redo(); else undo(); return; }
   if ((event.ctrlKey || event.metaKey) && key === 'y') { event.preventDefault(); redo(); return; }
@@ -2804,7 +2892,7 @@ function addDraftEquation() {
   }
 }
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && event.target.matches('math-field')) {
+  if (event.key === 'Escape' && event.target.matches?.('math-field')) {
     event.preventDefault();
     event.stopPropagation();
     if (editingSession) {
@@ -2997,6 +3085,7 @@ function withTouchHit(target, action) {
 function touchCandidates(screen) {
   return hitCandidates(screenToWorld(screen), object => {
     if (activeTool === 'point') return isPoint(object);
+    if (transformTypes.has(activeTool)) return pending?.transform ? activeTool === 'axialSymmetry' ? isLinear(object) : isPoint(object) : canTransform(object);
     if (toolParents.get(activeTool)?.id === 'circles' && !pending) return isPoint(object);
     if (['fillSingle','fillMultiple'].includes(activeTool)) return false;
     if (activeTool === 'intersection') return !isPoint(object) && (isPlot(object) || shapeTypes.has(object.type)) && object.id !== pending?.id;
@@ -3017,7 +3106,7 @@ function makeTouchInteraction(context) {
   selected: () => selected,
   mode: () => activeTool === 'select' ? 'select' : activeTool === 'pan' || activeTool === 'physicsDrag' || surfaceBrushes[activeTool] ? 'direct' : 'construct',
   candidates: touchCandidates,
-  allowCoordinate: () => ['point','smartPoint','line','segment','ray','circle','circleRadius','circle3','arc','circumArc','semicircle','sector','circumSector','ellipse','hyperbola'].includes(activeTool),
+  allowCoordinate: () => pending?.transform ? activeTool !== 'axialSymmetry' : ['point','smartPoint','line','segment','ray','circle','circleRadius','circle3','arc','circumArc','semicircle','sector','circumSector','ellipse','hyperbola'].includes(activeTool),
   allowAutomatic: () => ['smartPoint','line','segment','ray'].includes(activeTool) || conicTypes.has(activeTool),
   color: objectColor,
   describe: object => `${object.name || object.id} · ${t(labels[object.type] || (object.type === 'region' ? 'object.region' : object.type === 'equation' ? 'ui.equation' : object.type === 'softBody' ? 'soft.object' : object.type === 'liquid' ? 'liquid.object' : 'mobile.object'))}`,

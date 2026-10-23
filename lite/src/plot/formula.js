@@ -1,5 +1,6 @@
 import { LocalizedError } from '../i18n.js';
 import * as ranges from './interval.js';
+import { transformEquation } from './transform.js';
 
 const unaryNames = new Set(['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'sqrt', 'cbrt', 'abs', 'exp', 'expm1', 'log', 'log10', 'log2', 'floor', 'ceil', 'round', 'trunc', 'sign']);
 const binaryNames = new Set(['min', 'max', 'pow', 'hypot', 'fmod']);
@@ -290,16 +291,16 @@ export function compileExpression(input, parameters = {}, variable = 'x') {
 }
 
 export function compileEquation(input, parameters = {}) {
-  const source = normalizeSource(input);
+  const source = normalizeSource(typeof input === 'object' ? input.source : input);
   const bound = bindParameters(source, parameters);
   const { root } = parse(bound.source);
   const evaluate = compileScalar(root);
   const evaluateRange = compileInterval(root);
-  return {
+  return transformEquation({
     source: source.includes('=') ? source : `${source} = 0`,
     parameterNames: [...bound.used],
     evaluate,
     gradient: compileGradient(root),
     interval: (x0, x1, y0, y1) => evaluateRange(ranges.interval(x0, x1), ranges.interval(y0, y1)),
-  };
+  }, typeof input === 'object' ? input.plotTransform : null);
 }

@@ -1,4 +1,15 @@
 export default {
+  "tool.transforms": "變換工具",
+  "tool.centralSymmetry": "中心對稱",
+  "tool.axialSymmetry": "軸對稱",
+  "tool.rotation": "旋轉",
+  "transform.source": "選擇要變換的物件",
+  "transform.center": "選擇中心點，或點擊空白處建立",
+  "transform.axis": "選擇對稱軸（直線、射線或線段）",
+  "transform.centerHint": "先選擇物件，再選擇中心點",
+  "transform.axisHint": "先選擇物件，再選擇對稱軸",
+  "transform.angle": "旋轉角度（°，逆時針為正）",
+
   "startup.loading": "正在載入",
   "startup.failed": "載入失敗，請重試。",
   "startup.retry": "重試",

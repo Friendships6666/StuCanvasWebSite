@@ -1,6 +1,7 @@
 import { LocalizedError } from '../i18n.js';
 import { compileExpression } from './formula.js';
 import * as stuplotIntervals from './stuplot-interval.js';
+import { transformParametric } from './transform.js';
 
 function coordinate(source, parameters) {
   if (typeof source !== 'string' || !source.trim()) throw new LocalizedError('error.enterParametric');
@@ -19,12 +20,12 @@ export function compileParametric(object, parameters = {}) {
   const vertical = coordinate(object.ySource, parameters);
   const horizontalBoxes = horizontal.compileInterval(stuplotIntervals);
   const verticalBoxes = vertical.compileInterval(stuplotIntervals);
-  return {
+  return transformParametric({
     tMin, tMax,
     parameterNames: [...new Set([...horizontal.parameterNames, ...vertical.parameterNames])],
     intervalBoxes: (lower, upper) => ({ x: horizontalBoxes(lower, upper), y: verticalBoxes(lower, upper) }),
     evaluate: parameter => ({ x: horizontal.evaluate(parameter), y: vertical.evaluate(parameter) }),
     derivative: parameter => ({ x: horizontal.derivative(parameter), y: vertical.derivative(parameter) }),
     interval: (lower, upper) => ({ x: horizontal.interval(lower, upper), y: vertical.interval(lower, upper) }),
-  };
+  }, object.plotTransform, stuplotIntervals);
 }

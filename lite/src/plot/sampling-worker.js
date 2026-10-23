@@ -15,7 +15,7 @@ globalThis.onmessage = ({ data }) => {
   const state = current = { job };
   try {
     const parametric = object.type === 'parametric';
-    const compiled = parametric ? compileParametric(object, parameters) : compileEquation(object.source, parameters);
+    const compiled = parametric ? compileParametric(object, parameters) : compileEquation(object, parameters);
     const task = new (parametric ? ParametricTask : EquationTask)(compiled, view, width, height, options);
     let lastProgress = performance.now();
     const run = () => {

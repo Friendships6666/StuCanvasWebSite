@@ -60,7 +60,7 @@ function geometricObjects(definitions, plotRecipes = {}, fullPlots = false) {
   const objects = [...resolveObjects(definitions).values()], parameters = formulaParameters(definitions);
   return trimCadSources(objects).flatMap(cadPrimitives).map(object => {
     if (!isPlot(object) || object.invalid) return object;
-    const compiled = object.type === 'parametric' ? compileParametric(object, parameters) : compileEquation(object.source, parameters);
+    const compiled = object.type === 'parametric' ? compileParametric(object, parameters) : compileEquation(object, parameters);
     const recipe = plotRecipes[object.id];
     if (!fullPlots || !recipe) return { ...object, plot: object.type === 'parametric' ? { curve: compiled } : { equation: compiled } };
     if (!Number.isFinite(recipe.view?.x) || !Number.isFinite(recipe.view?.y) || !Number.isFinite(recipe.view?.scale) || recipe.view.scale <= 0 || !Number.isFinite(recipe.width) || recipe.width <= 0 || !Number.isFinite(recipe.height) || recipe.height <= 0 || !Number.isSafeInteger(recipe.work) || recipe.work < 0) fail(`construction.scene.plots.${object.id}`);

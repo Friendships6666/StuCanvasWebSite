@@ -1,7 +1,7 @@
 const finitePosition = position => Number.isFinite(position?.x) && Number.isFinite(position?.y);
 const distance = (first, second) => Math.hypot(first.x - second.x, first.y - second.y);
 export const intersectionKey = object => JSON.stringify([...(object.parents || [])].sort());
-export const intersectionContext = (...parents) => JSON.stringify(parents.map(parent => [parent.id, parent.type, parent.first?.x, parent.first?.y, parent.second?.x, parent.second?.y, parent.direction?.x, parent.direction?.y, parent.radius, parent.arcStart?.x, parent.arcStart?.y, parent.arcEnd?.x, parent.arcEnd?.y, parent.sweep, parent.source, parent.xSource, parent.ySource, parent.tMin, parent.tMax, parent.origin?.x, parent.origin?.y, parent.axis?.x, parent.axis?.y, parent.scale, parent.a, parent.b, parent.p, parent.coefficients]).sort((first, second) => String(first[0]).localeCompare(String(second[0]))));
+export const intersectionContext = (...parents) => JSON.stringify(parents.map(parent => [parent.id, parent.type, parent.first?.x, parent.first?.y, parent.second?.x, parent.second?.y, parent.direction?.x, parent.direction?.y, parent.radius, parent.arcStart?.x, parent.arcStart?.y, parent.arcEnd?.x, parent.arcEnd?.y, parent.sweep, parent.source, parent.xSource, parent.ySource, parent.tMin, parent.tMax, parent.origin?.x, parent.origin?.y, parent.axis?.x, parent.axis?.y, parent.scale, parent.a, parent.b, parent.p, parent.coefficients, parent.plotTransform]).sort((first, second) => String(first[0]).localeCompare(String(second[0]))));
 
 function assignCandidates(rows, candidates) {
   if (!rows.length || !candidates.length) return [];

@@ -1,4 +1,15 @@
 export default {
+  "tool.transforms": "Transformations",
+  "tool.centralSymmetry": "Point reflection",
+  "tool.axialSymmetry": "Line reflection",
+  "tool.rotation": "Rotation",
+  "transform.source": "Select the object to transform",
+  "transform.center": "Select a center point, or click empty space to create one",
+  "transform.axis": "Select the mirror axis (line, ray or segment)",
+  "transform.centerHint": "Select an object, then a center point",
+  "transform.axisHint": "Select an object, then a mirror axis",
+  "transform.angle": "Rotation angle (°, positive counterclockwise)",
+
   "startup.loading": "Loading",
   "startup.failed": "Unable to load. Please retry.",
   "startup.retry": "Retry",

@@ -24,6 +24,7 @@ import { jsonData } from './json-data.js';
 import { validSnapSettings, validTouchOffsetPixels } from './grid-snap.js';
 import { mainWindowId, renderTargets, validRenderTargets } from './render-targets.js';
 import { validCoordinateView, validCoordinateWindows } from './coordinate-system.js';
+import { isTransform, canTransform, transformedDefinition } from './transforms.js';
 
 export const documentFormat = 'stucanvas-lite';
 export const documentVersion = 1;
@@ -41,6 +42,9 @@ const threePoints = parents => parents.length === 3 && points(parents);
 const segmentOrPoints = parents => twoPoints(parents) || parents.length === 1 && parents[0].type === 'segment';
 const linesOrPoints = parents => threePoints(parents) || parents.length === 2 && lines(parents);
 const parentRules = {
+  centralSymmetry: parents => parents.length === 2 && canTransform(parents[0]) && isPoint(parents[1]),
+  axialSymmetry: parents => parents.length === 2 && canTransform(parents[0]) && isLinear(parents[1]),
+  rotation: parents => parents.length === 2 && canTransform(parents[0]) && isPoint(parents[1]),
   point: noParents, slider: noParents, javascript: noParents, equation: noParents, parametric: noParents, physicsBody: noParents, liquid: noParents, softBody: noParents,
   spring: parents => parents.length <= 2 && parents.every(parent => parent.type === 'physicsBody' || isSoftBody(parent) || isPoint(parent)),
   rope: parents => parents.length <= 2 && parents.every(parent => parent.type === 'physicsBody' || isSoftBody(parent) || isPoint(parent)),
@@ -134,6 +138,7 @@ export function objectDefinition(source, { plotDefaults = defaults, resolved } =
     object.softSubdivisions ??= DEFAULT_SOFT_SUBDIVISIONS;
   }
   if (object.type === 'ratioPoint') object.ratio ??= [1, 1];
+  if (object.type === 'rotation') object.angle ??= 90;
   if (isCad(object)) {
     if (object.type === 'arcConnection') {
       object.branch ??= 0;
@@ -379,7 +384,7 @@ export function parseDocument(text) {
   for (const [index, object] of document.objects.entries()) {
     const path = `objects[${index}]`;
     if (!record(object)) fail('error.documentValue', { path });
-    for (const key of ['latex', 'xLatex', 'yLatex', 'invalid', 'error']) if (Object.hasOwn(object, key)) fail('error.documentValue', { path: `${path}.${key}` });
+    for (const key of ['latex', 'xLatex', 'yLatex', 'invalid', 'error', 'transformNode', 'plotTransform']) if (Object.hasOwn(object, key)) fail('error.documentValue', { path: `${path}.${key}` });
     if (typeof object.id !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(object.id)) fail('error.documentId', { path: `${path}.id` });
     if (byId.has(object.id)) fail('error.documentDuplicate', { id: object.id });
     if (object.type === 'rightAngle') object.type = 'chamfer';
@@ -436,6 +441,10 @@ export function parseDocument(text) {
       }
     }
     if (object.type === 'point') position(object, path);
+    if (object.type === 'rotation') finite(object.angle ?? 90, `${path}.angle`);
+    if (isTransform(object)) for (const key of ['transformNode', 'plotTransform', 'first', 'second', 'origin', 'axis', 'coefficients', 'points', 'segments', 'x', 'y', 'source', 'xSource', 'ySource']) {
+      if (Object.hasOwn(object, key)) fail('error.documentValue', { path: `${path}.${key}` });
+    }
     if (object.type === 'physicsBody' || isFlexible(object) || isLiquid(object) || isSoftBody(object)) {
       const rope = isFlexible(object);
       const liquid = isLiquid(object), soft = isSoftBody(object), particles = rope || liquid || soft;
@@ -514,15 +523,16 @@ export function parseDocument(text) {
   for (const object of document.objects) {
     const parents = object.parents || [];
     for (const parent of parents) if (!byId.has(parent)) fail('error.documentReference', { id: object.id, parent });
-    if (!parentRules[object.type](parents.map(parent => byId.get(parent)))) fail('error.documentParents', { id: object.id, type: object.type });
+    if (!parentRules[object.type](parents.map(parent => transformedDefinition(byId.get(parent), byId)))) fail('error.documentParents', { id: object.id, type: object.type });
     if (object.construction !== undefined) {
       const three = object.construction === 'three-point';
       if (object.type === 'circle' ? three !== (parents.length === 3) : arcTypes.has(object.type) ? three !== object.type.startsWith('circum') : true) fail('error.documentValue', { path: `${object.id}.construction` });
     }
     if (object.type === 'snapPoint') {
-      const plot = isPlot(byId.get(parents[0]));
+      const parent = transformedDefinition(byId.get(parents[0]), byId);
+      const plot = isPlot(parent);
       if (plot) position(object, object.id);
-      else if (byId.get(parents[0]).type === 'hyperbola' && record(object.parameter)) {
+      else if (parent.type === 'hyperbola' && record(object.parameter)) {
         finite(object.parameter.value, `${object.id}.parameter.value`);
         if (![1, -1].includes(object.parameter.branch)) fail('error.documentValue', { path: `${object.id}.parameter.branch` });
       } else finite(object.parameter, `${object.id}.parameter`);
