@@ -466,6 +466,9 @@ body, math-field {
 
 .script-editor { margin-top: 6px; font: 11px/1.5 Arial, sans-serif; color: var(--text-secondary); min-width: 0; }
 .script-editor summary { cursor: pointer; color: var(--brand-700); padding: 2px 0; }
+.script-query-help { margin-top: 6px; }
+.script-query-help p { margin: 4px 0; }
+.script-query-help pre { max-height: 240px; overflow: auto; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--foreground); font: 11px/1.6 monospace; white-space: pre; }
 .script-toggle { display: flex; align-items: center; gap: 5px; margin: 5px 0; }
 .script-toggle input { accent-color: var(--brand-600); }
 .script-code { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }

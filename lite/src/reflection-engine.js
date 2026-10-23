@@ -3,8 +3,10 @@ import { resolveObjects } from './geometry.js';
 import { bindingPatch, formulaParameters, isJavaScript, jsonValue, needsReflection, pathParts, reflectionSource, variableRoot, variableValue } from './reflection.js';
 import { compileEquation } from './plot/formula.js';
 import { compileParametric } from './plot/parametric-formula.js';
+import { createQueryAPI } from './reflection-query.js';
 
 const metadata = new Set(['id', 'name', 'type', 'parents', 'source', 'enabled', 'bindings']);
+const computedField = (object, field) => isJavaScript(object) ? field === 'value' : !metadata.has(field);
 const keyOf = value => value === undefined ? 'undefined' : documentKey(value);
 
 // Runs inside a disposable worker. Read tracking records leaves, existence and
@@ -18,11 +20,24 @@ export class ReflectionEngine {
     const byName = new Map();
     for (const object of model.objects) if (!byName.has(object.name)) byName.set(object.name, object.id);
     const indices = new Map(model.objects.map((object, index) => [object.id, index]));
+    const queryIndices = { name: new Map(), type: new Map(), parents: new Map(), children: new Map() };
+    for (const object of model.objects) {
+      for (const [kind, key] of [['name', object.name], ['type', object.type]]) {
+        if (!queryIndices[kind].has(key)) queryIndices[kind].set(key, []);
+        queryIndices[kind].get(key).push(object.id);
+      }
+      queryIndices.parents.set(object.id, object.parents || []);
+      for (const parent of object.parents || []) {
+        if (!queryIndices.children.has(parent)) queryIndices.children.set(parent, []);
+        queryIndices.children.get(parent).push(object.id);
+      }
+    }
+    const allIds = [...byId.keys()];
     const variableIds = new Map(model.objects.filter(isJavaScript).map(object => [object.name.toLowerCase(), object.id]));
     const parameterIds = new Map(model.objects.filter(object => isJavaScript(object) || object.type === 'slider').map(object => [object.name.toLowerCase(), object.id]));
     const statuses = [], updates = [], states = new Map(), errors = new Map();
     const disabled = new Set(blocked);
-    let geometry = new Map(previous), geometryDirty = previous.length ? new Set() : null, reader = null;
+    let geometry = new Map(previous), geometryDirty = previous.length ? new Set() : null, reader = null, readerId = null;
     const spaces = new Map(), readyGeometry = new Set();
     const plots = model.objects.filter(object => ['equation', 'parametric'].includes(object.type) && !object.draft);
     let parameterNames = plots.length ? keyOf(Object.keys(formulaParameters(model.objects))) : '';
@@ -63,16 +78,28 @@ export class ReflectionEngine {
     const locate = (space, path) => {
       let value;
       if (space === 'lookup') return byId.has(path[0]) ? path[0] : byName.get(path[0]);
+      if (space === 'index') {
+        const [kind, key] = path;
+        if (kind === 'lookup') return byId.has(key) ? key : byName.get(key) ?? null;
+        if (kind === 'id') return byId.has(key) ? key : null;
+        if (kind === 'all') return allIds;
+        if (kind === 'position') return indices.get(key) ?? -1;
+        return queryIndices[kind].get(key) || [];
+      }
       if (space === 'json') value = model;
+      else if (space === 'definition') {
+        if (path.length >= 2 && computedField(byId.get(path[0]), path[1])) ensure(path[0]);
+        value = byId.get(path[0]);
+      }
       else if (space === 'vars') {
         if (!path.length) return Object.fromEntries([...variableIds].map(([name, id]) => [name, byId.get(id).value]));
         const id = variableIds.get(String(path[0]).toLowerCase());
         if (id) { ensure(id); value = byId.get(id).value; }
       } else value = currentGeometry(path[0]);
       const parts = space === 'json' ? path : path.slice(1);
-      if (space === 'json' && parts[0] === 'objects' && parts.length >= 3 && !metadata.has(parts[2])) {
+      if (space === 'json' && parts[0] === 'objects' && parts.length >= 3) {
         const object = model.objects[parts[1]];
-        if (object) ensure(object.id);
+        if (object && computedField(object, parts[2])) ensure(object.id);
       }
       for (const key of parts) value = value?.[key];
       return value;
@@ -169,6 +196,15 @@ export class ReflectionEngine {
       if (!valueAt(node)) throw new Error(`Object is undefined: ${name}`);
       return proxy(node);
     };
+    const query = createQueryAPI({
+      json, resolved: get,
+      definition: id => proxy(nodeAt('definition', [id])),
+      index: (kind, key = '') => {
+        const node = nodeAt('index', [kind, key]);
+        remember(node, 'value'); return valueAt(node);
+      },
+      searchable: path => !(path[0] === 'objects' && path[2] === 'value' && model.objects[path[1]]?.id === readerId),
+    });
     const validatePatch = (object, candidate) => {
       if (isJavaScript(object)) {
         // jsonValue already checked the only writable JS field. A changed set
@@ -213,7 +249,9 @@ export class ReflectionEngine {
       if (disabled.has(id)) { errors.set(id, 'Execution stopped: edit the script or retry'); states.set(id, 'done'); throw new Error(errors.get(id)); }
       states.set(id, 'visiting');
       const outerReader = reader;
+      const outerReaderId = readerId;
       reader = null;
+      readerId = id;
       progress(id);
       try {
         const source = reflectionSource(object);
@@ -231,13 +269,13 @@ export class ReflectionEngine {
             // An expression or a function body with return are both accepted.
             if (compiled?.source !== source) {
               let execute;
-              try { execute = new Function('json', 'get', 'vars', 'self', `"use strict"; return (${source}\n);`); }
-              catch { execute = new Function('json', 'get', 'vars', 'self', `"use strict";\n${source}\n`); }
+              try { execute = new Function('json', 'get', 'vars', 'self', 'query', `"use strict"; return (${source}\n);`); }
+              catch { execute = new Function('json', 'get', 'vars', 'self', 'query', `"use strict";\n${source}\n`); }
               compiled = { source, execute }; this.compiled.set(id, compiled);
             }
             const self = Object.freeze({ id: object.id, name: object.name });
             const execute = compiled.execute;
-            patch = { value: jsonValue(execute(json, get, vars, self)) };
+            patch = { value: jsonValue(execute(json, get, vars, self, query)) };
           } else patch = bindingPatch(object, reference => {
             const parts = pathParts(reference);
             if (!variableIds.has(parts[0].toLowerCase())) throw new Error(`Variable not found: ${parts[0]}`);
@@ -267,7 +305,7 @@ export class ReflectionEngine {
         states.set(id, 'done');
         this.cache.delete(id);
         throw error;
-      } finally { reader = outerReader; progress(null); }
+      } finally { reader = outerReader; readerId = outerReaderId; progress(null); }
     };
     for (const object of model.objects) if (needsReflection(object)) {
       try { ensure(object.id); } catch { /* Other independent bindings still run. */ }

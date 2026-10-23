@@ -592,6 +592,8 @@ export default {
   "theme.cyan": "Electric cyan · Dark",
   "theme.objectColor": "Use theme color",
   "script.retry": "Retry script",
+  "script.query": "Query API",
+  "script.queryNote": "Results are read-only. byId and related methods read JSON definitions; resolve reads computed objects. locate only returns a JSON index and path.",
   "tool.javascript": "JS region",
   "script.title": "JS region",
   "script.enabled": "Run this JS region",

@@ -197,15 +197,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "6062c9ab2428bd0502d3d9626ea80a06a5b3e669bbef837670ee5c067bbe5d29"
+      "sha256": "e415f872c24063ed76b5b0ec17c4a365d6771b1b4a8cf4b8cae249a165e05050"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "13ddbd8a28aac777a551fa96d8be61c1026078cd980f3cc9d0594c0db736925a"
+      "sha256": "99f87a8a033c74f0e5145adc8a0d828816db28baeea8812304c916d8cf3d73a9"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "957a770e67491afd752ae03d5a0381bf341e0751ca7a2c58a4caf7118d7ffb4c"
+      "sha256": "0386bdddbaa8a624b47f807b7d5d460fca0f950a86a12277f06d2db2b052d521"
     },
     {
       "path": "src/math-input.js",
@@ -337,15 +337,19 @@
     },
     {
       "path": "src/reflection-editor.js",
-      "sha256": "4a947a22603b4663ca3b1d4573d651ef974f8d29fd28c802e9dffdd2dc640f2f"
+      "sha256": "a9906608fc63f736440b8ad44b1f62ee8609cac5cd39044a41aafff67f5ed9e5"
     },
     {
       "path": "src/reflection-engine.js",
-      "sha256": "4ac4896dc6c09af6d5c1418cec5189e82a69c5cb316cba20607bfc1c4aee234e"
+      "sha256": "ea5a886ff293a9c21370eb0dcaf692be301c335acbfe0572be4070f9dca22d1f"
     },
     {
       "path": "src/reflection-manager.js",
       "sha256": "a3acc24bc35ee72b227313224845ca863535b3dee344cf143251518b332664b3"
+    },
+    {
+      "path": "src/reflection-query.js",
+      "sha256": "5bd1f1cf5a7bf0eaef8645b04398903add07d2b935e951263cdee4d2d769f057"
     },
     {
       "path": "src/reflection-worker.js",
@@ -437,7 +441,7 @@
     },
     {
       "path": "src/style.css",
-      "sha256": "fe1579a64f940cc2529ad022ea36c3c63a6606f29da564b9bb6deea5fa86bd36"
+      "sha256": "de58eba6cc54bfd69491be9d150026db9510775d7cd11e6d809a8e6ff1b70868"
     },
     {
       "path": "src/surface-brush-target.js",

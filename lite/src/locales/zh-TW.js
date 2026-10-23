@@ -592,6 +592,8 @@ export default {
   "theme.cyan": "電光青 · 暗色（黑夜模式）",
   "theme.objectColor": "使用主題預設顏色",
   "script.retry": "重新執行腳本",
+  "script.query": "查詢介面",
+  "script.queryNote": "查詢結果唯讀。byId 等讀取 JSON 定義，resolve 讀取計算後的物件；locate 只傳回 JSON 索引與路徑。",
   "tool.javascript": "JS 區域",
   "script.title": "JS 區域",
   "script.enabled": "啟用此 JS 區域",

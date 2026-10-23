@@ -21,6 +21,31 @@ export function createReflectionEditor(panel, actions) {
   const error = document.createElement('p'); error.className = 'formula-error'; error.setAttribute('role', 'status');
   const retry = document.createElement('button'); retry.type = 'button'; retry.dataset.i18n = 'script.retry';
   retry.addEventListener('click', () => actions.retry());
+  const help = document.createElement('details'); help.className = 'script-query-help';
+  const summary = document.createElement('summary'); summary.dataset.i18n = 'script.query'; help.append(summary);
+  help.addEventListener('toggle', () => {
+    if (!help.open || help.childElementCount > 1) return;
+    const note = document.createElement('p'); note.dataset.i18n = 'script.queryNote';
+    const sample = document.createElement('pre');
+    sample.textContent = `query.get("data.samples[0]", 0)
+query.get("/data/key~1with~1slashes")
+query.has("data.samples")
+query.byId("point-p")
+query.byName("A")
+query.byType("point")
+query.all().map(o => o.id)
+query.find({ type: "point", hidden: false })
+query.filter(o => o.type === "point" && o.x > 0)
+query.exists("A")
+query.locate("A")
+query.path("A")
+query.parents("segment-ab", true)
+query.children("A", true)
+query.resolve("A")
+query.search("radius", "data")
+query.search((value, path) => typeof value === "number" && value > 10, "data")`;
+    help.append(note, sample); localizeDOM(help);
+  });
   let timer = null, composing = false, dirty = false, displayedValue;
   let outputReady = false;
   const flush = () => {
@@ -50,7 +75,7 @@ export function createReflectionEditor(panel, actions) {
     });
   }
   for (const event of ['click', 'pointerdown', 'contextmenu']) area.addEventListener(event, event => event.stopPropagation());
-  area.append(heading, sourceHost, label, output, error, retry); panel.append(area);
+  area.append(heading, sourceHost, label, output, error, retry, help); panel.append(area);
   const sync = (object, result) => {
     if (!dirty) enabled.checked = object.enabled;
     if (!dirty && document.activeElement !== source && source.value !== object.source.replace(/\r\n?/g, '\n')) { source.value = object.source; highlight.update(); }
