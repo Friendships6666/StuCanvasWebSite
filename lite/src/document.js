@@ -424,7 +424,15 @@ export function parseDocument(text) {
         if (typeof input[sourceKey] !== 'string' || typeof input[latexKey] !== 'string') fail('error.documentValue', { path: `${path}.mathInput.${latexKey}` });
         if (object.draft || input[sourceKey] !== object[sourceKey]) continue;
         try {
-          if (equationToLatex(latexToSource(input[latexKey])) !== equationToLatex(object[sourceKey])) throw new Error('Inconsistent notation');
+          const corrected = latexToSource(input[latexKey]);
+          if (equationToLatex(corrected) !== equationToLatex(object[sourceKey])) {
+            // Repair only the exact source the old fraction parser generated
+            // from this bound notation. Explicit JSON source edits continue
+            // to discard stale notation rather than changing their meaning.
+            const legacy = latexToSource(input[latexKey], { legacyFractionArguments: true });
+            if (legacy !== object[sourceKey] || legacy === corrected) throw new Error('Inconsistent notation');
+            object[sourceKey] = input[sourceKey] = corrected;
+          }
         } catch { fail('error.documentValue', { path: `${path}.mathInput.${latexKey}` }); }
       }
     }

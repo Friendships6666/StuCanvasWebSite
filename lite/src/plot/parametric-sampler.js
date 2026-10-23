@@ -180,14 +180,19 @@ export class ParametricTask extends EquationTask {
   *traceAdaptive() {
     const { tMin, tMax } = this.curve;
     const count = this.options.initialSegments;
-    const stack = [];
-    for (let index = count - 1; index >= 0; index--) stack.push({ lower: mix(tMin, tMax, index / count), upper: mix(tMin, tMax, (index + 1) / count), weight: 1 / count });
+    const queue = [];
+    for (let index = 0; index < count; index++) queue.push({ lower: mix(tMin, tMax, index / count), upper: mix(tMin, tMax, (index + 1) / count), weight: 1 / count });
+    let head = 0;
     let completed = 0;
-    while (stack.length) {
+    while (head < queue.length) {
       // Undefined intermediate input and unresolved singularities must not
       // expand a binary tree until floating-point exhaustion.
       if (this.stats.boxes >= this.boxLimit) { this.stats.limited = true; break; }
-      const box = stack.pop();
+      // Visit all parameter intervals fairly. A singular endpoint must not
+      // consume the whole work budget before ordinary branches are sampled.
+      const box = queue[head];
+      queue[head++] = null;
+      if (head >= 8192 && head * 2 >= queue.length) { queue.splice(0, head); head = 0; }
       this.stats.boxes++;
       const range = this.curve.interval(box.lower, box.upper);
       const horizontal = hull(range.x);
@@ -219,7 +224,7 @@ export class ParametricTask extends EquationTask {
           if (terminal && !accepted) this.addWorldPoint(this.sample(box.lower).world);
           completed += box.weight;
         } else {
-          stack.push({ lower: middle, upper: box.upper, weight: box.weight / 2 }, { lower: box.lower, upper: middle, weight: box.weight / 2 });
+          queue.push({ lower: box.lower, upper: middle, weight: box.weight / 2 }, { lower: middle, upper: box.upper, weight: box.weight / 2 });
         }
       }
       this.progress = Math.max(this.progress, Math.min(.999, completed));

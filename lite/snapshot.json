@@ -133,7 +133,7 @@
     },
     {
       "path": "src/document.js",
-      "sha256": "68681bd18edb571283ac5faa4575d2967721beaf6295dda41a54ade670222516"
+      "sha256": "4092eb7b9915bbdbfdc224f94c8fa72de520626af96ad4dc8573e0fe3554f09f"
     },
     {
       "path": "src/equation-intersections.js",
@@ -213,7 +213,7 @@
     },
     {
       "path": "src/math-source.js",
-      "sha256": "996db0b1a1a1f70093cb47933438f354a506224935af395329421877bc898761"
+      "sha256": "f2862fd173e77a624bd4313eb453ccd16b69497cda97dfb780d0cd88ad6ba98f"
     },
     {
       "path": "src/measurements.js",
@@ -305,7 +305,7 @@
     },
     {
       "path": "src/plot/parametric-sampler.js",
-      "sha256": "e1e89c473f6b10a87c2efc1fc80da2cf1c1eab8e3a64b32681ac494b189850c8"
+      "sha256": "2adaf834d1776481fc8f2556740581ab3a08fbddac4166bf16af3402dc79f6e9"
     },
     {
       "path": "src/plot/sampler.js",

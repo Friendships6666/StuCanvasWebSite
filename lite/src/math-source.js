@@ -4,7 +4,9 @@ const functions = new Set(['sin', 'cos', 'tan', 'arcsin', 'arccos', 'arctan', 'a
 const inverseNames = { sin: 'asin', cos: 'acos', tan: 'atan' };
 const nameCommands = new Set(['operatorname', 'mathrm', 'mathit']);
 
-export function latexToSource(input) {
+// The legacy option is only used to recognize formulas saved by the old
+// fraction parser when importing a document.
+export function latexToSource(input, { legacyFractionArguments = false } = {}) {
   if (!input.trim()) throw new LocalizedError('error.enterEquation');
   if (input.length > 8192) throw new LocalizedError('error.tooLong');
   const source = input.replace(/\\(?:left|right|mleft|mright|displaystyle|textstyle)\b/g, '').replace(/\\(?:,|;|!| |quad\b|qquad\b)/g, ' ').replaceAll('−', '-');
@@ -52,10 +54,14 @@ export function latexToSource(input) {
     }
     throw new LocalizedError('error.unclosed');
   };
-  const argument = () => {
+  const argument = (singleToken = false) => {
     skip();
     if (source[cursor] === '{') return group('{', '}');
     if (source[cursor] === '(') return group('(', ')');
+    // Unbraced TeX macro arguments consume one token: \frac13t means
+    // (1 / 3) * t, and \frac xy means x / y. Ordinary expression atoms still
+    // read complete numbers and identifiers.
+    if (singleToken && /[a-zA-Z0-9.]/.test(source[cursor] || '')) return source[cursor++];
     return atom();
   };
   const functionCall = name => {
@@ -98,8 +104,8 @@ export function latexToSource(input) {
         return `${command === 'lfloor' ? 'floor' : 'ceil'}(${value})`;
       }
       if (command === 'frac' || command === 'dfrac' || command === 'tfrac') {
-        const numerator = argument();
-        return `((${numerator})/(${argument()}))`;
+        const numerator = argument(!legacyFractionArguments);
+        return `((${numerator})/(${argument(!legacyFractionArguments)}))`;
       }
       if (command === 'sqrt') {
         skip();
