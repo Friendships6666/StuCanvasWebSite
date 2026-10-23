@@ -58,7 +58,7 @@ export class PlotManager {
       const previous = old?.source === source ? this.display(old) : null;
       const Task = object.type === 'parametric' ? ParametricTask : EquationTask;
       const task = new Task(compiled, view, width + padding * 2, height + padding * 2, configurations[index]);
-      const background = compiled.parameterNames.length > 0;
+      const background = object.type === 'parametric' || compiled.parameterNames.length > 0;
       const compatibility = JSON.stringify([source, configurationKey, task.view, task.width, task.height]);
       entries.set(object.id, {
         source, compiled, parameterNamesKey, dependencyKey, configurationKey, background, compatibility,

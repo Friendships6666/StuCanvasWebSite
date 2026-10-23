@@ -289,7 +289,7 @@
     },
     {
       "path": "src/plot/manager.js",
-      "sha256": "b4f4443168639396342a386c683e1e5c5f2c3648d46ea78eca94c063f1840b43"
+      "sha256": "c52402d750371b05fcf9b80ee285f9ed66a3f66628e22aab18af25d7bfd67be4"
     },
     {
       "path": "src/plot/options.js",
@@ -305,7 +305,7 @@
     },
     {
       "path": "src/plot/parametric-sampler.js",
-      "sha256": "1ac3ba1a97700f71d1c5578edd1d786573a46326a1b53d11f9659021cd60d359"
+      "sha256": "e1e89c473f6b10a87c2efc1fc80da2cf1c1eab8e3a64b32681ac494b189850c8"
     },
     {
       "path": "src/plot/sampler.js",

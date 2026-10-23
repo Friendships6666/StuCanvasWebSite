@@ -17,6 +17,7 @@ export class ParametricTask extends EquationTask {
     this.stats.leaves = 0;
     this.stats.unboundedLeaves = 0;
     this.lattice = new Map();
+    this.boxLimit = Math.min(1048576, Math.max(65536, Math.ceil((width + height) * 64)));
     this.iterator = this.trace();
   }
 
@@ -119,8 +120,16 @@ export class ParametricTask extends EquationTask {
     const intersects = (range, lower, upper) => !range.poisoned && range.parts.some(bounds => !(bounds[0] > upper || bounds[1] < lower));
     const stack = [[this.curve.tMin, this.curve.tMax, 0]];
     const leaves = [];
+    const spacing = this.options.pointSpacing / this.view.scale;
+    // Once both coordinates stay in one lattice cell, every deeper leaf would
+    // emit the same point. Retain the grid result without visiting duplicates.
+    const sameCell = (range, lower, upper) => range.continuous && range.parts.length === 1
+      && range.parts[0].every(Number.isFinite)
+      && range.parts[0][0] >= lower && range.parts[0][1] <= upper
+      && Math.floor(range.parts[0][0] / spacing) === Math.floor(range.parts[0][1] / spacing);
     let completed = 0;
     while (stack.length) {
+      if (this.stats.boxes >= this.boxLimit) { this.stats.limited = true; return; }
       const [lower, upper, depth] = stack.pop();
       const range = this.curve.intervalBoxes(lower, upper);
       this.stats.boxes++;
@@ -128,8 +137,9 @@ export class ParametricTask extends EquationTask {
         this.stats.pruned++;
         if (range.x.poisoned || range.y.poisoned) this.stats.poisoned++;
         completed += 2 ** -depth;
-      } else if (depth < this.options.maxRecursionDepth) {
-        const middle = (lower + upper) * .5;
+      } else if (depth < this.options.maxRecursionDepth && mix(lower, upper, .5) !== lower && mix(lower, upper, .5) !== upper
+        && !(sameCell(range.x, viewport[0], viewport[1]) && sameCell(range.y, viewport[2], viewport[3]))) {
+        const middle = mix(lower, upper, .5);
         stack.push([lower, middle, depth + 1], [middle, upper, depth + 1]);
       } else {
         leaves.push(lower, upper);
@@ -139,7 +149,6 @@ export class ParametricTask extends EquationTask {
       this.progress = Math.min(.5, completed * .5);
       yield;
     }
-    const spacing = this.options.pointSpacing / this.view.scale;
     for (let index = 0; index < leaves.length; index += 2) {
       const range = this.curve.intervalBoxes(leaves[index], leaves[index + 1]);
       if (isUnbounded(range.x) || isUnbounded(range.y)) this.stats.unboundedLeaves++;
@@ -175,6 +184,9 @@ export class ParametricTask extends EquationTask {
     for (let index = count - 1; index >= 0; index--) stack.push({ lower: mix(tMin, tMax, index / count), upper: mix(tMin, tMax, (index + 1) / count), weight: 1 / count });
     let completed = 0;
     while (stack.length) {
+      // Undefined intermediate input and unresolved singularities must not
+      // expand a binary tree until floating-point exhaustion.
+      if (this.stats.boxes >= this.boxLimit) { this.stats.limited = true; break; }
       const box = stack.pop();
       this.stats.boxes++;
       const range = this.curve.interval(box.lower, box.upper);
