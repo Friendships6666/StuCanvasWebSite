@@ -82,7 +82,7 @@ export function createTouchInteraction(canvas, actions) {
     if (suppress) return;
     const mode = actions.mode(), screen = actions.position(event);
     current = { event, mode, screen, moved: false, started: false, candidates: actions.candidates(screen) };
-    if (mode === 'construct') update(event);
+    if (mode === 'construct') current.preview = update(event);
     else if (mode === 'direct') { actions.start(event); current.started = true; }
     else if (mode === 'select') timer = setTimeout(() => {
       timer = null;
@@ -101,7 +101,7 @@ export function createTouchInteraction(canvas, actions) {
     if (!current || suppress || current.event.pointerId !== event.pointerId) return;
     const screen = actions.position(event);
     if (Math.hypot(screen.x - current.screen.x, screen.y - current.screen.y) > 8) { current.moved = true; clearTimer(); }
-    if (current.mode === 'construct') { update(event); return; }
+    if (current.mode === 'construct') { current.preview = update(event); return; }
     if (current.mode === 'select' && current.moved && !current.started) {
       const selected = current.candidates.find(object => object.id === actions.selected());
       if (current.candidates.length > 1 && !selected) return;
@@ -125,12 +125,12 @@ export function createTouchInteraction(canvas, actions) {
     if (saved.started) { if (cancelled) actions.cancel(event); else { actions.move(event); actions.finish(event); } hideAim(); return; }
     if (cancelled) { hideAim(); return; }
     if (saved.mode === 'construct') {
-      const preview = update(event), position = preview.position;
+      const preview = saved.preview || update(event);
       hideAim();
       // Commit the same position and candidates that produced the visible aim.
       // Repeating the hit test at the unsnapped aim position loses curves.
       const candidates = preview.candidates;
-      const complete = target => actions.construct(position, target);
+      const complete = target => actions.construct(preview.positionFor(target), target);
       if (candidates.length > 1) choose(candidates, complete, actions.allowCoordinate(), actions.allowAutomatic());
       else complete(candidates[0]);
     } else if (saved.mode === 'select') {
@@ -138,10 +138,21 @@ export function createTouchInteraction(canvas, actions) {
       if (saved.candidates.length > 1) choose(saved.candidates, complete); else complete(saved.candidates[0] || null);
     }
   }
+  function cancelGesture() {
+    clearTimer();
+    if (!current && !pinch && !contacts.size && aim.hidden && chooser.hidden) return;
+    const saved = current, ids = [...contacts.keys()];
+    current = null; contacts.clear();
+    if (saved?.started) actions.cancel(saved.event);
+    if (pinch) actions.endPinch();
+    pinch = suppress = false;
+    suppressClick = true;
+    hideAim(); close();
+    for (const id of ids) if (canvas.hasPointerCapture(id)) canvas.releasePointerCapture(id);
+  }
   listen(window, 'blur', () => {
-    clearTimer(); if (current?.started) actions.cancel(current.event);
-    current = null; contacts.clear(); if (pinch) actions.endPinch(); pinch = suppress = false; hideAim(); close();
+    cancelGesture();
   });
   const unlocalize = onLocaleChange(() => { close(); localizeDOM(aim); });
-  return { down, move, end, close, destroy() { clearTimer();close();lifecycle.abort();unlocalize();aim.remove();chooser.remove(); }, get active() { return contacts.size > 0; } };
+  return { down, move, end, close, cancel: cancelGesture, destroy() { cancelGesture();lifecycle.abort();unlocalize();aim.remove();chooser.remove(); }, get active() { return contacts.size > 0; } };
 }

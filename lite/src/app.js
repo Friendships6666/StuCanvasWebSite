@@ -45,6 +45,7 @@ import { createSnapSettings } from './snap-settings.js';
 import { createTouchSettings } from './touch-settings.js';
 import { createMobileUI } from './mobile-ui.js';
 import { createTouchInteraction } from './touch-interaction.js';
+import { touchConstructionPolicy } from './touch-construction.js';
 import { createCadEditor } from './cad-editor.js';
 import { PhysicsWorld, PHYSICS_STEP, isPhysicsBody, isPhysicsObject, instantiateRegion, bodyContains, bodyState } from './physics.js';
 import { syncPhysicsBoundaries, physicsBoundaryFrame } from './physics-boundaries.js';
@@ -444,7 +445,7 @@ async function instantiatePhysicsBody(id, mode = false) {
   rememberRegionConstruction(object, source, objects, region, soft ? 'soft' : liquid ? 'liquid' : 'rigid', { view, width, height });
   objects.push(object); selected = object.id; selection.clear();
   setHint(''); setTool('select'); commit(before, new Set([object.id]));
-  element('objects').querySelector(`[data-id="${object.id}"]`)?.scrollIntoView({ block: 'nearest' });
+  revealSelectedObject();
 }
 
 // Subdivide actual geometry to 1/8 of a device pixel, with a bounded DPR.
@@ -749,7 +750,9 @@ function cancelPending() {
 }
 
 function setTool(tool) {
-  touchInteraction?.close();
+  const viewport = activeViewport;
+  for (const viewport of viewports) viewport.touchInteraction?.cancel();
+  activateViewport(viewport);
   if (mobileUI?.mobile) mobileUI.show(false);
   pausePhysics();
   const cadSelection = cadTools.has(tool) ? [...new Set([...selection, selected, ...(pending?.cad && tool !== activeTool ? pending.ids : [])])].map(id => resolved.get(id)).filter(object => (tool === 'arcConnection' ? isArcSource(object) : isLinear(object)) && !object.hidden) : [];
@@ -1236,19 +1239,25 @@ function derivedCandidates(point, reference) {
   return derivedLines(activeTool, point, reference, reference?.type === 'equation' ? plots.equation(reference.id) : null);
 }
 
-function constructDerivedLine(position) {
+function constructDerivedLine(position, touch = false) {
   const before = pending?.before || snapshot();
+  let immediate = false;
   if (!pending) {
     const target = hitTest(position, object => isPoint(object) || derivedReference(object));
+    // A touch release on a curve supplies both the reference and its contact
+    // point. Keep explicit point-first and mouse constructions in two steps.
+    immediate = touch && activeTool === 'tangent' && isTangentCurve(target);
     if (target && !isPoint(target)) pending = { referenceId: target.id, before };
     else {
       const point = target || pickSmartPoint(position);
       if (target) triggerRipple(point);
       pending = { pointId: point.id, before };
     }
-    setHint(pending.referenceId ? 'hint.throughPoint' : activeTool === 'tangent' ? 'hint.tangentCurve' : 'hint.referenceLine');
-    refresh();
-    return;
+    if (!immediate) {
+      setHint(pending.referenceId ? 'hint.throughPoint' : activeTool === 'tangent' ? 'hint.tangentCurve' : 'hint.referenceLine');
+      refresh();
+      return;
+    }
   }
   const attempt = snapshot();
   const reference = pending.referenceId ? resolved.get(pending.referenceId) : hitTest(position, derivedReference);
@@ -1257,6 +1266,7 @@ function constructDerivedLine(position) {
   const lines = derivedCandidates(point, reference);
   if (!lines.some(Boolean)) {
     restoreSnapshot(attempt);
+    if (immediate) pending = null;
     setHint(activeTool === 'tangent' ? reference.type === 'equation' ? 'hint.regularPoint' : 'hint.noTangent' : 'hint.unavailableLine');
     refresh();
     return;
@@ -1366,7 +1376,7 @@ function constructCadCorner(position, targetObject = null) {
   triggerRipple(target.vertex);
   setHint('');
   commit(before, new Set([object.id]));
-  element('objects').querySelector(`[data-id="${object.id}"]`)?.scrollIntoView({ block: 'nearest' });
+  revealSelectedObject();
 }
 
 function cadPreview(position) {
@@ -3117,22 +3127,13 @@ function withTouchHit(target, action) {
 }
 
 function touchCandidates(screen) {
-  return hitCandidates(screenToWorld(screen), object => {
-    if (activeTool === 'commonTangent') return isCommonTangentCurve(object) && object.id !== pending?.sourceId;
-    if (activeTool === 'point') return isPoint(object);
-    if (activeTool === 'snapPoint') return object.type === 'snapPoint' || !isPoint(object) && (shapeTypes.has(object.type) || isPlot(object));
-    if (transformTypes.has(activeTool)) return pending?.transform ? activeTool === 'axialSymmetry' ? isLinear(object) : isPoint(object) : canTransform(object);
-    if (toolParents.get(activeTool)?.id === 'circles' && !pending) return isPoint(object);
-    if (['fillSingle','fillMultiple'].includes(activeTool)) return false;
-    if (activeTool === 'intersection') return !isPoint(object) && (isPlot(object) || shapeTypes.has(object.type)) && object.id !== pending?.id;
-    if (activeTool === 'arcConnection') return isArcSource(object) && !pending?.ids?.includes(object.id);
-    if (['fillet', 'chamfer'].includes(activeTool)) return isLinear(object) && !pending?.ids?.includes(object.id);
-    if (['midpoint', 'ratioPoint', 'perpendicularBisector'].includes(activeTool)) return isPoint(object) || object.type === 'segment';
-    if (['rope', 'spring'].includes(activeTool)) return isPoint(object) || isPhysicsBody(object) || isSoftBody(object);
-    if (activeTool === 'physicsDrag') return isPhysicsObject(object);
-    if (activeTool !== 'select' && activeTool !== 'pan') return isPoint(object) || shapeTypes.has(object.type) || isPlot(object);
-    return true;
-  }, 2);
+  return hitCandidates(screenToWorld(screen), touchConstructionPolicy(activeTool, pending).accepts, 2);
+}
+
+function touchProjection(position, target) {
+  return isPoint(target) ? { x: target.x, y: target.y }
+    : isPlot(target) ? nearestPlotPoint(position, target)
+    : target && projectPointOnObject(position, target);
 }
 
 function makeTouchInteraction(context) {
@@ -3142,8 +3143,8 @@ function makeTouchInteraction(context) {
   selected: () => selected,
   mode: () => activeTool === 'select' ? 'select' : activeTool === 'pan' || activeTool === 'physicsDrag' || surfaceBrushes[activeTool] ? 'direct' : 'construct',
   candidates: touchCandidates,
-  allowCoordinate: () => pending?.transform ? activeTool !== 'axialSymmetry' : ['point','smartPoint','line','segment','ray','circle','circleRadius','circle3','arc','circumArc','semicircle','sector','circumSector','ellipse','hyperbola'].includes(activeTool),
-  allowAutomatic: () => ['smartPoint','line','segment','ray'].includes(activeTool) || conicTypes.has(activeTool),
+  allowCoordinate: () => touchConstructionPolicy(activeTool, pending).coordinates,
+  allowAutomatic: () => touchConstructionPolicy(activeTool, pending).automatic,
   color: objectColor,
   describe: object => `${object.name || object.id} · ${t(labels[object.type] || (object.type === 'region' ? 'object.region' : object.type === 'equation' ? 'ui.equation' : object.type === 'softBody' ? 'soft.object' : object.type === 'liquid' ? 'liquid.object' : 'mobile.object'))}`,
   hover(id) { hovered = id; draw(); },
@@ -3151,31 +3152,47 @@ function makeTouchInteraction(context) {
     touchPreview = true;
     const target = touchAim(screen, width, height, touchSettings.offset());
     const position = screenToWorld(target);
+    const policy = touchConstructionPolicy(activeTool, pending);
+    const coordinate = snapped(position);
     let candidates = touchCandidates(target);
     let candidate = candidates[0];
-    let shown = isPoint(candidate) ? candidate : snapped(position);
-    const attaches = ['snapPoint','smartPoint','line','segment','ray'].includes(activeTool) || conicTypes.has(activeTool) || pending && toolParents.get(activeTool)?.id === 'circles';
-    if (!isPoint(candidate)) {
-      const nearest = candidate || (attaches ? nearestObjects(position, activeTool === 'snapPoint' ? Infinity : 24)[0]?.object : null);
-      const projected = isPlot(nearest) ? nearestPlotPoint(position, nearest) : nearest && projectPointOnObject(position, nearest);
-      if (projected) shown = projected;
+    let shown = touchProjection(position, candidate) || coordinate;
+    if (!candidate && policy.attaches) {
+      const nearest = nearestObjects(position, activeTool === 'snapPoint' ? Infinity : 24).find(hit => policy.accepts(hit.object))?.object;
+      if (nearest) { candidate = nearest; candidates = [nearest]; shown = touchProjection(position, nearest) || coordinate; }
     }
-    if (!candidates.length) {
+    if (!candidate) {
       candidates = touchCandidates(toScreen(shown, view, width, height));
       candidate = candidates[0];
-      if (isPoint(candidate)) shown = candidate;
+      shown = touchProjection(position, candidate) || shown;
     }
     const committed = { x: shown.x, y: shown.y };
+    // A chooser can select a different overlapping curve or request a free
+    // coordinate. Capture each target's own projection before the gesture ends.
+    const positions = new Map(candidates.map(object => {
+      const projected = touchProjection(position, object) || position;
+      return [object.id, { x: projected.x, y: projected.y }];
+    }));
     pointer = committed;
     hovered = candidate?.id || null;
     draw();
-    return { screen: toScreen(committed, view, width, height), position: committed, candidates, label: `${number(shown.x)}, ${number(shown.y)}` };
+    return {
+      screen: toScreen(committed, view, width, height), position: committed, candidates,
+      positionFor: object => object === null ? { x: coordinate.x, y: coordinate.y }
+        : object ? positions.get(object.id) || committed : policy.automatic ? { x: position.x, y: position.y } : committed,
+      label: `${number(shown.x)}, ${number(shown.y)}`,
+    };
   },
   clearPreview() { touchPreview = false; pointer = null; hovered = null; draw(); },
   construct(position, target) {
     if (gesture) return;
+    if (target) {
+      target = resolved.get(target.id);
+      if (!target || target.hidden || !rendersInWindow(target, activeViewport.id) || !touchConstructionPolicy(activeTool, pending).accepts(target)) return;
+    }
     withTouchHit(target, () => {
       if (['rope','spring'].includes(activeTool)) constructRope(position, false);
+      else if (activeTool === 'tangent') constructDerivedLine(position, true);
       else construct(position);
     });
   },
@@ -3264,12 +3281,12 @@ element('coordinate-new').addEventListener('click',()=>coordinateWindows.add());
 
 element('touch-properties').addEventListener('click', () => {
   mobileUI.show(true); documentEditor.showObjects();
-  element('objects').querySelector(`[data-id="${CSS.escape(selected || '')}"]`)?.scrollIntoView({ block: 'nearest' });
+  revealSelectedObject();
 });
 element('touch-object-menu').addEventListener('click', () => {
   if (selected) objectMenu.openQuick(selected, element('touch-object-menu'));
 });
-element('touch-cancel').addEventListener('click', () => { touchInteraction.close(); cancelPending(); pointer = null; setHint(''); refresh(); });
+element('touch-cancel').addEventListener('click', () => { touchInteraction.cancel(); cancelPending(); pointer = null; setHint(''); refresh(); });
 
 function resize() { resizeViewport(mainViewport); }
 new ResizeObserver(resize).observe(element('canvas-wrap'));
