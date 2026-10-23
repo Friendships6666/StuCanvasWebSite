@@ -85,7 +85,7 @@
     },
     {
       "path": "src/app.js",
-      "sha256": "c860a62249072d2905dd545ca87770a5b749e60f3d59ae6a3ed836b5a0081613"
+      "sha256": "454be9ed6f55a2fe598f1d0f317b3df8492b8d819baef5a6097de2dffea01b46"
     },
     {
       "path": "src/arc-connection.js",
@@ -309,7 +309,7 @@
     },
     {
       "path": "src/plot/sampler.js",
-      "sha256": "152bdede4e5e707fa0dc155912804291a41d0965d85416819575d51b8beec253"
+      "sha256": "c348be995ecd4c642487d30cd0938ec7c3ac682e7b6d67667dddc6a01a8e237d"
     },
     {
       "path": "src/plot/sampling-queue.js",
@@ -485,7 +485,7 @@
     },
     {
       "path": "src/touch-interaction.js",
-      "sha256": "bf150b46e2c67c533cdd6c0094c5d9ecf12c65e0b0a26c298696addbd32cf9ef"
+      "sha256": "c9f4b68b42d5c0ce2b522df8ba543eb90f320b911dda29e41a397b91eac68fe6"
     },
     {
       "path": "src/touch-settings.js",

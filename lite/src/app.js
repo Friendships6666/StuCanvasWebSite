@@ -994,7 +994,7 @@ function movePoint(point, position) {
 function hitCandidates(position, filter = () => true, radius = hitRadius) {
   return trimCadSources([...resolved.values()].filter(object=>rendersInWindow(object,activeViewport.id) && !(canvasVisibility.hidePoints && isPoint(object)))).filter(object => !object.hidden && !object.invalid && (isMeasurement(object) || isPoint(object) || shapeTypes.has(object.type) || isPlot(object) || object.type === 'region' || isPhysicsObject(object)) && filter(object))
     .map(object => ({ object, distance: isPlot(object)
-      ? plots.get(object.id)?.distance(toScreen(position, view, width, height), view, width, height) ?? Infinity
+      ? plots.get(object.id)?.distance(toScreen(position, view, width, height), view, width, height, 9 * radius) ?? Infinity
       : isMeasurement(object) ? measurementDistance(measurementLayout(object, view, width, height), toScreen(position, view, width, height))
       : isLiquid(object) ? liquidDistance(object, position) * view.scale
       : isSoftBody(object) ? softDistance(object,position)*view.scale
@@ -3120,6 +3120,7 @@ function touchCandidates(screen) {
   return hitCandidates(screenToWorld(screen), object => {
     if (activeTool === 'commonTangent') return isCommonTangentCurve(object) && object.id !== pending?.sourceId;
     if (activeTool === 'point') return isPoint(object);
+    if (activeTool === 'snapPoint') return object.type === 'snapPoint' || !isPoint(object) && (shapeTypes.has(object.type) || isPlot(object));
     if (transformTypes.has(activeTool)) return pending?.transform ? activeTool === 'axialSymmetry' ? isLinear(object) : isPoint(object) : canTransform(object);
     if (toolParents.get(activeTool)?.id === 'circles' && !pending) return isPoint(object);
     if (['fillSingle','fillMultiple'].includes(activeTool)) return false;
@@ -3150,18 +3151,25 @@ function makeTouchInteraction(context) {
     touchPreview = true;
     const target = touchAim(screen, width, height, touchSettings.offset());
     const position = screenToWorld(target);
-    pointer = position;
-    const candidate = touchCandidates(target)[0];
+    let candidates = touchCandidates(target);
+    let candidate = candidates[0];
     let shown = isPoint(candidate) ? candidate : snapped(position);
     const attaches = ['snapPoint','smartPoint','line','segment','ray'].includes(activeTool) || conicTypes.has(activeTool) || pending && toolParents.get(activeTool)?.id === 'circles';
-    if (!isPoint(candidate) && attaches) {
-      const nearest = candidate || nearestObjects(position, activeTool === 'snapPoint' ? Infinity : 24)[0]?.object;
+    if (!isPoint(candidate)) {
+      const nearest = candidate || (attaches ? nearestObjects(position, activeTool === 'snapPoint' ? Infinity : 24)[0]?.object : null);
       const projected = isPlot(nearest) ? nearestPlotPoint(position, nearest) : nearest && projectPointOnObject(position, nearest);
       if (projected) shown = projected;
     }
+    if (!candidates.length) {
+      candidates = touchCandidates(toScreen(shown, view, width, height));
+      candidate = candidates[0];
+      if (isPoint(candidate)) shown = candidate;
+    }
+    const committed = { x: shown.x, y: shown.y };
+    pointer = committed;
     hovered = candidate?.id || null;
     draw();
-    return { screen: toScreen(shown, view, width, height), position, label: `${number(shown.x)}, ${number(shown.y)}` };
+    return { screen: toScreen(committed, view, width, height), position: committed, candidates, label: `${number(shown.x)}, ${number(shown.y)}` };
   },
   clearPreview() { touchPreview = false; pointer = null; hovered = null; draw(); },
   construct(position, target) {

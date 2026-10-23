@@ -261,12 +261,12 @@ export class EquationTask {
 
   step() { this.work = (this.work || 0) + 1; return this.iterator.next(); }
 
-  distance(screen, view, width, height) {
+  distance(screen, view, width, height, hitRadius = 10) {
     const worldX = view.x + (screen.x - width / 2) / view.scale;
     const worldY = view.y - (screen.y - height / 2) / view.scale;
     const originalX = this.width / 2 + (worldX - this.view.x) * this.view.scale;
     const originalY = this.height / 2 - (worldY - this.view.y) * this.view.scale;
-    const radius = 10 * this.view.scale / view.scale;
+    const radius = hitRadius * this.view.scale / view.scale;
     let minimum = Infinity;
     const check = index => { minimum = Math.min(minimum, Math.hypot((this.points[index] - worldX) * view.scale, (this.points[index + 1] - worldY) * view.scale)); };
     if (radius > 64) for (let index = 0; index < this.points.length; index += 2) check(index);

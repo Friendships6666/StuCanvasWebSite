@@ -66,7 +66,7 @@ export function createTouchInteraction(canvas, actions) {
     coordinates.style.left = caption.style.left = `${offset}px`;
     coordinates.style.top = preview.screen.y < 64 ? '24px' : '';
     caption.style.top = preview.screen.y < 64 ? '58px' : '';
-    return preview.position;
+    return preview;
   }
   function down(event) {
     event.preventDefault();
@@ -125,9 +125,11 @@ export function createTouchInteraction(canvas, actions) {
     if (saved.started) { if (cancelled) actions.cancel(event); else { actions.move(event); actions.finish(event); } hideAim(); return; }
     if (cancelled) { hideAim(); return; }
     if (saved.mode === 'construct') {
-      const position = update(event), screen = actions.screen(position);
+      const preview = update(event), position = preview.position;
       hideAim();
-      const candidates = actions.candidates(screen);
+      // Commit the same position and candidates that produced the visible aim.
+      // Repeating the hit test at the unsnapped aim position loses curves.
+      const candidates = preview.candidates;
       const complete = target => actions.construct(position, target);
       if (candidates.length > 1) choose(candidates, complete, actions.allowCoordinate(), actions.allowAutomatic());
       else complete(candidates[0]);
