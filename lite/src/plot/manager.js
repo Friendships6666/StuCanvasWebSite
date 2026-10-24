@@ -27,7 +27,9 @@ export class PlotManager {
   }
 
   sync(objects, view, width, height) {
-    const equations = objects.filter(object => isPlot(object) && !object.hidden && !object.invalid);
+    // Visibility belongs to rendering/hit testing. Hidden plots still supply
+    // samples and compiled equations to snap points, intersections and regions.
+    const equations = objects.filter(object => isPlot(object) && !object.invalid);
     const parameters = formulaParameters(objects);
     const parameterKey = JSON.stringify(parameters);
     const parameterNamesKey = JSON.stringify(Object.keys(parameters).sort());

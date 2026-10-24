@@ -331,13 +331,14 @@ export class RegionManager {
 
   sync(objects, view, width, height, plots) {
     const byId = new Map(objects.map(object => [object.id, object]));
-    const measuredRegions = new Set(objects.filter(object => object.type === 'areaMeasure' && !object.hidden).map(object => object.parents[0]));
     const ids = new Set();
     for (const object of objects) {
-      if (object.type !== 'region' || object.hidden && !measuredRegions.has(object.id)) continue;
+      if (object.type !== 'region') continue;
       ids.add(object.id);
-      const parents = object.parents.map(id => byId.get(id)).map(parent => measuredRegions.has(object.id) && parent?.hidden ? { ...parent, hidden: false } : parent);
-      if (!parents.length || parents.some(parent => !parent || parent.hidden)) { this.entries.delete(object.id); continue; }
+      // Existing regions keep their defining boundaries when those boundaries
+      // are hidden. isBoundary still filters visibility when picking NEW ones.
+      const parents = object.parents.map(id => byId.get(id)).map(parent => parent?.hidden ? { ...parent, hidden: false } : parent);
+      if (!parents.length || parents.some(parent => !parent)) { this.entries.delete(object.id); continue; }
       if (!parents.every(isBoundary)) {
         const entry = this.entries.get(object.id);
         if (entry) { entry.result = null; entry.iterator = null; entry.desired = null; entry.attempted = null; }

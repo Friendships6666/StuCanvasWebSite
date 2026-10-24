@@ -289,7 +289,7 @@
     },
     {
       "path": "src/plot/manager.js",
-      "sha256": "c52402d750371b05fcf9b80ee285f9ed66a3f66628e22aab18af25d7bfd67be4"
+      "sha256": "2f097907fbe511ca8b67cf70f47a99f299470c0e509f9ba230fe32d29a86240b"
     },
     {
       "path": "src/plot/options.js",
@@ -389,7 +389,7 @@
     },
     {
       "path": "src/regions.js",
-      "sha256": "0ab63b5261f15261b5f8459e68dfe9615afd436a9e3630fb7592311815f57063"
+      "sha256": "8c2ca3665a65accefca16f2c84b0e91282d973a9b589e3836409d3ab732592ad"
     },
     {
       "path": "src/render-targets.js",
