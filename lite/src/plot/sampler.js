@@ -1,4 +1,4 @@
-import { containsZero, isUnbounded, nextDown, nextUp } from './interval.js';
+import { bounded, containsZero, isUnbounded, nextDown, nextUp } from './interval.js';
 import { refineLShade } from './lshade.js';
 import { normalizeOptions } from './options.js';
 
@@ -45,7 +45,34 @@ export class EquationTask {
     if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) return false;
     const epsilon = this.options.verificationRadius / this.view.scale;
     this.stats.verifications++;
-    const range = this.equation.interval(nextDown(worldX - epsilon), nextUp(worldX + epsilon), nextDown(worldY - epsilon), nextUp(worldY + epsilon));
+    // Natural interval evaluation loses correlations between repeated inputs.
+    // Intersect it with a centered slope enclosure, without a residual cutoff
+    // or a formula-specific rewrite. Unsupported/singular slope operations
+    // conservatively keep their original enclosure.
+    const box=radius=>[nextDown(worldX-radius),nextUp(worldX+radius),nextDown(worldY-radius),nextUp(worldY+radius)];
+    const terminal=box(0);
+    let radius=epsilon,bounds=box(radius),domain=this.equation.interval(...bounds);
+    if(!containsZero(domain)||isUnbounded(domain))return false;
+    // A finite candidate can lie next to a domain boundary. Find a continuous
+    // outer box, then verify on its inner half. The surrounding domain margin
+    // prevents an almost-singular box edge from dominating slope estimates.
+    // This same numerical rule applies to every equation and orientation.
+    while(!domain.continuous||!bounded(domain)){
+      radius/=2;
+      const smaller=box(radius);
+      if(smaller.every((value,index)=>value===terminal[index])){
+        // A rounded neighborhood can still touch an undefined point. Check
+        // the center with outward-rounded arithmetic, including fmod's
+        // quotient boundary, rather than a scalar residual threshold.
+        const remaining=this.equation.centeredInterval(...smaller,worldX,worldY);
+        const center=this.equation.pointInterval(worldX,worldY);
+        return containsZero(remaining)&&!isUnbounded(remaining)&&containsZero(center)&&!isUnbounded(center);
+      }
+      bounds=smaller;
+      domain=this.equation.interval(...bounds);
+      if(!containsZero(domain))return false;
+    }
+    const range = this.equation.centeredInterval(...box(radius/2),worldX,worldY);
     return containsZero(range) && !isUnbounded(range);
   }
 

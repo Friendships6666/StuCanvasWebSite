@@ -28,6 +28,12 @@ export function transformEquation(equation, matrix) {
       const x = ranges.hull(box.x), y = ranges.hull(box.y);
       return equation.interval(x[0], x[1], y[0], y[1]);
     },
+    centeredInterval: (x0, x1, y0, y1, cx = x0 + (x1 - x0) / 2, cy = y0 + (y1 - y0) / 2) => {
+      const box = transformRanges(inverse, ranges.interval(x0, x1), ranges.interval(y0, y1));
+      const x = ranges.hull(box.x), y = ranges.hull(box.y);
+      return equation.centeredInterval(x[0], x[1], y[0], y[1], ...local(cx, cy));
+    },
+    pointInterval: (x,y) => equation.pointInterval(...local(x,y)),
   };
 }
 

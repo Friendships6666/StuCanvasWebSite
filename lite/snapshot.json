@@ -277,7 +277,7 @@
     },
     {
       "path": "src/plot/formula.js",
-      "sha256": "59eb1009d2831565967ae8a2aeab0a2c819fb1d6a30f089c56ff9757bb507839"
+      "sha256": "2e848d922b80f0ea5384ad5a03b763bb6be7afe19b1b1e178a874d2807129f2c"
     },
     {
       "path": "src/plot/interval.js",
@@ -290,6 +290,10 @@
     {
       "path": "src/plot/manager.js",
       "sha256": "2f097907fbe511ca8b67cf70f47a99f299470c0e509f9ba230fe32d29a86240b"
+    },
+    {
+      "path": "src/plot/monotone-interval.js",
+      "sha256": "8821119d351cc24a47af8ab222a0171e2a6fea95005cbbd25d1e783d85b49c02"
     },
     {
       "path": "src/plot/options.js",
@@ -308,8 +312,12 @@
       "sha256": "2adaf834d1776481fc8f2556740581ab3a08fbddac4166bf16af3402dc79f6e9"
     },
     {
+      "path": "src/plot/projective-interval.js",
+      "sha256": "cd01c7762b89b097116e5e59402469b9492242988fcccb04f5ea5da66b29e202"
+    },
+    {
       "path": "src/plot/sampler.js",
-      "sha256": "c348be995ecd4c642487d30cd0938ec7c3ac682e7b6d67667dddc6a01a8e237d"
+      "sha256": "a2ea672f3c195d8315880086447e532a43708b030e09043eddcfcd2a580852ab"
     },
     {
       "path": "src/plot/sampling-queue.js",
@@ -320,12 +328,16 @@
       "sha256": "2ad295b3d9a15273eae934fad32c65fba6fc0215a9995051a1b5a68d18229bcf"
     },
     {
+      "path": "src/plot/slope-interval.js",
+      "sha256": "a74f47d5c8cad047697c38a4caa41dd32769d72deec19874ce96f9f7b7e0e7ef"
+    },
+    {
       "path": "src/plot/stuplot-interval.js",
       "sha256": "ce60442e26b2210aa31d9d89dbcb976217c967d6a759ae4e704c1b95b28d98a3"
     },
     {
       "path": "src/plot/transform.js",
-      "sha256": "893c94d697808a69cce27d073ff68fe86ea4953b3bc847cbc5cae1b8634bf06c"
+      "sha256": "c88da4a28d0796d9ff5b120663d6f4b41c262edfbf1cbca2046f3c311e2be615"
     },
     {
       "path": "src/plot/types.js",
