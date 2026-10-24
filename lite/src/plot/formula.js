@@ -68,7 +68,7 @@ function makeFactory() {
       const value = scalar(operation, first.value, second?.value);
       if (Number.isFinite(value)) { operation = 'number'; first = value; second = undefined; }
     }
-    const key = operation === 'number' ? `#${first}` : `${operation}(${first?.key || ''},${second?.key || ''})`;
+    const key = operation === 'number' ? `#${Object.is(first, -0) ? '-0' : first}` : `${operation}(${first?.key || ''},${second?.key || ''})`;
     if (nodes.has(key)) return nodes.get(key);
     if (nodes.size >= 256) throw new LocalizedError('error.nodeCount');
     const leaf = ['number', 'x', 'y'].includes(operation);
@@ -201,15 +201,20 @@ const parameterNames = new Set([...unaryNames, ...binaryNames, ...Object.keys(co
 function bindParameters(source, parameters, independentVariables = ['x', 'y']) {
   const used = new Set();
   if (!parameters || !Object.keys(parameters).length) return { source, used };
-  const variables = [...Object.keys(parameters), ...independentVariables].sort((first, second) => second.length - first.length);
+  const variables = [...Object.keys(parameters), ...independentVariables].filter(Boolean).sort((first, second) => second.length - first.length);
   const splitToken = token => {
+    // Cache failed suffixes too: overlapping slider names such as a/aa/aaa
+    // otherwise make an unknown suffix trigger exponential backtracking.
+    const memo = new Map();
     const visit = position => {
       if (position === token.length) return [];
+      if (memo.has(position)) return memo.get(position);
       for (const variable of variables) {
         if (!token.startsWith(variable, position)) continue;
         const rest = visit(position + variable.length);
-        if (rest) return [variable, ...rest];
+        if (rest) { const result = [variable, ...rest]; memo.set(position, result); return result; }
       }
+      memo.set(position, null);
       return null;
     };
     const parts = visit(0);
@@ -220,9 +225,9 @@ function bindParameters(source, parameters, independentVariables = ['x', 'y']) {
   const bound = source.replace(/\b[a-zA-Z][a-zA-Z0-9]*(?:(?:\.[a-zA-Z][a-zA-Z0-9]*)|(?:\[\d+\]))*/g, name => {
     const key = name.toLowerCase();
     if (parameterNames.has(key)) return name;
-    if (!Object.hasOwn(parameters, key)) return splitToken(name);
+    if (!Object.hasOwn(parameters, key)) return splitToken(key);
     const value = Number(parameters[key]);
-    if (!Number.isFinite(value)) return splitToken(name);
+    if (!Number.isFinite(value)) return splitToken(key);
     used.add(key);
     return `(${value})`;
   });
@@ -233,6 +238,7 @@ export function equationToLatex(input) {
   const { left, right } = parse(normalizeSource(input), true);
   const format = (node, precedence = 0) => {
     if (node.op === 'number') {
+      if (Object.is(node.value, -0)) return precedence > 25 ? '\\left(-0\\right)' : '-0';
       if (node.value === Math.PI) return '\\pi';
       if (node.value === Math.E) return 'e';
       const value = String(node.value).replace(/e([+-]?\d+)$/, '\\cdot 10^{$1}');

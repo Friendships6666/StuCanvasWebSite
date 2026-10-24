@@ -426,11 +426,16 @@ export function parseDocument(text) {
         try {
           const corrected = latexToSource(input[latexKey]);
           if (equationToLatex(corrected) !== equationToLatex(object[sourceKey])) {
-            // Repair only the exact source the old fraction parser generated
+            // Repair only the exact source a previous parser generated
             // from this bound notation. Explicit JSON source edits continue
             // to discard stale notation rather than changing their meaning.
-            const legacy = latexToSource(input[latexKey], { legacyFractionArguments: true });
-            if (legacy !== object[sourceKey] || legacy === corrected) throw new Error('Inconsistent notation');
+            const matchesPrevious = [{ legacySyntax: true }, { legacyFractionArguments: true }].some(options => {
+              try {
+                const legacy = latexToSource(input[latexKey], options);
+                return legacy !== corrected && (legacy === object[sourceKey] || object.type === 'equation' && !legacy.includes('=') && `${legacy} = 0` === object[sourceKey]);
+              } catch { return false; }
+            });
+            if (!matchesPrevious) throw new Error('Inconsistent notation');
             object[sourceKey] = input[sourceKey] = corrected;
           }
         } catch { fail('error.documentValue', { path: `${path}.mathInput.${latexKey}` }); }

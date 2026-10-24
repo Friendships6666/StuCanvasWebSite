@@ -5,13 +5,16 @@ const inverseNames = { sin: 'asin', cos: 'acos', tan: 'atan' };
 const nameCommands = new Set(['operatorname', 'mathrm', 'mathit']);
 
 // The legacy option is only used to recognize formulas saved by the old
-// fraction parser when importing a document.
-export function latexToSource(input, { legacyFractionArguments = false } = {}) {
-  if (!input.trim()) throw new LocalizedError('error.enterEquation');
+// parser when importing a document. It reproduces the previous argument rules.
+export function latexToSource(input, { legacyFractionArguments = false, legacySyntax = legacyFractionArguments } = {}) {
+  if (typeof input !== 'string' || !input.trim()) throw new LocalizedError('error.enterEquation');
   if (input.length > 8192) throw new LocalizedError('error.tooLong');
-  const source = input.replace(/\\(?:left|right|mleft|mright|displaystyle|textstyle)\b/g, '').replace(/\\(?:,|;|!| |quad\b|qquad\b)/g, ' ').replaceAll('−', '-');
+  const source = (legacySyntax ? input : input.replace(/\\(?:m?left)\s*\|/g, '\\lvert ').replace(/\\(?:m?right)\s*\|/g, '\\rvert '))
+    .replace(/\\(?:left|right|mleft|mright|displaystyle|textstyle)\b/g, '').replace(/\\(?:,|;|!| |quad\b|qquad\b)/g, ' ').replaceAll('−', '-');
   let cursor = 0;
   let depth = 0;
+  let recursion = 0;
+  const endings = [];
   const skip = () => { while (/\s/.test(source[cursor] || '') && cursor < source.length) cursor++; };
   const group = (opening, closing) => {
     skip();
@@ -58,6 +61,7 @@ export function latexToSource(input, { legacyFractionArguments = false } = {}) {
     skip();
     if (source[cursor] === '{') return group('{', '}');
     if (source[cursor] === '(') return group('(', ')');
+    if (!legacySyntax && source[cursor] === '[') return group('[', ']');
     // Unbraced TeX macro arguments consume one token: \frac13t means
     // (1 / 3) * t, and \frac xy means x / y. Ordinary expression atoms still
     // read complete numbers and identifiers.
@@ -66,35 +70,73 @@ export function latexToSource(input, { legacyFractionArguments = false } = {}) {
   };
   const functionCall = name => {
     skip();
-    let base;
-    if (source[cursor] === '_') {
-      cursor++;
-      base = argument();
-      if (name !== 'log') throw new LocalizedError('error.logSubscript');
+    let base, exponent;
+    // TeX allows a function's subscript and superscript in either order.
+    while (source[cursor] === '_' || source[cursor] === '^') {
+      const script = source[cursor++];
+      if (script === '_') {
+        if (base !== undefined || name !== 'log') throw new LocalizedError('error.logSubscript');
+        base = argument(!legacySyntax);
+      } else {
+        if (exponent !== undefined) throw new LocalizedError('error.mathSymbol');
+        exponent = argument(!legacySyntax);
+      }
+      skip();
+      if (legacySyntax && (exponent !== undefined || base === undefined)) break;
     }
     skip();
-    let exponent;
-    if (source[cursor] === '^') { cursor++; exponent = argument(); }
-    skip();
-    const groupedArgument = source[cursor] === '(' || source[cursor] === '{';
-    let value = argument();
-    if (!groupedArgument && source[cursor] === '^') { cursor++; value = `(${value})^(${argument()})`; }
+    const groupedArgument = ['(', '{', '['].includes(source[cursor]);
+    let value;
+    if (legacySyntax) {
+      value = argument();
+      if (!groupedArgument && source[cursor] === '^') { cursor++; value = `(${value})^(${argument()})`; }
+    } else if (groupedArgument) value = argument();
+    else {
+      // An unparenthesized function consumes an implicit product, e.g.
+      // sin 2x and sin \frac13x. Stop at a sum or the next adjacent function.
+      const factors = [];
+      skip();
+      let sign = '';
+      while (source[cursor] === '+' || source[cursor] === '-') { sign += source[cursor++]; skip(); }
+      do {
+        let factor = atom();
+        skip();
+        if (source[cursor] === '^') { cursor++; factor = `(${factor})^(${argument(true)})`; skip(); }
+        factors.push(factor);
+        const rest = source.slice(cursor);
+        const command = /^\\([a-zA-Z]+)/.exec(rest)?.[1];
+        const word = /^[a-zA-Z][a-zA-Z0-9]*/.exec(rest)?.[0];
+        if (functions.has(command) || nameCommands.has(command) || functions.has(word) || (endings.at(-1) === '|' && source[cursor] === '|')) break;
+        if (!/[a-zA-Z0-9.(\[{|]/.test(source[cursor] || '') && !['frac', 'dfrac', 'tfrac', 'sqrt', 'pi', 'lvert'].includes(command)) break;
+      } while (cursor < source.length);
+      value = sign + factors.map(factor => `(${factor})`).join('*');
+    }
     if (exponent?.replaceAll(' ', '') === '-1' && inverseNames[name]) return `${inverseNames[name]}(${value})`;
-    const call = base ? `(log(${value})/log(${base}))` : `${name}(${value})`;
+    const logBase = base?.replaceAll(' ', '');
+    const directLog = !legacySyntax && (logBase === '2' ? 'log2' : logBase === '10' ? 'log10' : null);
+    const call = directLog ? `${directLog}(${value})` : base ? `(log(${value})/log(${base}))` : `${name}(${value})`;
     return exponent ? `(${call})^(${exponent})` : call;
   };
-  const atom = () => {
+  const readAtom = () => {
     skip();
     const character = source[cursor];
     if (!character) throw new LocalizedError('error.completeEquation');
     if (character === '{') return `(${group('{', '}')})`;
     if (character === '(') return `(${group('(', ')')})`;
+    if (!legacySyntax && character === '[') return `(${group('[', ']')})`;
     if (character === '|') return `abs(${group('|', '|')})`;
     if (character === '\\') {
       cursor++;
       const command = /^[a-zA-Z]+/.exec(source.slice(cursor))?.[0];
       if (!command) throw new LocalizedError('error.mathSymbol');
       cursor += command.length;
+      if (!legacySyntax && command === 'lvert') {
+        const value = sequence('\\rvert');
+        if (!source.startsWith('\\rvert', cursor)) throw new LocalizedError('error.unclosed');
+        cursor += '\\rvert'.length;
+        if (!value.trim()) throw new LocalizedError('error.completeBlanks');
+        return `abs(${value})`;
+      }
       if (command === 'lfloor' || command === 'lceil') {
         const ending = command === 'lfloor' ? '\\rfloor' : '\\rceil';
         const value = sequence(ending);
@@ -110,7 +152,9 @@ export function latexToSource(input, { legacyFractionArguments = false } = {}) {
       if (command === 'sqrt') {
         skip();
         const root = source[cursor] === '[' ? group('[', ']') : '2';
-        const value = argument();
+        const value = argument(!legacySyntax);
+        const degree = Number(root.replaceAll(' ', ''));
+        if (!legacySyntax && Number.isInteger(degree) && Math.abs(degree % 2) === 1 && degree !== 3) return `(sign(${value})*(abs(${value})^(1/(${root}))))`;
         return root === '2' ? `sqrt(${value})` : root === '3' ? `cbrt(${value})` : `((${value})^(1/(${root})))`;
       }
       if (nameCommands.has(command)) {
@@ -135,12 +179,23 @@ export function latexToSource(input, { legacyFractionArguments = false } = {}) {
     }
     if ('+-*/=,^'.includes(character)) {
       cursor++;
-      return character === '^' ? `^(${argument()})` : character;
+      return character === '^' ? `^(${argument(!legacySyntax)})` : character;
     }
     throw new LocalizedError('error.symbol', { symbol: character });
   };
+  const atom = () => {
+    if (++recursion > 64) throw new LocalizedError('error.nesting');
+    try {
+      const value = readAtom();
+      // Rewrites such as real odd roots repeat their argument. Bound expanded
+      // output as well as input so nesting cannot grow strings exponentially.
+      if (value.length > 8192) throw new LocalizedError('error.tooLong');
+      return value;
+    } finally { recursion--; }
+  };
   function sequence(ending) {
     if (++depth > 64) throw new LocalizedError('error.nesting');
+    endings.push(ending);
     const values = [];
     while (cursor < source.length) {
       skip();
@@ -148,6 +203,7 @@ export function latexToSource(input, { legacyFractionArguments = false } = {}) {
       values.push(atom());
     }
     depth--;
+    endings.pop();
     return values.join(' ');
   }
   return sequence();
