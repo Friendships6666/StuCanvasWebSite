@@ -1,7 +1,5 @@
 import { LocalizedError } from '../i18n.js';
 import * as ranges from './interval.js';
-import * as slopes from './slope-interval.js';
-import * as projective from './projective-interval.js';
 import { transformEquation } from './transform.js';
 
 const unaryNames = new Set(['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'sqrt', 'cbrt', 'abs', 'exp', 'expm1', 'log', 'log10', 'log2', 'floor', 'ceil', 'round', 'trunc', 'sign']);
@@ -304,37 +302,11 @@ export function compileEquation(input, parameters = {}) {
   const { root } = parse(bound.source);
   const evaluate = compileScalar(root);
   const evaluateRange = compileInterval(root);
-  const gradient = compileGradient(root);
-  let evaluateSlopes, evaluateProjective;
   return transformEquation({
     source: source.includes('=') ? source : `${source} = 0`,
     parameterNames: [...bound.used],
     evaluate,
-    gradient,
+    gradient: compileGradient(root),
     interval: (x0, x1, y0, y1) => evaluateRange(ranges.interval(x0, x1), ranges.interval(y0, y1)),
-    pointInterval: (x, y) => {
-      evaluateSlopes ||= compileInterval(root, slopes);
-      return evaluateSlopes(slopes.variable(x,x,x,0),slopes.variable(y,y,y,1)).range;
-    },
-    // Every implicit equation uses the same centered-slope arithmetic.
-    centeredInterval: (x0, x1, y0, y1, cx = x0 + (x1 - x0) / 2, cy = y0 + (y1 - y0) / 2) => {
-      evaluateSlopes ||= compileInterval(root, slopes);
-      const x = slopes.variable(x0, x1, cx, 0), y = slopes.variable(y0, y1, cy, 1);
-      const value = evaluateSlopes(x, y);
-      const range = slopes.intersection(evaluateRange(x.range, y.range), slopes.enclose(value, x, y));
-      if (!ranges.containsZero(range) || ranges.isUnbounded(range)) return range;
-      if (value.supported) {
-        // A continuous sign bracket is an existence witness. Try it in the
-        // gradient direction before the more costly dependency relaxations.
-        // This is the same numerical test for every expression.
-        const [, dx, dy] = gradient(cx, cy);
-        const first = evaluateRange(ranges.interval(dx < 0 ? x1 : x0), ranges.interval(dy < 0 ? y1 : y0));
-        const second = evaluateRange(ranges.interval(dx < 0 ? x0 : x1), ranges.interval(dy < 0 ? y0 : y1));
-        const [a, b] = ranges.hull(first), [c, d] = ranges.hull(second);
-        if (ranges.bounded(first) && ranges.bounded(second) && (b < 0 && c > 0 || d < 0 && a > 0)) return range;
-      }
-      evaluateProjective ||= compileInterval(root, projective);
-      return slopes.intersection(range, projective.enclose(evaluateProjective, [x0, x1, y0, y1]));
-    },
   }, typeof input === 'object' ? input.plotTransform : null);
 }
