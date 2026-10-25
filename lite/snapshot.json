@@ -197,15 +197,15 @@
     },
     {
       "path": "src/locales/en.js",
-      "sha256": "dfec992a2545aade4ec92520f569c66ff55fe4e4756586ddd38280deb7498faa"
+      "sha256": "47d5ae46b2aad8bb2da141d0ee1a08d7029884d00be12c2e309968ec85f1327f"
     },
     {
       "path": "src/locales/zh-CN.js",
-      "sha256": "f600bf5121b7cad95ac488deda43e061fb1060d4f2a4e0b7e54c5f554a0eefa0"
+      "sha256": "fa4e8120b26b2d7bacceb4db2f69b6f873933d2c0c45a0d66eaa8585b22d8841"
     },
     {
       "path": "src/locales/zh-TW.js",
-      "sha256": "66d7a472c5f506415b20361045c8308800917aeee5e310abf6f9ec2ba9e34dfa"
+      "sha256": "7dce816c1a127e1ad034e34a395d0d125d4a020f81fc80c566346130604187ae"
     },
     {
       "path": "src/math-input.js",
@@ -225,7 +225,7 @@
     },
     {
       "path": "src/object-menu.js",
-      "sha256": "7acb9967b3ee7162ca60da35e1c96468fb0ed3a9ffa3d1ab8e194ffcc7fe7c81"
+      "sha256": "4abf795892b061737c643caf461cf552d286f0eaea778d56ab4e89578999e2f7"
     },
     {
       "path": "src/object-status.js",
@@ -285,7 +285,7 @@
     },
     {
       "path": "src/plot/lshade.js",
-      "sha256": "06db9b5a3649dffa8a867f5aff2ff58bf2e07872333336a065c0c4387150bdfc"
+      "sha256": "a155b337610ab3ead83acd89ede4b57f88bad3f4ac2a002bace487f56c5df059"
     },
     {
       "path": "src/plot/manager.js",
@@ -293,7 +293,7 @@
     },
     {
       "path": "src/plot/options.js",
-      "sha256": "6e2edc5cca50b3d5e7010d35e6e8cee12a6e8e61893c164cdd7c31fd73d5e0c0"
+      "sha256": "d918896f0dbac6acfe25b585d36916c37f30c0668411305743a5005ff6ba27b6"
     },
     {
       "path": "src/plot/parametric-formula.js",
@@ -309,7 +309,7 @@
     },
     {
       "path": "src/plot/sampler.js",
-      "sha256": "c348be995ecd4c642487d30cd0938ec7c3ac682e7b6d67667dddc6a01a8e237d"
+      "sha256": "8529d7b338e46022ccc6b1a0408dab4ec5e3f60170322fe60597d8a806d7eeac"
     },
     {
       "path": "src/plot/sampling-queue.js",
@@ -330,6 +330,10 @@
     {
       "path": "src/plot/types.js",
       "sha256": "0b72989f06325f3fd77da78ac6c89227b2ae5cc34386c2e07dde0989818d6bb2"
+    },
+    {
+      "path": "src/plot/verification.js",
+      "sha256": "e41343d61bd159e094b2915466efc3be58840592e088950d31543786da406665"
     },
     {
       "path": "src/project-file.js",

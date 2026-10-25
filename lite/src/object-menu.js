@@ -1,7 +1,7 @@
 import { mainOnly, mainWindowId, renderTargets } from './render-targets.js';
 import { createRegionEditor } from './region-editor.js';
 import { t, onLocaleChange } from './i18n.js';
-import { normalizeOptions, parameterAppliesToAlgorithm, parameters } from './plot/options.js';
+import { normalizeOptions, parameterAppliesToAlgorithm, parameterHints, parameters } from './plot/options.js';
 import { objectColor, objectOpacity } from './object-style.js';
 import { isPlot } from './plot/types.js';
 import { isJavaScript } from './reflection.js';
@@ -182,16 +182,19 @@ export function createObjectMenu(actions) {
       for (const [key, label, , minimum, maximum, step] of settings) {
         if (!applies(key, options.algorithm)) continue;
         const input = document.createElement('input');
-        input.type = 'number';
+        const toggle = !parametric && key === 'adaptiveVerification';
+        input.type = toggle ? 'checkbox' : 'number';
+        if (toggle) input.checked = options[key] === 1;
         input.value = options[key];
         input.min = minimum;
         input.max = maximum;
         input.step = step;
         input.dataset.parameter = key;
+        if (!parametric && parameterHints[key]) input.title = t(parameterHints[key]);
         input.addEventListener('change', () => {
-          if (!input.value.trim() || !input.checkValidity()) return;
+          if (!toggle && (!input.value.trim() || !input.checkValidity())) return;
           actions.change(objectId, target => {
-            target.plotOptions = normalize({ ...base, ...target.plotOptions, [key]: Number(input.value) });
+            target.plotOptions = normalize({ ...base, ...target.plotOptions, [key]: toggle ? Number(input.checked) : Number(input.value) });
           });
           input.value = actions.get(objectId).plotOptions[key];
         });

@@ -39,7 +39,7 @@ const normal = random => {
 };
 const cauchy = random => Math.tan(Math.PI * (random() - 0.5));
 
-export function* refineLShade(evaluate, bounds, accept, seed = 0, options = {}) {
+export function* refineLShade(evaluate, bounds, seed = 0, options = {}) {
   const initialSize = options.population ?? 100;
   const minimumSize = options.minimumPopulation ?? 4;
   const reductionScale = 150000;
@@ -61,7 +61,6 @@ export function* refineLShade(evaluate, bounds, accept, seed = 0, options = {}) 
     const cost = score(position);
     population.push(position);
     costs.push(cost);
-    if (accept(position, cost)) return position;
     yield;
   }
   let populationSize = initialSize;
@@ -133,7 +132,6 @@ export function* refineLShade(evaluate, bounds, accept, seed = 0, options = {}) 
         else if (archive.length) archive[Math.floor(random() * archive.length)] = population[index].slice();
         population[index] = trial[index];
         costs[index] = trialCosts[index];
-        if (accept(population[index], costs[index])) return population[index];
       }
     }
     const sumDelta = deltaF.reduce((sum, value) => sum + value, 0);

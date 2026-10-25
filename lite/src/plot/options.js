@@ -4,7 +4,12 @@ export const parameters = [
   ['marchingBlocks', 'parameter.marchingBlocks', 4, 1, 16, 1],
   ['marchingRefinement', 'parameter.marchingRefinement', 1, 0, 4, 1],
   ['tolerance', 'parameter.tolerance', 1e-7, 1e-300, 1e300, 'any'],
-  ['verificationRadius', 'parameter.verificationRadius', 0.001, 1e-9, 1, 'any'],
+  ['verificationRadius', 'parameter.verificationRadius', 0, 0, 1, 'any'],
+  ['adaptiveVerification', 'parameter.adaptiveVerification', 1, 0, 1, 1],
+  ['verificationGrowth', 'parameter.verificationGrowth', 2, 1.1, 16, 'any'],
+  ['verificationScale', 'parameter.verificationScale', 0.5, 0, 1, 'any'],
+  ['verificationThreshold', 'parameter.verificationThreshold', Number.EPSILON ** 0.25, 0, 1, 'any'],
+  ['verificationRetries', 'parameter.verificationRetries', 2, 0, 8, 1],
   ['newtonIterations', 'parameter.newtonIterations', 5, 0, 50, 1],
   ['population', 'parameter.population', 100, 4, 256, 1],
   ['minimumPopulation', 'parameter.minimumPopulation', 4, 4, 128, 1],
@@ -19,8 +24,10 @@ export const parameters = [
 
 export const defaults = Object.fromEntries([['algorithm', 'marching'], ...parameters.map(([key, , value]) => [key, value])]);
 
+export const parameterHints = Object.fromEntries(['verificationRadius', 'adaptiveVerification', 'verificationGrowth', 'verificationScale', 'verificationThreshold', 'verificationRetries'].map(key => [key, `parameter.${key}.hint`]));
+
 const marchingParameters = new Set(['cellSize', 'marchingBlocks', 'marchingRefinement', 'edgeIterations', 'pointSpacing', 'tolerance']);
-const lshadeParameters = new Set(['lshadeCellSize', 'newtonIterations', 'population', 'minimumPopulation', 'memory', 'pBest', 'archiveRatio', 'seed', 'verificationRadius']);
+const lshadeParameters = new Set(['lshadeCellSize', 'newtonIterations', 'population', 'minimumPopulation', 'memory', 'pBest', 'archiveRatio', 'seed', 'verificationRadius', 'adaptiveVerification', 'verificationGrowth', 'verificationScale', 'verificationThreshold', 'verificationRetries']);
 
 export function parameterAppliesToAlgorithm(key, algorithm) {
   return !(algorithm === 'lshade' ? marchingParameters : lshadeParameters).has(key);

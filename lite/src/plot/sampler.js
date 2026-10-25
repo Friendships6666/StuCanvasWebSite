@@ -1,6 +1,7 @@
-import { containsZero, isUnbounded, nextDown, nextUp } from './interval.js';
+import { containsZero, nextDown, nextUp } from './interval.js';
 import { refineLShade } from './lshade.js';
 import { normalizeOptions } from './options.js';
+import { acceptsRange, adaptiveVerification } from './verification.js';
 
 const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
 const edgePairs = [[], [[3, 0]], [[0, 1]], [[3, 1]], [[1, 2]], [], [[0, 2]], [[3, 2]], [[2, 3]], [[0, 2]], [], [[1, 2]], [[1, 3]], [[0, 1]], [[3, 0]], []];
@@ -23,7 +24,7 @@ export class EquationTask {
     this.cornerScaleX = this.cornerResolution / width;
     this.cornerScaleY = this.cornerResolution / height;
     this.binColumns = Math.ceil(width / 16) + 1;
-    this.stats = { boxes: 0, pruned: 0, poisoned: 0, evaluations: 0, cacheHits: 0, newtonRoots: 0, refinements: 0, verifications: 0, marchingCells: 0, marchingRefined: 0 };
+    this.stats = { boxes: 0, pruned: 0, poisoned: 0, evaluations: 0, cacheHits: 0, newtonRoots: 0, refinements: 0, verifications: 0, adaptiveChecks: 0, adaptiveConflicts: 0, adaptiveRejected: 0, verificationRetries: 0, marchingCells: 0, marchingRefined: 0 };
     this.done = false;
     this.progress = 0;
     this.iterator = this.trace();
@@ -40,19 +41,41 @@ export class EquationTask {
   }
 
   verify(screenX, screenY, score) {
+    const { x, y } = this.world(screenX, screenY);
+    return this.verifyWorld(x, y, score);
+  }
+
+  verifyWorld(worldX, worldY, score, cellWorld = this.cellSize / this.view.scale) {
     if (!Number.isFinite(score)) return false;
-    const { x: worldX, y: worldY } = this.world(screenX, screenY);
     if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) return false;
-    const epsilon = this.options.verificationRadius / this.view.scale;
     this.stats.verifications++;
-    const range = this.equation.interval(nextDown(worldX - epsilon), nextUp(worldX + epsilon), nextDown(worldY - epsilon), nextUp(worldY + epsilon));
-    return containsZero(range) && !isUnbounded(range);
+    // Every candidate first passes the original zero-radius enclosure.
+    const range = this.equation.interval(nextDown(worldX), nextUp(worldX), nextDown(worldY), nextUp(worldY));
+    if (!acceptsRange(range)) return false;
+    const epsilon = this.options.verificationRadius / this.view.scale;
+    if (epsilon > 0) {
+      this.stats.verifications++;
+      if (!acceptsRange(this.equation.interval(nextDown(worldX - epsilon), nextUp(worldX + epsilon), nextDown(worldY - epsilon), nextUp(worldY + epsilon)))) return false;
+    }
+    if (!this.options.adaptiveVerification) return true;
+    const result = adaptiveVerification((...bounds) => {
+      this.stats.verifications++;
+      this.stats.adaptiveChecks++;
+      return this.equation.interval(...bounds);
+    }, worldX, worldY, range, cellWorld, this.options);
+    if (result.conflict) this.stats.adaptiveConflicts++;
+    if (!result.accepted) this.stats.adaptiveRejected++;
+    return result.accepted;
   }
 
   evaluate(screenX, screenY) {
-    this.stats.evaluations++;
-    return this.equation.evaluate(this.view.x + (screenX - this.width / 2) / this.view.scale,
+    return this.evaluateWorld(this.view.x + (screenX - this.width / 2) / this.view.scale,
       this.view.y - (screenY - this.height / 2) / this.view.scale);
+  }
+
+  evaluateWorld(worldX, worldY) {
+    this.stats.evaluations++;
+    return this.equation.evaluate(worldX, worldY);
   }
 
   corner(screenX, screenY) {
@@ -75,6 +98,12 @@ export class EquationTask {
   addPoint(screenX, screenY) {
     const worldX = this.view.x + (screenX - this.width / 2) / this.view.scale;
     const worldY = this.view.y - (screenY - this.height / 2) / this.view.scale;
+    this.storeWorldPoint(worldX, worldY, screenX, screenY);
+  }
+
+  storeWorldPoint(worldX, worldY,
+    screenX = clamp(this.width / 2 + (worldX - this.view.x) * this.view.scale, 0, this.width),
+    screenY = clamp(this.height / 2 - (worldY - this.view.y) * this.view.scale, 0, this.height)) {
     if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) return;
     const index = this.points.length;
     this.points.push(worldX, worldY);
@@ -85,38 +114,53 @@ export class EquationTask {
   }
 
   *refine(box) {
-    let screenX = (box[0] + box[2]) / 2;
-    let screenY = (box[1] + box[3]) / 2;
+    // Keep the optimizer, interval check and stored result in the same world
+    // coordinates. A screen round trip can move a point by many world ULPs.
+    const lower = this.world(box[0], box[3]);
+    const upper = this.world(box[2], box[1]);
+    const cellWorld = Math.max(upper.x - lower.x, upper.y - lower.y);
+
+    // Newton remains the fast first stage. If it reaches an interval-verified
+    // root, the cell is accepted immediately; otherwise L-SHADE completes its
+    // full search before the single final interval verification below.
+    let { x: worldX, y: worldY } = this.world((box[0] + box[2]) / 2, (box[1] + box[3]) / 2);
     for (let iteration = 0; iteration <= this.options.newtonIterations; iteration++) {
-      const [value, derivativeX, derivativeY] = this.equation.gradient(this.view.x + (screenX - this.width / 2) / this.view.scale,
-        this.view.y - (screenY - this.height / 2) / this.view.scale);
+      const [value, derivativeX, derivativeY] = this.equation.gradient(worldX, worldY);
       this.stats.evaluations++;
-      if (this.verify(screenX, screenY, Math.abs(value))) {
+      if (this.verifyWorld(worldX, worldY, Math.abs(value), cellWorld)) {
         this.stats.newtonRoots++;
-        this.addPoint(screenX, screenY);
+        this.storeWorldPoint(worldX, worldY);
         return;
       }
       yield;
       if (iteration === this.options.newtonIterations) break;
-      const gradientX = derivativeX / this.view.scale;
-      const gradientY = -derivativeY / this.view.scale;
-      const norm = Math.hypot(gradientX, gradientY);
+      const norm = Math.hypot(derivativeX, derivativeY);
       if (!Number.isFinite(value) || !Number.isFinite(norm) || norm === 0) break;
       const step = value / norm;
-      const nextX = clamp(screenX - step * (gradientX / norm), box[0], box[2]);
-      const nextY = clamp(screenY - step * (gradientY / norm), box[1], box[3]);
-      if (nextX === screenX && nextY === screenY) break;
-      screenX = nextX;
-      screenY = nextY;
+      const nextX = clamp(worldX - step * (derivativeX / norm), lower.x, upper.x);
+      const nextY = clamp(worldY - step * (derivativeY / norm), lower.y, upper.y);
+      if (nextX === worldX && nextY === worldY) break;
+      worldX = nextX;
+      worldY = nextY;
     }
+
     this.stats.refinements++;
     const seed = this.options.seed ^ Math.imul(Math.round(box[0] * 4096), 73856093) ^ Math.imul(Math.round(box[1] * 4096), 19349663);
-    yield* refineLShade((x, y) => this.evaluate(x, y), [[box[0], box[2]], [box[1], box[3]]],
-      (position, score) => {
-        if (!this.verify(...position, score)) return false;
-        this.addPoint(...position);
-        return true;
-      }, seed, this.options);
+    let position;
+    for (let attempt = 0; attempt <= this.options.verificationRetries; attempt++) {
+      if (attempt) this.stats.verificationRetries++;
+      // Each attempt completes L-SHADE before checking its final candidate.
+      position = yield* refineLShade((x, y) => this.evaluateWorld(x, y),
+        [[lower.x, upper.x], [lower.y, upper.y]], seed ^ Math.imul(attempt, 0x9e3779b9), this.options);
+      const rejectedBefore = this.stats.adaptiveRejected;
+      if (position && this.verifyWorld(...position, Math.abs(this.evaluateWorld(...position)), cellWorld)) {
+        this.storeWorldPoint(...position);
+        break;
+      }
+      // Only adaptive rejections trigger another seed, not every empty cell.
+      if (this.stats.adaptiveRejected === rejectedBefore) break;
+    }
+    return position;
   }
 
   *edge(first, second, firstValue, secondValue) {
