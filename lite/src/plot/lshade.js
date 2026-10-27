@@ -39,7 +39,7 @@ const normal = random => {
 };
 const cauchy = random => Math.tan(Math.PI * (random() - 0.5));
 
-export function* refineLShade(evaluate, bounds, seed = 0, options = {}) {
+export function* refineLShade(evaluate, bounds, seed = 0, options = {}, initialPosition = null) {
   const initialSize = options.population ?? 100;
   const minimumSize = options.minimumPopulation ?? 4;
   const reductionScale = 150000;
@@ -58,6 +58,11 @@ export function* refineLShade(evaluate, bounds, seed = 0, options = {}) {
   const costs = [];
   for (let index = 0; index < initialSize; index++) {
     const position = [randomSource.range(bounds[0][0], bounds[0][1]), randomSource.range(bounds[1][0], bounds[1][1])];
+    // Optional Newton warm start occupies one member; the remaining population
+    // and the complete optimizer termination criteria stay unchanged.
+    if (index === 0 && initialPosition?.length === 2 && initialPosition.every(Number.isFinite)) {
+      for (let axis = 0; axis < 2; axis++) position[axis] = clamp(initialPosition[axis], bounds[axis][0], bounds[axis][1]);
+    }
     const cost = score(position);
     population.push(position);
     costs.push(cost);

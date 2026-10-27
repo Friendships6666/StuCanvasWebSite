@@ -1,7 +1,7 @@
 import { containsZero, nextDown, nextUp } from './interval.js';
 import { refineLShade } from './lshade.js';
 import { normalizeOptions } from './options.js';
-import { acceptsRange, adaptiveVerification } from './verification.js';
+import { acceptsRange } from './verification.js';
 
 const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
 const edgePairs = [[], [[3, 0]], [[0, 1]], [[3, 1]], [[1, 2]], [], [[0, 2]], [[3, 2]], [[2, 3]], [[0, 2]], [], [[1, 2]], [[1, 3]], [[0, 1]], [[3, 0]], []];
@@ -45,27 +45,13 @@ export class EquationTask {
     return this.verifyWorld(x, y, score);
   }
 
-  verifyWorld(worldX, worldY, score, cellWorld = this.cellSize / this.view.scale) {
-    if (!Number.isFinite(score)) return false;
+  verifyWorld(worldX, worldY, score, cellWorld = this.cellSize / this.view.scale, allowWhole = true) {
     if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) return false;
     this.stats.verifications++;
-    // Every candidate first passes the original zero-radius enclosure.
+    // The original ULP enclosure is the entire policy. Scalar residuals and
+    // legacy radius/adaptive settings must not override this stage's result.
     const range = this.equation.interval(nextDown(worldX), nextUp(worldX), nextDown(worldY), nextUp(worldY));
-    if (!acceptsRange(range)) return false;
-    const epsilon = this.options.verificationRadius / this.view.scale;
-    if (epsilon > 0) {
-      this.stats.verifications++;
-      if (!acceptsRange(this.equation.interval(nextDown(worldX - epsilon), nextUp(worldX + epsilon), nextDown(worldY - epsilon), nextUp(worldY + epsilon)))) return false;
-    }
-    if (!this.options.adaptiveVerification) return true;
-    const result = adaptiveVerification((...bounds) => {
-      this.stats.verifications++;
-      this.stats.adaptiveChecks++;
-      return this.equation.interval(...bounds);
-    }, worldX, worldY, range, cellWorld, this.options);
-    if (result.conflict) this.stats.adaptiveConflicts++;
-    if (!result.accepted) this.stats.adaptiveRejected++;
-    return result.accepted;
+    return acceptsRange(range, allowWhole);
   }
 
   evaluate(screenX, screenY) {
@@ -120,45 +106,41 @@ export class EquationTask {
     const upper = this.world(box[2], box[1]);
     const cellWorld = Math.max(upper.x - lower.x, upper.y - lower.y);
 
-    // Newton remains the fast first stage. If it reaches an interval-verified
-    // root, the cell is accepted immediately; otherwise L-SHADE completes its
-    // full search before the single final interval verification below.
+    // Each Newton update is ULP-verified. A whole-real enclosure continues the
+    // search; only a zero-containing, non-whole enclosure accepts early.
     let { x: worldX, y: worldY } = this.world((box[0] + box[2]) / 2, (box[1] + box[3]) / 2);
-    for (let iteration = 0; iteration <= this.options.newtonIterations; iteration++) {
+    for (let iteration = 0; iteration < 5; iteration++) {
       const [value, derivativeX, derivativeY] = this.equation.gradient(worldX, worldY);
       this.stats.evaluations++;
-      if (this.verifyWorld(worldX, worldY, Math.abs(value), cellWorld)) {
+      const norm = Math.hypot(derivativeX, derivativeY);
+      let nextX = worldX, nextY = worldY;
+      if (Number.isFinite(value) && Number.isFinite(norm) && norm > 0) {
+        const step = value / norm;
+        nextX = clamp(worldX - step * (derivativeX / norm), lower.x, upper.x);
+        nextY = clamp(worldY - step * (derivativeY / norm), lower.y, upper.y);
+        // An overflowing update must not lose the finite fallback position.
+        if (!Number.isFinite(nextX) || !Number.isFinite(nextY)) { nextX = worldX; nextY = worldY; }
+      }
+      worldX = nextX;
+      worldY = nextY;
+      if (this.verifyWorld(worldX, worldY, undefined, cellWorld, false)) {
         this.stats.newtonRoots++;
         this.storeWorldPoint(worldX, worldY);
         return;
       }
       yield;
-      if (iteration === this.options.newtonIterations) break;
-      const norm = Math.hypot(derivativeX, derivativeY);
-      if (!Number.isFinite(value) || !Number.isFinite(norm) || norm === 0) break;
-      const step = value / norm;
-      const nextX = clamp(worldX - step * (derivativeX / norm), lower.x, upper.x);
-      const nextY = clamp(worldY - step * (derivativeY / norm), lower.y, upper.y);
-      if (nextX === worldX && nextY === worldY) break;
-      worldX = nextX;
-      worldY = nextY;
+      // Stagnation or an invalid gradient keeps the current coordinates;
+      // without acceptance, all five attempts and ULP checks still run.
     }
 
     this.stats.refinements++;
     const seed = this.options.seed ^ Math.imul(Math.round(box[0] * 4096), 73856093) ^ Math.imul(Math.round(box[1] * 4096), 19349663);
-    let position;
-    for (let attempt = 0; attempt <= this.options.verificationRetries; attempt++) {
-      if (attempt) this.stats.verificationRetries++;
-      // Each attempt completes L-SHADE before checking its final candidate.
-      position = yield* refineLShade((x, y) => this.evaluateWorld(x, y),
-        [[lower.x, upper.x], [lower.y, upper.y]], seed ^ Math.imul(attempt, 0x9e3779b9), this.options);
-      const rejectedBefore = this.stats.adaptiveRejected;
-      if (position && this.verifyWorld(...position, Math.abs(this.evaluateWorld(...position)), cellWorld)) {
-        this.storeWorldPoint(...position);
-        break;
-      }
-      // Only adaptive rejections trigger another seed, not every empty cell.
-      if (this.stats.adaptiveRejected === rejectedBefore) break;
+    // Finish the existing optimizer before exactly one final ULP verification.
+    // Until a later classifier is selected, whole-real results count as roots.
+    const position = yield* refineLShade((x, y) => this.evaluateWorld(x, y),
+      [[lower.x, upper.x], [lower.y, upper.y]], seed, this.options, [worldX, worldY]);
+    if (position && this.verifyWorld(...position, undefined, cellWorld)) {
+      this.storeWorldPoint(...position);
     }
     return position;
   }

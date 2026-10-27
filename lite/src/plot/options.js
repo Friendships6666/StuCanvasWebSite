@@ -28,9 +28,12 @@ export const parameterHints = Object.fromEntries(['verificationRadius', 'adaptiv
 
 const marchingParameters = new Set(['cellSize', 'marchingBlocks', 'marchingRefinement', 'edgeIterations', 'pointSpacing', 'tolerance']);
 const lshadeParameters = new Set(['lshadeCellSize', 'newtonIterations', 'population', 'minimumPopulation', 'memory', 'pBest', 'archiveRatio', 'seed', 'verificationRadius', 'adaptiveVerification', 'verificationGrowth', 'verificationScale', 'verificationThreshold', 'verificationRetries']);
+// Preserve these fields when loading older documents, but the ULP-only flow
+// no longer applies radius/adaptive filters or rejection-triggered retries.
+const legacyVerificationParameters = new Set(['verificationRadius', 'adaptiveVerification', 'verificationGrowth', 'verificationScale', 'verificationThreshold', 'verificationRetries']);
 
 export function parameterAppliesToAlgorithm(key, algorithm) {
-  return !(algorithm === 'lshade' ? marchingParameters : lshadeParameters).has(key);
+  return key !== 'newtonIterations' && !legacyVerificationParameters.has(key) && !(algorithm === 'lshade' ? marchingParameters : lshadeParameters).has(key);
 }
 
 export function normalizeOptions(input = {}) {
@@ -41,5 +44,8 @@ export function normalizeOptions(input = {}) {
   }
   options.marchingBlocks = 2 ** Math.round(Math.log2(options.marchingBlocks));
   options.minimumPopulation = Math.min(options.minimumPopulation, options.population);
+  // The production protocol fixes Newton at five attempts; retain the field
+  // for document compatibility without allowing old settings to bypass it.
+  options.newtonIterations = 5;
   return options;
 }
